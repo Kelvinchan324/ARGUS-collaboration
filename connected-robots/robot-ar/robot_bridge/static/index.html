@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Thor teleop</title>
+  <style>
+    :root { color-scheme: dark; --bg:#111; --fg:#eee; --muted:#9aa; --line:#2a2a2a; --accent:#6cf; --stop:#e55; --ok:#3c8; }
+    body { font-family: ui-sans-serif, system-ui, sans-serif; margin: 0; background: var(--bg); color: var(--fg); }
+    main { max-width: 1080px; margin: 0 auto; padding: 20px; }
+    .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .lang { display: flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; flex: 0 0 auto; }
+    .lang button { border: none; border-radius: 0; padding: 6px 12px; font-size: 12px; background: #1b1b1b; }
+    .lang button.on { background: #203038; color: var(--accent); }
+    h1 { font-size: 18px; font-weight: 600; margin: 0 0 4px; }
+    h2 { font-size: 13px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+    .muted { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
+    .row { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 14px; }
+    .card { background: #1b1b1b; border: 1px solid var(--line); border-radius: 10px; padding: 14px; flex: 1 1 300px; }
+    .card.grow { flex: 1.2 1 360px; }
+    button { background: #222; color: var(--fg); border: 1px solid #444; border-radius: 8px; padding: 8px 12px; font-size: 13px; cursor: pointer; }
+    button:hover { border-color: var(--accent); }
+    .stop { background: var(--stop); color: #fff; border-color: #c33; font-size: 16px; padding: 12px; width: 100%; }
+    .ok { color: var(--ok); }
+    .bad { color: var(--stop); }
+    .pad { display: grid; grid-template-columns: repeat(3, 64px); gap: 6px; justify-content: center; }
+    .pad button { width: 64px; height: 42px; }
+    kbd { background: #333; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+    input[type=text] { width: 100%; box-sizing: border-box; background: #111; color: var(--fg); border: 1px solid #444; border-radius: 8px; padding: 9px 11px; font-size: 14px; }
+    .examples button { margin: 4px 4px 0 0; font-size: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { color: var(--muted); font-weight: 500; }
+    .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+    .dot.on { background: var(--ok); }
+    .dot.off { background: var(--stop); }
+    .view { position: relative; aspect-ratio: 16/9; background: #0c0c0c; border-radius: 8px; overflow: hidden; }
+    .view img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    details { margin-top: 14px; color: var(--muted); font-size: 12px; }
+    pre { background: #111; border-radius: 8px; padding: 10px; overflow: auto; font-size: 12px; color: var(--fg); }
+    #plan { margin: 10px 0 0; min-height: 3em; }
+    .flow { margin-top: 28px; padding-top: 8px; }
+    .flow-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+    .here { font-size: 12px; color: var(--accent); border: 1px solid #2a5566; background: #152026; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+    .rail { display: flex; gap: 0; align-items: stretch; overflow-x: auto; padding-bottom: 8px; }
+    .step { flex: 1 1 140px; min-width: 132px; background: transparent; border: none; color: inherit; text-align: left; padding: 0 10px 0 0; cursor: pointer; position: relative; }
+    .step:last-child { padding-right: 0; }
+    .step::after { content: ""; position: absolute; left: 22px; right: -8px; top: 13px; height: 1px; background: var(--line); z-index: 0; }
+    .step:last-child::after { display: none; }
+    .node { position: relative; z-index: 1; width: 26px; height: 26px; border-radius: 50%; border: 1px solid #555; background: #161616; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; margin-bottom: 8px; }
+    .step.done .node { border-color: var(--ok); color: var(--ok); background: #132018; }
+    .step.current .node { border-color: var(--accent); color: var(--accent); background: #102028; box-shadow: 0 0 0 4px rgba(102,204,255,.12); }
+    .step.locked .node { opacity: .45; }
+    .step.active .node { outline: 1px solid var(--accent); }
+    .step-k { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+    .step-t { font-size: 13px; font-weight: 600; margin: 2px 0 4px; }
+    .step-s { font-size: 11px; color: var(--muted); }
+    .step.current .step-s { color: var(--accent); }
+    .panel { margin-top: 8px; border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; background: #161616; min-height: 120px; }
+    .panel h3 { margin: 0 0 6px; font-size: 15px; }
+    .checks { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 8px; }
+    .checks li { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; }
+    .mark { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #555; flex: 0 0 16px; margin-top: 2px; }
+    .mark.yes { background: var(--ok); border-color: var(--ok); }
+    .mark.no { background: transparent; }
+    .mark.wait { border-color: var(--accent); background: #102028; }
+    .guide-steps { margin: 0 0 12px; padding-left: 22px; font-size: 14px; line-height: 1.55; }
+    .guide-steps li { margin: 8px 0; }
+    .guide-steps button { margin-left: 8px; padding: 4px 10px; font-size: 12px; vertical-align: middle; }
+    .guide-note { margin: 0; font-size: 13px; color: var(--fg); background: #152026; border: 1px solid #2a5566; border-radius: 8px; padding: 10px 12px; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="top">
+      <div>
+        <h1 data-i="title">雙臂輪式底盤</h1>
+        <p class="muted" id="hint"></p>
+      </div>
+      <div class="lang" role="group" aria-label="Language">
+        <button type="button" id="lang-zh" class="on">繁中</button>
+        <button type="button" id="lang-en">EN</button>
+      </div>
+    </div>
+    <p id="status">…</p>
+
+    <div class="card" style="margin-top:12px">
+      <form id="cmdform">
+        <input id="cmd" type="text" autocomplete="off" />
+      </form>
+      <div class="examples" id="examples"></div>
+      <pre id="plan" hidden></pre>
+    </div>
+
+    <div class="row">
+      <div class="card">
+        <h2 data-i="teleop">遙控</h2>
+        <button class="stop" id="estop">STOP</button>
+        <div class="pad" style="margin-top:12px">
+          <button data-vx="0.3" data-vy="0.3">u</button>
+          <button data-vx="0.35" data-vy="0">i / W</button>
+          <button data-vx="0.3" data-vy="-0.3">o</button>
+          <button data-vx="0" data-vy="0.35">j / A</button>
+          <button data-vx="0" data-vy="0" data-wz="0">k</button>
+          <button data-vx="0" data-vy="-0.35">l / D</button>
+          <button data-vx="-0.3" data-vy="0.3">m</button>
+          <button data-vx="-0.35" data-vy="0">, / S</button>
+          <button data-vx="-0.3" data-vy="-0.3">.</button>
+        </div>
+        <div style="margin-top:10px; display:flex; gap:8px; justify-content:center">
+          <button data-wz="0.8" data-i="turnL">t 左轉</button>
+          <button data-wz="-0.8" data-i="turnR">b 右轉</button>
+        </div>
+        <div style="margin-top:10px; display:flex; gap:8px">
+          <button id="enable" data-i="enable">啟動電機</button>
+          <button id="reset" data-i="reset">復位里程計</button>
+        </div>
+      </div>
+      <div class="card grow">
+        <h2 data-i="camera">相機</h2>
+        <div class="view"><img id="cam" alt="" /></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <h2 data-i="hardware">硬體</h2>
+      <table>
+        <thead>
+          <tr>
+            <th data-i="colPart">部件</th>
+            <th data-i="colModel">型號</th>
+            <th data-i="colRole">用途</th>
+            <th data-i="colStatus">狀態</th>
+          </tr>
+        </thead>
+        <tbody id="hw"></tbody>
+      </table>
+    </div>
+
+    <section class="flow" id="project-flow">
+      <div class="flow-head">
+        <h2 data-i="flow">專案流程</h2>
+        <span class="here" id="here">…</span>
+      </div>
+      <div class="rail" id="rail"></div>
+      <div class="panel" id="panel"></div>
+    </section>
+
+    <div class="card" id="chassis-guide" style="margin-top:14px">
+      <h2 data-i="guideTitle">底盤連接指引</h2>
+      <ol class="guide-steps" id="guide-steps"></ol>
+      <p class="guide-note" id="guide-note"></p>
+    </div>
+
+    <details>
+      <summary data-i="raw">原始狀態</summary>
+      <pre id="state">{}</pre>
+    </details>
+  </main>
+  <script>
+    const I18N = {
+      zh: {
+        title: '雙臂輪式底盤',
+        hint: '<kbd>i j k l</kbd> / <kbd>WASD</kbd> · Space 急停',
+        connecting: '連線中…',
+        offline: 'bridge 離線',
+        teleop: '遙控', camera: '相機', hardware: '硬體', flow: '專案流程', raw: '原始狀態',
+        guideTitle: '底盤連接指引',
+        guideSteps: [
+          '扭底盤紅色和黑色按鈕',
+          'USB-A 插上 Thor',
+          '調整輪子角度',
+          'Refresh 網頁',
+        ],
+        guideNote: '然後應該見到底盤的輪子自動調整回 0 度，OLED 的 voltage 約 21，就可以試著點遙控的按鈕了。',
+        guideRefresh: '重新整理',
+        enable: '啟動電機', reset: '復位里程計', turnL: 't 左轉', turnR: 'b 右轉',
+        colPart: '部件', colModel: '型號', colRole: '用途', colStatus: '狀態',
+        placeholder: '前進 1 秒 然後 關閉夾爪',
+        planWait: '規劃中…',
+        planOnly: '無底盤，只規劃不執行',
+        planRun: '已交給任務執行',
+        planSrc: { parser: '短語', ollama: 'Ollama 7B', deepseek: 'DeepSeek' },
+        examples: [
+          ['前進 1 秒', '前進 1 秒'],
+          ['左轉 1 秒 然後 停', '左轉然後停'],
+          ['左臂回home 然後 關閉夾爪', '左臂 home + 夾爪'],
+          ['前進 1 秒 然後 關閉夾爪', '前進再夾'],
+        ],
+        connected: '已連線', disconnected: '未連線',
+        mock: 'MOCK', serial: 'SERIAL OK', noChassis: '無底盤',
+        here: '現在',
+        done: '完成', current: '進行中', locked: '未解鎖',
+        parts: {
+          Compute: '運算', 'Chassis MCU': '底盤主控', 'Drive motors': '驅動電機',
+          'Left arm': '左臂', 'Right arm': '右臂', 'Left gripper': '左夾爪',
+          'Right gripper': '右夾爪', Camera: '相機', VLA: 'VLA',
+        },
+        roles: {
+          'Onboard computer': '車載電腦', 'Wheelbase controller': '底盤控制器',
+          Locomotion: '移動', 'Left manipulator': '左機械臂', 'Right manipulator': '右機械臂',
+          'Left grasp': '左夾持', 'Right grasp': '右夾持', Perception: '感知',
+          'Contact policy': '接觸政策',
+        },
+        phases: {
+          p1: { title: '遠端實時操控', blurb: '人在網頁／SSH 上開車與急停',
+            items: { bridge: 'Thor 上 robot_bridge + 本頁', chassis: '底盤 USB 真連（非 mock）', arms: '雙臂 Feetech 串口 + 校準' } },
+          p2a: { title: '語言 → 原語', blurb: '一句話拆成 move / gripper / stop',
+            items: { parser: '短語 parser 與 /command', skill: 'OpenClaw skill 檔（不碰串口）', llm: 'Ollama 或雲端 LLM（可選）' } },
+          p2b: { title: '視覺插槽', blurb: '相機畫面進模型，禁止假成功',
+            items: { camslot: '/camera 插槽', camera: '相機已插入並出圖', vla: 'vla_act 政策接通' } },
+          p3: { title: '接觸技能', blurb: '開門、收拾：看圖 + vla_act，不是寫死關節',
+            items: { door: '開門閉環', tidy: '抓放／收拾' } },
+          p4: { title: '搜救', blurb: '同一套原語 + 移動規劃，現場人機共駕',
+            items: { sar: '搜救任務（規劃仍用 LLM）' } },
+        },
+      },
+      en: {
+        title: 'Bimanual wheelbase',
+        hint: '<kbd>i j k l</kbd> / <kbd>WASD</kbd> · Space e-stop',
+        connecting: 'connecting…',
+        offline: 'bridge offline',
+        teleop: 'Teleop', camera: 'Camera', hardware: 'Hardware', flow: 'Project flow', raw: 'Raw state',
+        guideTitle: 'Chassis connection',
+        guideSteps: [
+          'Press the chassis red and black buttons',
+          'Plug USB-A into Thor',
+          'Adjust the wheel angles',
+          'Refresh this page',
+        ],
+        guideNote: 'Wheels should auto-return to 0°, OLED voltage around 21 V. Then try the teleop buttons.',
+        guideRefresh: 'Refresh',
+        enable: 'Enable motor', reset: 'Reset odom', turnL: 't left', turnR: 'b right',
+        colPart: 'Part', colModel: 'Model', colRole: 'Role', colStatus: 'Status',
+        placeholder: 'forward 1s then close gripper',
+        planWait: 'planning…',
+        planOnly: 'no chassis — plan only, not executed',
+        planRun: 'sent to task runner',
+        planSrc: { parser: 'phrase', ollama: 'Ollama 7B', deepseek: 'DeepSeek' },
+        examples: [
+          ['forward 1s', 'forward 1s'],
+          ['turn left 1s then stop', 'turn left then stop'],
+          ['left arm home then close gripper', 'left home + gripper'],
+          ['forward 1s then close gripper', 'forward then grip'],
+        ],
+        connected: 'connected', disconnected: 'disconnected',
+        mock: 'MOCK', serial: 'SERIAL OK', noChassis: 'NO CHASSIS',
+        here: 'Now',
+        done: 'done', current: 'in progress', locked: 'locked',
+        parts: {
+          Compute: 'Compute', 'Chassis MCU': 'Chassis MCU', 'Drive motors': 'Drive motors',
+          'Left arm': 'Left arm', 'Right arm': 'Right arm', 'Left gripper': 'Left gripper',
+          'Right gripper': 'Right gripper', Camera: 'Camera', VLA: 'VLA',
+        },
+        roles: {
+          'Onboard computer': 'Onboard computer', 'Wheelbase controller': 'Wheelbase controller',
+          Locomotion: 'Locomotion', 'Left manipulator': 'Left manipulator', 'Right manipulator': 'Right manipulator',
+          'Left grasp': 'Left grasp', 'Right grasp': 'Right grasp', Perception: 'Perception',
+          'Contact policy': 'Contact policy',
+        },
+        phases: {
+          p1: { title: 'Remote teleop', blurb: 'Drive and e-stop from the web / SSH',
+            items: { bridge: 'robot_bridge + this page on Thor', chassis: 'Chassis USB live (not mock)', arms: 'Dual-arm Feetech serial + calibrate' } },
+          p2a: { title: 'Language → primitives', blurb: 'A sentence becomes move / gripper / stop',
+            items: { parser: 'Phrase parser and /command', skill: 'OpenClaw skill (no raw serial)', llm: 'Ollama or cloud LLM (optional)' } },
+          p2b: { title: 'Vision slots', blurb: 'Camera frames into the model; no fake success',
+            items: { camslot: '/camera slot', camera: 'Camera plugged and streaming', vla: 'vla_act policy wired' } },
+          p3: { title: 'Contact skills', blurb: 'Open door / tidy: vision + vla_act, not scripted joints',
+            items: { door: 'Open-door closed loop', tidy: 'Pick-and-place / tidy' } },
+          p4: { title: 'Search & rescue', blurb: 'Same primitives + mobility; human in the loop on site',
+            items: { sar: 'SAR missions (LLM still plans)' } },
+        },
+      },
+    };
+
+    let lang = 'zh';
+    const t = () => I18N[lang];
+
+    const keys = {};
+    const map = {
+      i: {vx: 0.35, vy: 0, wz: 0}, w: {vx: 0.35, vy: 0, wz: 0},
+      k: {vx: 0, vy: 0, wz: 0},
+      j: {vx: 0, vy: 0.35, wz: 0}, a: {vx: 0, vy: 0.35, wz: 0},
+      l: {vx: 0, vy: -0.35, wz: 0}, d: {vx: 0, vy: -0.35, wz: 0},
+      s: {vx: -0.35, vy: 0, wz: 0}, ',': {vx: -0.35, vy: 0, wz: 0},
+      u: {vx: 0.3, vy: 0.3, wz: 0}, o: {vx: 0.3, vy: -0.3, wz: 0},
+      m: {vx: -0.3, vy: 0.3, wz: 0}, '.': {vx: -0.3, vy: -0.3, wz: 0},
+      t: {vx: 0, vy: 0, wz: 0.8}, b: {vx: 0, vy: 0, wz: -0.8},
+    };
+    let hold = {vx: 0, vy: 0, wz: 0};
+    let holding = false;
+    let selectedPhase = null;
+    let lastFlags = {};
+    let lastFlowKey = '';
+    let lastRows = [];
+    let chassisLive = false;
+
+    const PHASES = [
+      { id: 'p1', key: 'Phase 1', items: [
+        { id: 'bridge', done: () => true },
+        { id: 'chassis', done: (f) => f.chassis },
+        { id: 'arms', done: (f) => f.arms },
+      ]},
+      { id: 'p2a', key: 'Phase 2A', items: [
+        { id: 'parser', done: () => true },
+        { id: 'skill', done: () => true },
+        { id: 'llm', done: () => false, optional: true },
+      ]},
+      { id: 'p2b', key: 'Phase 2B', items: [
+        { id: 'camslot', done: () => true },
+        { id: 'camera', done: (f) => f.cameraDev },
+        { id: 'vla', done: (f) => f.vla },
+      ]},
+      { id: 'p3', key: 'Phase 3', items: [
+        { id: 'door', done: () => false },
+        { id: 'tidy', done: () => false },
+      ]},
+      { id: 'p4', key: 'Phase 4', items: [
+        { id: 'sar', done: () => false },
+      ]},
+    ];
+
+    function applyLang() {
+      const d = t();
+      document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+      document.querySelectorAll('[data-i]').forEach((el) => {
+        const k = el.getAttribute('data-i');
+        if (d[k] != null) el.innerHTML = d[k];
+      });
+      document.getElementById('hint').innerHTML = d.hint;
+      document.getElementById('cmd').placeholder = d.placeholder;
+      document.getElementById('lang-zh').classList.toggle('on', lang === 'zh');
+      document.getElementById('lang-en').classList.toggle('on', lang === 'en');
+      const ex = document.getElementById('examples');
+      ex.innerHTML = d.examples.map(([cmd, label]) =>
+        `<button type="button" data-cmd="${cmd}">${label}</button>`
+      ).join('');
+      ex.querySelectorAll('button').forEach((b) => {
+        b.onclick = async () => {
+          document.getElementById('cmd').value = b.dataset.cmd;
+          document.getElementById('cmdform').requestSubmit();
+        };
+      });
+      const steps = document.getElementById('guide-steps');
+      steps.innerHTML = d.guideSteps.map((s, i) => {
+        const refresh = i === 3 ? ` <button type="button" id="guide-refresh">${d.guideRefresh}</button>` : '';
+        return `<li>${s}${refresh}</li>`;
+      }).join('');
+      document.getElementById('guide-refresh').onclick = () => location.reload();
+      document.getElementById('guide-note').textContent = d.guideNote;
+      lastFlowKey = '';
+      renderTable(lastRows);
+      if (Object.keys(lastFlags).length) renderFlow(lastFlags);
+    }
+
+    function flagsFrom(st) {
+      const inv = {};
+      (st.inventory || []).forEach((r) => { inv[r.part] = r.status === 'connected'; });
+      const cap = st.capabilities || {};
+      return {
+        chassis: !!(inv['Chassis MCU'] || inv['Drive motors'] || (cap.chassis && cap.chassis.wired)),
+        arms: !!(inv['Left arm'] && inv['Right arm']),
+        camera: !!(inv['Camera'] && cap.camera && cap.camera.frame),
+        cameraDev: !!inv['Camera'],
+        vla: !!(inv['VLA'] || (cap.vla_act && cap.vla_act.wired)),
+      };
+    }
+
+    function requiredDone(p, f) {
+      return p.items.filter((it) => !it.optional).every((it) => it.done(f));
+    }
+    function currentId(f) {
+      for (const p of PHASES) {
+        if (!requiredDone(p, f)) return p.id;
+      }
+      return PHASES[PHASES.length - 1].id;
+    }
+    function phaseState(p, f) {
+      if (requiredDone(p, f)) return 'done';
+      if (p.id === currentId(f)) return 'current';
+      return 'locked';
+    }
+
+    function renderFlow(f) {
+      lastFlags = f;
+      const cur = currentId(f);
+      if (!selectedPhase) selectedPhase = cur;
+      const key = JSON.stringify(f) + '|' + selectedPhase + '|' + lang;
+      if (key === lastFlowKey) return;
+      lastFlowKey = key;
+      const d = t();
+      const here = PHASES.find((p) => p.id === cur);
+      const hereTx = d.phases[here.id];
+      document.getElementById('here').textContent = d.here + '：' + here.key + ' · ' + hereTx.title;
+      const stLabel = { done: d.done, locked: d.locked, current: d.current };
+      document.getElementById('rail').innerHTML = PHASES.map((p) => {
+        const st = phaseState(p, f);
+        const tx = d.phases[p.id];
+        const active = p.id === selectedPhase ? ' active' : '';
+        return `<button type="button" class="step ${st}${active}" data-phase="${p.id}">
+          <div class="node">${p.key.replace('Phase ', '')}</div>
+          <div class="step-k">${p.key}</div>
+          <div class="step-t">${tx.title}</div>
+          <div class="step-s">${stLabel[st]}</div>
+        </button>`;
+      }).join('');
+      document.querySelectorAll('.step').forEach((el) => {
+        el.onclick = () => { selectedPhase = el.dataset.phase; lastFlowKey = ''; renderFlow(lastFlags); };
+      });
+      const p = PHASES.find((x) => x.id === selectedPhase) || here;
+      const tx = d.phases[p.id];
+      const pst = phaseState(p, f);
+      const items = p.items.map((it) => {
+        const yes = it.done(f);
+        const mark = yes ? 'yes' : (pst === 'current' ? 'wait' : 'no');
+        return `<li><span class="mark ${mark}"></span><span>${tx.items[it.id]}</span></li>`;
+      }).join('');
+      document.getElementById('panel').innerHTML =
+        `<h3>${p.key} · ${tx.title}</h3><p class="muted" style="margin:0">${tx.blurb}</p><ul class="checks">${items}</ul>`;
+    }
+
+    async function post(url, body) {
+      const r = await fetch(url, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: body ? JSON.stringify(body) : '{}',
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) alert(data.detail || data.reason || r.statusText);
+      return data;
+    }
+
+    function renderTable(rows) {
+      lastRows = rows || [];
+      const d = t();
+      const tb = document.getElementById('hw');
+      tb.innerHTML = lastRows.map((r) => {
+        const on = r.status === 'connected';
+        const part = d.parts[r.part] || r.part;
+        const role = d.roles[r.role] || r.role;
+        const st = on ? d.connected : d.disconnected;
+        return `<tr>
+          <td>${part}</td>
+          <td>${r.model}</td>
+          <td>${role}</td>
+          <td><span class="dot ${on ? 'on' : 'off'}"></span><span class="${on ? 'ok' : 'bad'}">${st}</span></td>
+        </tr>`;
+      }).join('');
+    }
+
+    async function tick() {
+      if (holding) await post('/cmd_vel', hold);
+      const d = t();
+      try {
+        const st = await fetch('/state').then(r => r.json());
+        const c = st.chassis;
+        const cls = c.connected || c.mock ? 'ok' : 'bad';
+        const task = st.task || {};
+        const mode = c.mock ? d.mock : (c.connected ? d.serial : d.noChassis);
+        chassisLive = !!(c.connected && !c.mock);
+        document.getElementById('status').innerHTML =
+          `<span class="${cls}">${mode}</span>` +
+          (task.running ? ` · task ${task.index}/${task.steps.length}` : '');
+        renderTable(st.inventory);
+        renderFlow(flagsFrom(st));
+        document.getElementById('state').textContent = JSON.stringify({
+          cmd: {vx: c.vx, vy: c.vy, wz: c.wz},
+          odom: {x: +c.odom_x.toFixed(3), y: +c.odom_y.toFixed(3), th: +c.odom_th.toFixed(3)},
+          motor: c.motor_enabled,
+          task,
+        }, null, 2);
+      } catch (e) {
+        document.getElementById('status').innerHTML = `<span class="bad">${d.offline}</span>`;
+      }
+    }
+
+    function applyKeys() {
+      hold = {vx: 0, vy: 0, wz: 0};
+      holding = false;
+      for (const [k, on] of Object.entries(keys)) {
+        if (!on || !map[k]) continue;
+        holding = true;
+        hold.vx += map[k].vx;
+        hold.vy += map[k].vy;
+        hold.wz += map[k].wz;
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.target && e.target.id === 'cmd') return;
+      if (e.repeat) return;
+      if (e.key === ' ' || e.key === 'Escape') {
+        e.preventDefault();
+        post('/stop');
+        holding = false;
+        return;
+      }
+      const k = e.key.toLowerCase();
+      if (map[k]) { keys[k] = true; applyKeys(); e.preventDefault(); }
+    });
+    window.addEventListener('keyup', (e) => {
+      const k = e.key.toLowerCase();
+      if (map[k]) { keys[k] = false; applyKeys(); }
+    });
+    window.addEventListener('blur', () => { Object.keys(keys).forEach(k => keys[k] = false); applyKeys(); post('/cmd_vel', {vx:0,vy:0,wz:0}); });
+
+    document.querySelectorAll('.pad button, .card button[data-wz]').forEach(btn => {
+      const down = () => {
+        hold = {
+          vx: parseFloat(btn.dataset.vx || '0'),
+          vy: parseFloat(btn.dataset.vy || '0'),
+          wz: parseFloat(btn.dataset.wz || '0'),
+        };
+        holding = true;
+      };
+      const up = () => { holding = false; post('/cmd_vel', {vx:0,vy:0,wz:0}); };
+      btn.addEventListener('mousedown', down);
+      btn.addEventListener('mouseup', up);
+      btn.addEventListener('mouseleave', up);
+      btn.addEventListener('touchstart', (e) => { e.preventDefault(); down(); });
+      btn.addEventListener('touchend', up);
+    });
+    document.getElementById('estop').onclick = () => post('/stop');
+    document.getElementById('enable').onclick = () => post('/motor', {enabled: true});
+    document.getElementById('reset').onclick = () => post('/reset_odom');
+    document.getElementById('cmdform').onsubmit = async (e) => {
+      e.preventDefault();
+      const text = document.getElementById('cmd').value.trim();
+      if (!text) return;
+      const box = document.getElementById('plan');
+      const d = t();
+      box.hidden = false;
+      box.textContent = d.planWait;
+      const data = await post('/command', {text, plan_only: !chassisLive});
+      if (!data.ok) {
+        const err = data.detail;
+        box.textContent = typeof err === 'string' ? err : JSON.stringify(err || data, null, 2);
+        return;
+      }
+      const src = (d.planSrc && d.planSrc[data.source]) || data.source || '';
+      const note = data.plan_only ? d.planOnly : d.planRun;
+      box.textContent = `${note} · ${src}\n` + JSON.stringify(data.steps || data, null, 2);
+    };
+    document.getElementById('lang-zh').onclick = () => { lang = 'zh'; applyLang(); };
+    document.getElementById('lang-en').onclick = () => { lang = 'en'; applyLang(); };
+
+    const cam = document.getElementById('cam');
+    function refreshCam() { cam.src = '/camera/snapshot.svg?t=' + Date.now(); }
+    applyLang();
+    refreshCam();
+    setInterval(tick, 200);
+    setInterval(refreshCam, 1000);
+  </script>
+</body>
+</html>

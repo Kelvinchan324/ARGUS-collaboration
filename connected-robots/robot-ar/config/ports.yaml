@@ -1,0 +1,29 @@
+# Fill ports after:  bash scripts/detect_ports.sh
+# Persistent by-id paths survive USB reorder. ttyACM0/1 are fallbacks.
+
+robot_type: so101_follower   # change to so100_follower if your arms are SO-100
+
+arms:
+  left:
+    id: left_follower
+    port: /dev/ttyACM0
+    enabled: true
+  right:
+    id: right_follower
+    port: /dev/ttyACM1
+    enabled: true
+
+# Leader arms (optional). Leave enabled: false if you only have followers.
+leaders:
+  left:
+    type: so101_leader
+    id: left_leader
+    port: /dev/ttyACM2
+    enabled: false
+  right:
+    type: so101_leader
+    id: right_leader
+    port: /dev/ttyACM3
+    enabled: false
+
+# Feetech bus: 6× STS3215 per arm, id 1–6, gripper = id 6 (parallel jaw).

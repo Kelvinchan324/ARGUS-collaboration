@@ -5,7 +5,7 @@ adds and maintains its connection code inside that folder.
 
 | Robot | Folder | Current status |
 | --- | --- | --- |
-| Robot-AR | [`robot-ar/`](robot-ar/) | Inventory needed |
+| Robot-AR | [`robot-ar/`](robot-ar/) | Bridge and planner prototype imported; hardware validation pending |
 | Aloha Mini | [`aloha-mini/`](aloha-mini/) | Inventory needed |
 | Open Duck Mini | [`open-duck-mini/`](open-duck-mini/) | Inventory needed |
 | Pupper V2 | [`pupper-v2/`](pupper-v2/) | Inventory needed |
