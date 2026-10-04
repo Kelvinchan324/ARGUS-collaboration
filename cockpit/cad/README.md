@@ -1,5 +1,7 @@
 # Cockpit CAD parts
 
+> [Open the ARGUS website](https://kelvinchan324.github.io/ARGUS-collaboration/) · [English](https://kelvinchan324.github.io/ARGUS-collaboration/en/)
+
 These SolidWorks part files are the current ARGUS cockpit frame and seat
 dimension references supplied by the project team.
 

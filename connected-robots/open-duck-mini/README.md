@@ -1,5 +1,7 @@
 # Open Duck Mini
 
+> [Open the ARGUS website](https://kelvinchan324.github.io/ARGUS-collaboration/) · [English](https://kelvinchan324.github.io/ARGUS-collaboration/en/)
+
 <p align="center">
   <img src="https://github.com/user-attachments/assets/2a407765-70ad-48dd-8a5d-488f82503716" alt="Open Duck Mini v2" width="420">
 </p>

@@ -1,5 +1,7 @@
 # Phase 2 first half — language agent
 
+> [Open the ARGUS website](https://kelvinchan324.github.io/ARGUS-collaboration/) · [English](https://kelvinchan324.github.io/ARGUS-collaboration/en/)
+
 This folder is the ABot-Claw *slot*: an agent that may only call `robot_bridge`.
 
 ```

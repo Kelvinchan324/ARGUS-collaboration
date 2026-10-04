@@ -1,5 +1,7 @@
 # Cockpit
 
+> [Open the ARGUS website](https://kelvinchan324.github.io/ARGUS-collaboration/) · [English](https://kelvinchan324.github.io/ARGUS-collaboration/en/)
+
 This is the shared ARGUS application. Cockpit code should handle the operator
 controls, user interface, robot selection, video/telemetry display, and the
 common connection layer used to reach the connected robots.

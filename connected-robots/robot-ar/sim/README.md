@@ -1,5 +1,7 @@
 # SO-ARM simulator (laptop, optional)
 
+> [Open the ARGUS website](https://kelvinchan324.github.io/ARGUS-collaboration/) · [English](https://kelvinchan324.github.io/ARGUS-collaboration/en/)
+
 This is **arm-only**, not the wheeled base. Keep it off the Thor agent.
 
 Isaac Sim is not set up here (large install). Use MuJoCo.

@@ -1,5 +1,7 @@
 # Connected Robots
 
+> [Open the ARGUS website](https://kelvinchan324.github.io/ARGUS-collaboration/) · [English](https://kelvinchan324.github.io/ARGUS-collaboration/en/)
+
 Each robot has one self-contained folder. The student responsible for that robot
 adds and maintains its connection code inside that folder.
 
