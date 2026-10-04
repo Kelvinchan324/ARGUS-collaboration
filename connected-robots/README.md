@@ -8,7 +8,7 @@ adds and maintains its connection code inside that folder.
 | Robot-AR | [`robot-ar/`](robot-ar/) | Bridge and planner prototype imported; hardware validation pending |
 | Aloha Mini | [`aloha-mini/`](aloha-mini/) | Inventory needed |
 | Open Duck Mini | [`open-duck-mini/`](open-duck-mini/) | Inventory needed |
-| Pupper V2 | [`pupper-v2/`](pupper-v2/) | Inventory needed |
+| Pupper V3 | [`pupper-v3/`](pupper-v3/) | Inventory needed |
 | Unitree Go2 with dimOS | [`unitree-go2/`](unitree-go2/) | Planned |
 
 ## What belongs inside each robot folder

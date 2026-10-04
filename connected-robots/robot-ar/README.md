@@ -1,8 +1,11 @@
 # Robot-AR
 
 <p align="center">
-  <img src="robot-ar.png" alt="Robot-AR concept render" width="520">
+  <img src="robot-ar.png" alt="Robot-AR bimanual mobile robot" width="520">
 </p>
+
+> Robot-AR prototype photographed for ARGUS Report Back Session 1. Robot-AR is
+> the team's large bimanual mobile robot; it is separate from Aloha Mini.
 
 Robot-AR is the large ARGUS mobile-manipulation research platform: a
 four-wheel-steer chassis, two SO-ARM100/101 arms, Robonine parallel grippers,

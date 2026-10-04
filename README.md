@@ -11,7 +11,7 @@ The Chinese page is the default entry point and links to the English version.
 
 ARGUS is a multi-robot telepresence and control project. This repository is the
 shared integration hub for the cockpit, Robot-AR, Aloha Mini, Open Duck Mini,
-Stanford Pupper V2, and Unitree Go2 through dimOS.
+Pupper V3, and Unitree Go2 through dimOS.
 
 ## Where work goes
 
@@ -44,7 +44,7 @@ flowchart LR
     Cockpit --> AR[Robot-AR folder]
     Cockpit --> Aloha[Aloha Mini folder]
     Cockpit --> Duck[Open Duck Mini folder]
-    Cockpit --> Pupper[Pupper V2 folder]
+    Cockpit --> Pupper[Pupper V3 folder]
     Cockpit --> Go2[Go2 / dimOS folder]
 ```
 
@@ -64,7 +64,7 @@ requests safely. Unsupported requests should return a clear error.
 - [Robot-AR](connected-robots/robot-ar/)
 - [Aloha Mini](connected-robots/aloha-mini/)
 - [Open Duck Mini](connected-robots/open-duck-mini/)
-- [Pupper V2](connected-robots/pupper-v2/)
+- [Pupper V3](connected-robots/pupper-v3/)
 - [Unitree Go2 with dimOS](connected-robots/unitree-go2/)
 
 The robot folders are currently placeholders. Their maintainers should add only
