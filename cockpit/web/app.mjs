@@ -1,5 +1,5 @@
-import './layout.mjs?v=investor-2';
-import {ROBOTS,STALE_MS,emptyState,demoState,fresh,finite,clamp,normalizeAR,normalizeGeneric,validateEndpoint,commandRequest,jsonRequest,CommandChannel} from './core.mjs?v=investor-2';
+import './layout.mjs?v=investor-3';
+import {ROBOTS,STALE_MS,emptyState,demoState,fresh,finite,clamp,normalizeAR,normalizeGeneric,validateEndpoint,commandRequest,jsonRequest,CommandChannel} from './core.mjs?v=investor-3';
 const $=id=>document.getElementById(id);
 let selected=ROBOTS[0].id,mode='demo',hold=null,transition=false,videoMode=false;
 const records=new Map(ROBOTS.map((robot,i)=>[robot.id,{robot,demo:demoState(robot,i),state:emptyState(),config:null,channel:null,version:0,controlEpoch:0,polling:false,authorized:false,busy:false,history:[],rightJoints:[0,-12,24,0,12,0],leftJoints:[0,-12,24,0,12,0],lastError:''}]));
