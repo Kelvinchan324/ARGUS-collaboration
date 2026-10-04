@@ -19,3 +19,10 @@ cockpit/
 ```
 
 Only create these subfolders when there are real files to put in them.
+
+## Current public files
+
+- [`cad/`](cad/) contains the current SolidWorks frame and seat-dimension part
+  references. They are research files, not certified manufacturing drawings.
+- Shared cockpit application code should be added under `src/` when it is ready
+  to migrate from the development machine.
