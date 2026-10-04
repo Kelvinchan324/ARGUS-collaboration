@@ -23,6 +23,13 @@ controls, odometry, speed history, command acknowledgements, per-robot and fleet
 software stops, and JSON telemetry export. Missing sensor values remain unknown.
 There is no live camera stream in the current Robot-AR backend.
 
+The header uses the original ARGUS logo. The operator cockpit status panel
+separately reports browser focus, the active control route, fresh robot links,
+VR browser support and detected gamepads. Device detection does not imply a
+calibrated control mapping. Leader arms, foot pedals and physical emergency-stop
+feedback remain unconfigured/unverified until their integrations are available;
+a robot connection never marks the physical cockpit ready automatically.
+
 ### Run and connect
 
 Build and serve the website using the root README instructions, then open

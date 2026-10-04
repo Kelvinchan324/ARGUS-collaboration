@@ -3,12 +3,26 @@
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#080d14"><title>ARGUS · Fleet Control</title><link rel="stylesheet" href="cockpit.css"></head>
 <body>
 <a class="skip" href="#workspace">Skip to robot controls</a>
-<header class="top"><a class="wordmark" href="../"><span class="brand-icon">A</span>ARGUS<small>CONTROL CENTER</small></a><div class="session"><span class="pulse"></span><span id="mode-label">DEMO SESSION</span><time id="clock"></time></div><button class="stop-all danger" id="stop-all">■ Stop all robots</button></header>
+<header class="top"><a class="wordmark" href="../" aria-label="ARGUS home"><img class="argus-logo" src="../assets/argus-logo.png" alt="ARGUS"><small>CONTROL CENTER</small></a><div class="session"><span class="pulse"></span><span id="mode-label">DEMO SESSION</span><time id="clock"></time></div><button class="stop-all danger" id="stop-all">■ Stop all robots</button></header>
 <div class="app-shell">
  <aside class="sidebar"><div class="rail-title"><span>CONNECTED ROBOTS</span><b>06</b></div><p class="rail-note">One cockpit. Every platform.</p><nav id="fleet" aria-label="Select robot"></nav><div class="rail-bottom"><button id="connections">⚙ Connection settings</button><button id="export">↓ Export telemetry</button><a href="../#fleet">← Project &amp; robot materials</a><span id="session-note">Simulated telemetry · no robot commands</span></div></aside>
  <main id="workspace">
   <div class="workspace-head"><div><p class="eyebrow">FLEET OPERATIONS / <span id="robot-code">BM</span></p><h1 id="robot-name">Bimanual Bunker Mini</h1><p id="robot-kind">Tracked · dual arm</p></div><div class="head-actions"><label class="mode-picker">Data source<select id="mode"><option value="demo">Demonstration</option><option value="connected">Connected robots</option></select></label><span class="tag" id="robot-status">SIMULATED</span></div></div>
   <div class="notice" id="notice" role="status">Demo mode: explore the controls with simulated robots. Nothing is sent to hardware.</div>
+  <section class="panel cockpit-status" aria-labelledby="cockpit-title">
+   <div class="panel-head"><h2 id="cockpit-title">Operator cockpit status</h2><span class="tag muted" id="cockpit-readiness">HARDWARE UNVERIFIED</span></div>
+   <div class="cockpit-status-grid">
+    <article><span>OPERATOR STATION</span><strong id="station-status">Browser ready</strong><small id="station-detail">Keyboard and pointer interface</small></article>
+    <article><span>CONTROL ROUTE</span><strong id="route-status">Control locked</strong><small id="route-detail">No robot armed</small></article>
+    <article><span>ROBOT LINKS</span><strong id="links-status">Demo session</strong><small id="links-detail">No hardware connections</small></article>
+    <article><span>VR HEADSET</span><strong id="vr-status">Not connected</strong><small id="vr-detail">Checking browser VR support</small></article>
+    <article><span>LEADER ARMS</span><strong>Not configured</strong><small>No cockpit arm telemetry bridge</small></article>
+    <article><span>FOOT PEDALS</span><strong>Not configured</strong><small>No calibrated pedal mapping</small></article>
+    <article><span>INPUT DEVICES</span><strong id="input-status">Keyboard / pointer</strong><small id="input-detail">Gamepad detection available</small></article>
+    <article><span>PHYSICAL EMERGENCY STOP</span><strong class="unverified">Unverified</strong><small>No physical stop feedback channel</small></article>
+   </div>
+   <p class="cockpit-status-note">Cockpit hardware readiness is separate from robot connectivity. Leader arms, pedals, headset sessions and physical stop feedback require their own integrations.</p>
+  </section>
   <section class="stats" aria-label="Selected robot telemetry"><article><span>BATTERY</span><strong id="battery">—</strong><small id="voltage">—</small></article><article><span>BASE SPEED</span><strong id="speed">—</strong><small id="speed-note">Simulated velocity</small></article><article><span>ROUND-TRIP</span><strong id="latency">—</strong><small id="freshness">Waiting for telemetry</small></article><article><span>COMPUTE TEMP</span><strong id="temperature">—</strong><small id="control-state">Control disabled</small></article></section>
   <div class="main-grid">
    <section class="panel vision"><div class="panel-head"><h2>Operator view</h2><span class="tag muted" id="view-label">MODEL PREVIEW</span></div><div class="view-stage" id="view-stage"><div class="view-grid"></div><img id="robot-image" alt="Selected robot reference model"><div id="robot-symbol" class="robot-symbol" hidden></div><video id="inspection-video" controls playsinline preload="none" hidden><source src="../connected-robots/bimanual-bunker-mini/media/Industrial_Inspection_Demo.mp4" type="video/mp4"></video><div class="view-corner"><span id="view-caption">Reference model · not a live camera</span><b id="view-robot">BM / 01</b></div></div><div class="view-toolbar"><button id="preview-view" class="active">Robot reference</button><button id="video-view">Inspection demo</button><span id="camera-status">Camera not connected</span></div></section>

@@ -3,6 +3,19 @@ const $=id=>document.getElementById(id);
 let selected=ROBOTS[0].id,mode='demo',hold=null,transition=false,videoMode=false;
 const records=new Map(ROBOTS.map((robot,i)=>[robot.id,{robot,demo:demoState(robot,i),state:emptyState(),config:null,channel:null,version:0,controlEpoch:0,polling:false,authorized:false,busy:false,history:[],rightJoints:[0,-12,24,0,12,0],leftJoints:[0,-12,24,0,12,0],lastError:''}]));
 const logs=[];
+let vrSupport='Checking browser VR support';
+if(navigator.xr?.isSessionSupported){navigator.xr.isSessionSupported('immersive-vr').then(supported=>{vrSupport=supported?'VR available · no active session':'Immersive VR unavailable';}).catch(()=>{vrSupport='VR support could not be checked';});}else{vrSupport='WebXR unavailable in this browser';}
+function cockpitSnapshot(){
+ let gamepads=[];try{gamepads=[...(navigator.getGamepads?.()||[])].filter(p=>p?.connected);}catch{/* Device access may be restricted by the browser. */}
+ const armed=[...records.values()].filter(r=>r.authorized&&state(r).enabled&&fresh(state(r)));
+ return {stationFocused:document.hasFocus()&&!document.hidden,source:mode,armedRobotIds:armed.map(r=>r.robot.id),freshRobotLinks:mode==='connected'?[...records.values()].filter(r=>r.config&&fresh(r.state)).length:0,vrSession:'not connected',vrSupport,gamepadsDetected:gamepads.length,leaderArms:'not configured',footPedals:'not configured',physicalEmergencyStop:'unverified',hardwareReady:false};
+}
+function renderCockpit(){
+ const c=cockpitSnapshot();$('station-status').textContent=c.stationFocused?'Operator page active':'Operator page unfocused';$('station-detail').textContent=c.stationFocused?'Keyboard and pointer available':'Motion locks when focus is lost';
+ $('route-status').textContent=c.armedRobotIds.length?(mode==='demo'?'Demo control enabled':'Robot control enabled'):'Control locked';$('route-detail').textContent=c.armedRobotIds.length?c.armedRobotIds.map(id=>records.get(id).robot.name).join(', '):'No robot armed by this cockpit';
+ $('links-status').textContent=mode==='demo'?'Demo session':`${c.freshRobotLinks} / 6 fresh links`;$('links-detail').textContent=mode==='demo'?'Local simulation · no hardware traffic':'Fresh links may include bridge simulation';
+ $('vr-status').textContent='Not connected';$('vr-detail').textContent=c.vrSupport;$('input-status').textContent=c.gamepadsDetected?`${c.gamepadsDetected} gamepad(s) detected`:'Keyboard / pointer';$('input-detail').textContent=c.gamepadsDetected?'Detected only · no robot mapping':'No gamepad detected';
+}
 const record=()=>records.get(selected);
 const state=r=>mode==='demo'?r.demo:r.state;
 const fmt=(v,unit='',digits=0)=>finite(v)===null?'—':`${v.toFixed(digits)}${unit}`;
@@ -68,6 +81,7 @@ function drawMap(){
  }
 }
 function render(){
+ renderCockpit();
  const r=record(),s=state(r),ok=fresh(s);const live=mode==='connected';
  $('mode-label').textContent=live?'CONNECTED SESSION':'DEMO SESSION';$('clock').textContent=new Date().toLocaleTimeString('en-GB');
  for(const item of records.values()){

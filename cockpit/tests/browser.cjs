@@ -34,8 +34,12 @@ const fixture=http.createServer(async(req,res)=>{
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto(origin+'/control/');await page.waitForSelector('.robot-option');
   assert.equal(await page.locator('.robot-option').count(),6);assert.equal(commands.length,0);
+  assert.equal(await page.locator('.argus-logo').evaluate(img=>img.complete&&img.naturalWidth>0),true);
+  assert.equal(await page.locator('.cockpit-status-grid article').count(),8);
+  assert.equal(await page.locator('#cockpit-readiness').textContent(),'HARDWARE UNVERIFIED');
   await page.locator('#enable').click();
   const forward=page.locator('[data-drive=forward]');await forward.hover();await page.mouse.down();await page.waitForTimeout(650);
+  assert.equal(await page.locator('#route-status').textContent(),'Demo control enabled');
   assert.notEqual(await page.locator('#speed').textContent(),'0.00 m/s');await page.mouse.up();await page.waitForTimeout(300);assert.equal(await page.locator('#speed').textContent(),'0.00 m/s');assert.equal(commands.length,0);
   await page.keyboard.down('w');await page.waitForTimeout(350);assert.notEqual(await page.locator('#speed').textContent(),'0.00 m/s');await page.keyboard.up('w');await page.waitForTimeout(300);assert.equal(await page.locator('#speed').textContent(),'0.00 m/s');
   await page.locator('[data-preset=inspect]').click();assert.match(await page.locator('#joints').textContent(),/55/);
@@ -47,6 +51,9 @@ const fixture=http.createServer(async(req,res)=>{
   await page.setViewportSize({width:1536,height:1080});
   await page.locator('#connections').click();await page.locator('#connection-robot').selectOption('robot-ar');await page.locator('#endpoint').fill(origin+'/bridge');await page.locator('#token').fill('test-only-token');await page.locator('#connection-form button[type=submit]').click();await page.waitForFunction(()=>!document.querySelector('#connection-dialog').open);
   assert.equal(await page.locator('#mode').inputValue(),'connected');assert.match(await page.locator('#robot-status').textContent(),/SIMULATION/);assert.equal(commands.length,0);assert.equal(await page.locator('#battery').textContent(),'—');assert.equal(await page.locator('#gripper').isDisabled(),true);
+  assert.equal(await page.locator('#links-status').textContent(),'1 / 6 fresh links');
+  assert.equal(await page.locator('#vr-status').textContent(),'Not connected');
+  assert.equal(await page.locator('#cockpit-readiness').textContent(),'HARDWARE UNVERIFIED');
   await page.locator('#enable').click();await page.waitForFunction(()=>!document.querySelector('[data-drive=forward]').disabled);await forward.hover();await page.mouse.down();await page.waitForTimeout(550);await page.mouse.up();await page.waitForTimeout(300);
   assert(commands.some(c=>c.url.endsWith('/cmd_vel')&&c.data.vx>0));assert.equal(commands.at(-1).data.vx,0);
   // Export includes no bearer token or connection configuration.
