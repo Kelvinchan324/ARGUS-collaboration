@@ -1,35 +1,23 @@
-"""Publish robot assets from their canonical adaptor folder without Git duplicates."""
+"""Build the ARGUS Pages artifact from public, source-verified assets."""
 import argparse
-import hashlib
-import json
-from pathlib import Path
 import shutil
-import zipfile
+from pathlib import Path
 
 
-def build(output):
+def build(output: Path) -> None:
     root = Path(__file__).resolve().parents[1]
-    robot = root / "connected-robots/bimanual-bunker-mini"
-    manifest = json.loads((robot / "asset-manifest.json").read_text(encoding="utf-8-sig"))
-    for asset in manifest["assets"]:
-        path = robot / asset["path"]
-        with path.open("rb") as stream:
-            digest = hashlib.file_digest(stream, "sha256").hexdigest()
-        if path.stat().st_size != asset["bytes"] or digest != asset["sha256"]:
-            raise ValueError(f"Asset mismatch: {asset['path']}. Retrieve full assets with git lfs pull.")
-    # Require a fresh directory to prevent stale downloads or accidental overwrites.
+    video = root / "connected-robots/bimanual-bunker-mini/media/Industrial_Inspection_Demo.mp4"
+    if not video.is_file():
+        raise FileNotFoundError(f"Missing concept video: {video}")
     if output.exists():
         raise FileExistsError(f"Choose a new output directory: {output}")
+
     shutil.copytree(root / "docs", output)
     shutil.copytree(root / "cockpit/web", output / "control")
-    shutil.copytree(robot, output / "connected-robots" / robot.name)
-    downloads = output / "downloads"
-    downloads.mkdir()
-    with zipfile.ZipFile(downloads / f"{robot.name}.zip", "w", zipfile.ZIP_DEFLATED) as archive:
-        for path in sorted(robot.rglob("*")):
-            if path.is_file():
-                archive.write(path, Path(robot.name) / path.relative_to(robot))
-    print(f"Website and complete adaptor archive ready: {output}")
+    video_target = output / "connected-robots/bimanual-bunker-mini/media"
+    video_target.mkdir(parents=True)
+    shutil.copy2(video, video_target / video.name)
+    print(f"Website ready: {output}")
 
 
 if __name__ == "__main__":

@@ -3,111 +3,104 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#05070a">
-  <meta name="description" content="ARGUS is an immersive cockpit for human-in-the-loop control across a growing fleet of robots.">
-  <title>ARGUS · Immersive Robot Control</title>
+  <meta name="theme-color" content="#f3f0e9">
+  <meta name="description" content="ARGUS is a human-in-the-loop control layer for a growing fleet of research robots.">
+  <title>ARGUS — Human-led robot operations</title>
   <link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
   <header class="topbar">
     <div class="shell topbar-inner">
-      <a class="brand" href="#top" aria-label="ARGUS home"><img src="assets/argus-logo.png" alt="ARGUS"></a>
+      <a class="wordmark" href="#top" aria-label="ARGUS home"><span></span>ARGUS</a>
       <button class="menu" type="button" data-menu aria-expanded="false" aria-controls="primary-nav">Menu</button>
-      <nav class="nav" id="primary-nav" data-nav aria-label="Primary navigation"><a href="#system">System</a><a href="#fleet">Fleet</a><a href="#gallery">Gallery</a><a href="#cad-lab">CAD Lab</a><a href="#roadmap">Roadmap</a></nav>
-      <a class="button compact" href="control/">Open control center ↗</a>
+      <nav class="nav" id="primary-nav" data-nav aria-label="Primary navigation">
+        <a href="#system">System</a><a href="#fleet">Fleet</a><a href="#bunker">In action</a>
+      </nav>
+      <a class="button compact" href="control/">Open control center <span aria-hidden="true">↗</span></a>
     </div>
   </header>
+
   <main id="main">
     <section class="hero" id="top">
-      <div class="shell hero-inner">
+      <div class="shell hero-grid">
         <div class="hero-copy">
-          <div class="eyebrow"><span></span> Immersive multi-robot control</div>
-          <h1>One cockpit.<br><em>Every robot.</em></h1>
-          <p class="lede">ARGUS brings VR vision, leader arms, foot controls, live telemetry, and robot-specific adapters into one human-in-the-loop control system.</p>
-          <div class="hero-actions"><a class="button primary" href="control/">Launch ARGUS control center</a><a class="button" href="#fleet">Explore the robots</a></div>
-          <p class="note">A research integration platform for safe teleoperation, supervised autonomy, and repeatable cross-robot workflows.</p>
+          <p class="kicker"><span>Research platform</span> Human-led robotics</p>
+          <h1>One place to<br>operate <em>many.</em></h1>
+          <p class="lede">ARGUS connects one operator experience to many robot bodies—without hiding who has control, what is connected, or when to stop.</p>
+          <div class="hero-actions"><a class="button primary" href="control/">Launch control center</a><a class="text-link" href="#fleet">Meet the fleet <span>↓</span></a></div>
         </div>
-        <figure class="hero-visual cockpit-visual">
-          <img src="assets/cockpit-design.png" alt="New ARGUS cockpit design with VR headset, leader arms, and foot pedals">
-          <figcaption><span>Current cockpit design</span> VR vision · natural arm control · foot-driven mobility</figcaption>
+        <figure class="hero-media">
+          <img src="assets/generated/hero-cockpit.png" alt="Operator using the ARGUS VR cockpit in a robotics laboratory">
+          <figcaption><span>Operator station / concept configuration</span><span>VR · leader arms · foot controls</span></figcaption>
         </figure>
       </div>
-      <div class="shell metrics" aria-label="Project overview"><div><strong>01</strong><span>shared cockpit</span></div><div><strong>06</strong><span>robot platforms</span></div><div><strong>∞</strong><span>extensible adapters</span></div></div>
+      <div class="shell assurance" aria-label="ARGUS principles"><p><b>01</b> Visible control authority</p><p><b>02</b> Robot-specific limits</p><p><b>03</b> Human takeover by design</p></div>
     </section>
-    <section class="section" id="system">
-      <div class="shell">
-        <div class="section-head"><div><span class="section-tag">01 / SYSTEM</span><h2>Human judgement stays in the loop.</h2></div><p>ARGUS separates the operator experience from robot-specific control. The cockpit stays familiar while each adapter handles the capabilities and limits of its machine.</p></div>
-        <div class="signal-flow" aria-label="ARGUS control flow"><article><span>INPUT</span><h3>Operator cockpit</h3><p>VR view, leader arms, pedals, and task selection.</p></article><i aria-hidden="true">→</i><article><span>ORCHESTRATE</span><h3>ARGUS control layer</h3><p>Authority, limits, routing, status, and safe-stop logic.</p></article><i aria-hidden="true">→</i><article><span>ADAPT</span><h3>Robot adapters</h3><p>Translate common intent into platform-specific commands.</p></article><i aria-hidden="true">↺</i><article><span>RETURN</span><h3>Live feedback</h3><p>Video, telemetry, robot state, and operator handover.</p></article></div>
+
+    <section class="section statement" id="system">
+      <div class="shell statement-grid">
+        <p class="section-label">01 / THE SYSTEM</p>
+        <div><h2>The operator experience stays familiar. The adapter respects the machine.</h2><p class="section-intro">ARGUS separates common intent from robot-specific execution. Video, telemetry, commands and stop behavior return through one clear loop.</p></div>
+      </div>
+      <div class="shell system-media" aria-label="ARGUS connects an operator cockpit to a robot platform">
+        <figure class="system-media-primary"><img src="assets/generated/hero-cockpit.png" alt="Operator using the ARGUS cockpit" loading="lazy"><figcaption><span>Operator layer</span><b>One familiar cockpit</b></figcaption></figure>
+        <div class="system-link" aria-hidden="true"><span></span><i>ARGUS</i><span></span></div>
+        <figure class="system-media-secondary"><img src="assets/generated/robot-ar-studio.png" alt="Robot-AR mobile research platform" loading="lazy"><figcaption><span>Machine layer</span><b>Platform-aware control</b></figcaption></figure>
+      </div>
+      <div class="shell flow" aria-label="ARGUS operating loop">
+        <article><div class="flow-top"><span>01</span><svg viewBox="0 0 48 48" role="img" aria-label="Vision"><path d="M4 24s7-11 20-11 20 11 20 11-7 11-20 11S4 24 4 24Z"/><circle cx="24" cy="24" r="5"/></svg></div><h3>See</h3><p>Live video and state make the machine and its surroundings legible.</p></article>
+        <article><div class="flow-top"><span>02</span><svg viewBox="0 0 48 48" role="img" aria-label="Decision"><path d="M13 7h22v34H13z"/><path d="M18 16h12M18 23h12M18 30h7"/><path d="m29 31 3 3 6-7"/></svg></div><h3>Decide</h3><p>The operator selects a task, robot and level of control.</p></article>
+        <article><div class="flow-top"><span>03</span><svg viewBox="0 0 48 48" role="img" aria-label="Command"><path d="M7 24h28"/><path d="m27 15 9 9-9 9"/><circle cx="10" cy="24" r="6"/><path d="M39 10v28"/></svg></div><h3>Act</h3><p>Each adapter translates intent within platform limits.</p></article>
+        <article><div class="flow-top"><span>04</span><svg viewBox="0 0 48 48" role="img" aria-label="Verification"><circle cx="24" cy="24" r="17"/><path d="m15 24 6 6 12-13"/></svg></div><h3>Verify</h3><p>Telemetry and observable outcomes close the loop.</p></article>
       </div>
     </section>
-    <section class="section dark-panel" id="fleet">
-      <div class="shell">
-        <div class="section-head"><div><span class="section-tag">02 / ROBOT FLEET</span><h2>Different bodies. One control idea.</h2></div><p>Each platform has its own adapter folder, maintainer, setup notes, and validation record.</p></div>
-        <div class="fleet-grid">
-          <a class="fleet-card has-photo" href="#bimanual-bunker-mini"><img src="connected-robots/bimanual-bunker-mini/media/model-preview.png" alt="Bimanual Bunker Mini CAD assembly with tracked base, lift and two arms" loading="lazy"><div><span class="status build">CAD + inspection demo</span><h3>Bimanual Bunker Mini</h3><p>Tracked mobile manipulation for industrial inspection. Watch the demo and explore the materials below.</p></div></a>
-          <a class="fleet-card featured" href="https://github.com/Kelvinchan324/ARGUS-collaboration/tree/main/connected-robots/robot-ar" target="_blank" rel="noopener noreferrer"><img src="assets/robot-ar.png" alt="Robot-AR bimanual wheeled robot"><div><span class="status active">Integration active</span><h3>Robot-AR</h3><p>Large bimanual mobile manipulation platform.</p></div></a>
-          <a class="fleet-card has-photo" href="https://github.com/Kelvinchan324/ARGUS-collaboration/tree/main/connected-robots/aloha-mini" target="_blank" rel="noopener noreferrer"><img src="assets/aloha-mini.png" alt="Aloha Mini dual-arm mobile robot" loading="lazy"><div><span class="status build">Adapter area</span><h3>Aloha Mini</h3><p>Compact dual-arm mobile research robot.</p></div></a>
-          <a class="fleet-card" href="https://github.com/Kelvinchan324/ARGUS-collaboration/tree/main/connected-robots/unitree-go2" target="_blank" rel="noopener noreferrer"><div class="robot-mark">G2</div><div><span class="status build">dimOS planned</span><h3>Unitree Go2</h3><p>Quadruped perception and inspection platform.</p></div></a>
-          <a class="fleet-card" href="https://github.com/Kelvinchan324/ARGUS-collaboration/tree/main/connected-robots/pupper-v3" target="_blank" rel="noopener noreferrer"><div class="robot-mark">P3</div><div><span class="status build">In assembly</span><h3>Pupper V3</h3><p>Open-source robotics and AI learning platform.</p></div></a>
-          <a class="fleet-card" href="https://github.com/Kelvinchan324/ARGUS-collaboration/tree/main/connected-robots/open-duck-mini" target="_blank" rel="noopener noreferrer"><div class="robot-mark">OD</div><div><span class="status build">In assembly</span><h3>Open Duck Mini</h3><p>Biped platform for expressive embodied interaction.</p></div></a>
-        </div>
+
+    <section class="section fleet-section" id="fleet">
+      <div class="shell section-heading"><div><p class="section-label">02 / CONNECTED FLEET</p><h2>Different bodies.<br>One honest status.</h2></div><p>Photography is illustrative. Integration labels reflect the repository—not a marketing promise.</p></div>
+      <figure class="shell fleet-overview"><img src="assets/generated/fleet-lab.png" alt="Robot-AR, Aloha Mini and Bimanual Bunker Mini together in a robotics workshop" loading="lazy"></figure>
+      <div class="shell fleet-grid">
+        <article class="robot-card robot-ar-card">
+          <img src="assets/generated/robot-ar-studio.png" alt="Robot-AR prototype photographed in a dark robotics studio" loading="lazy">
+          <div class="card-copy"><p class="status active">Software bridge available</p><h3>Robot-AR</h3><p>Large mobile research platform with a public bridge, planner and browser controls awaiting supervised hardware validation.</p><a href="https://github.com/Kelvinchan324/ARGUS-collaboration/tree/main/connected-robots/robot-ar">Open adapter <span>↗</span></a></div>
+        </article>
+        <article class="robot-card">
+          <img src="assets/generated/aloha-mini-studio.png" alt="Aloha Mini dual-arm prototype photographed in a dark robotics studio" loading="lazy">
+          <div class="card-copy"><p class="status">Adapter area</p><h3>Aloha Mini</h3><p>Compact dual-arm platform. Hardware inventory and a tested upstream revision are still required.</p><a href="https://github.com/Kelvinchan324/ARGUS-collaboration/tree/main/connected-robots/aloha-mini">Open adapter <span>↗</span></a></div>
+        </article>
+        <article class="robot-card">
+          <img src="assets/generated/bunker-mini-studio.png" alt="Bimanual Bunker Mini inspection concept in an industrial corridor" loading="lazy">
+          <div class="card-copy"><p class="status">Concept evidence</p><h3>Bimanual Bunker Mini</h3><p>Tracked inspection concept with an authored animation. No verified fabrication CAD is published here.</p><a href="#bunker">View concept <span>↓</span></a></div>
+        </article>
+        <article class="robot-card robot-card-source">
+          <img src="assets/fleet/unitree-go2.jpg" alt="Unitree Go2 quadruped robot" loading="lazy">
+          <div class="card-copy"><p class="status">Integration planned</p><h3>Unitree Go2</h3><p>Compact quadruped platform represented with official Unitree product imagery.</p><a href="https://github.com/Kelvinchan324/ARGUS-collaboration/tree/main/connected-robots/unitree-go2">Open adapter <span>↗</span></a></div>
+        </article>
+        <article class="robot-card robot-card-source">
+          <img src="assets/fleet/pupper-v3.gif" alt="Pupper V3 quadruped robot outdoors" loading="lazy">
+          <div class="card-copy"><p class="status">Fleet platform</p><h3>Pupper V3</h3><p>Open-source quadruped for locomotion, robotics education and embodied AI research.</p><a href="https://github.com/G-Levine/pupper_v3_description">Open project <span>↗</span></a></div>
+        </article>
+        <article class="robot-card robot-card-source">
+          <img src="assets/fleet/open-duck-mini-v2.png" alt="Open Duck Mini v2 biped robot on a workbench" loading="lazy">
+          <div class="card-copy"><p class="status">Fleet platform</p><h3>Open Duck Mini v2</h3><p>Open-source biped for walking, control and expressive embodied interaction.</p><a href="https://github.com/apirrone/Open_Duck_Mini/tree/v2">Open project <span>↗</span></a></div>
+        </article>
       </div>
     </section>
-    <section class="section robot-detail" id="bimanual-bunker-mini" aria-labelledby="bunker-heading">
-      <div class="shell">
-        <div class="section-head"><div><span class="section-tag">CONNECTED ROBOT / BIMANUAL BUNKER MINI</span><h2 id="bunker-heading">From elevator access<br>to panel inspection.</h2></div><p>A tracked Bunker Mini base, a lift, and two robot arms. Explore the actual assembly and the 36-second industrial inspection concept directly on this page.</p></div>
-        <figure class="inspection-video">
-          <video controls playsinline preload="metadata" poster="connected-robots/bimanual-bunker-mini/media/inspection-poster.png" aria-label="Bimanual Bunker Mini industrial inspection concept animation" aria-describedby="inspection-caption">
-            <source src="connected-robots/bimanual-bunker-mini/media/Industrial_Inspection_Demo.mp4" type="video/mp4">
-            <a href="connected-robots/bimanual-bunker-mini/media/Industrial_Inspection_Demo.mp4">Download the inspection video</a>.
-          </video>
-          <figcaption id="inspection-caption"><span>36 seconds · 720p · Blender animation · silent</span><span>Concept demonstration; hardware integration and contact physics are not validated.</span></figcaption>
-        </figure>
-        <ol class="inspection-steps" aria-label="Inspection sequence">
-          <li><b>01 / Elevator access</b><span>Press the call button, wait, board, then exit at the next floor.</span></li>
-          <li><b>02 / Stairwell door</b><span>Reach for the handle and pull the hinged door open.</span></li>
-          <li><b>03 / Electrical cabinet</b><span>Open the cabinet and inspect the meter and breaker compartment.</span></li>
-        </ol>
-        <div class="robot-materials">
-          <figure class="assembly-preview"><button type="button" data-lightbox="connected-robots/bimanual-bunker-mini/media/model-preview.png" aria-label="Enlarge the Bimanual Bunker Mini assembly preview"><img src="connected-robots/bimanual-bunker-mini/media/model-preview.png" alt="Rendered CAD assembly showing the tracked mobile base, central lift and two articulated arms" loading="lazy"></button><figcaption>Assembly preview from the supplied CAD model. Select to enlarge.</figcaption></figure>
-          <div class="material-copy"><span class="section-tag">MODEL &amp; ADAPTOR MATERIALS</span><h3>Work with the complete assembly.</h3><p>Download the original STEP file for your CAD application, or get the whole adaptor folder with the model, video, previews, setup notes and file checksums.</p>
-            <div class="material-downloads"><a class="button primary" href="connected-robots/bimanual-bunker-mini/cad/bunker_mini_stepper_lift.STEP" download>Download STEP · 144 MB</a><a class="button" href="downloads/bimanual-bunker-mini.zip" download>Download whole adaptor folder</a><a class="button" href="connected-robots/bimanual-bunker-mini/media/Industrial_Inspection_Demo.mp4" download>Download video · 2.5 MB</a></div>
-            <details><summary>Integration status and folder contents</summary><p>CAD and animation are available. The hardware adaptor is pending, with MuJoCo or Isaac Sim as the intended simulation targets. The STEP file contains geometry; simulator joints and the editable Blender scene are separate deliverables.</p><ul><li><strong>cad/</strong> — original STEP assembly</li><li><strong>media/</strong> — inspection video and previews</li><li><strong>README.md</strong> — setup, provenance and limitations</li><li><strong>asset-manifest.json</strong> — file sizes and SHA-256 checksums</li></ul><p><a class="text-link" href="https://github.com/Kelvinchan324/ARGUS-collaboration/tree/main/connected-robots/bimanual-bunker-mini" target="_blank" rel="noopener noreferrer">Browse source files on GitHub ↗</a></p></details>
-          </div>
-        </div>
+
+    <section class="section bunker" id="bunker">
+      <div class="shell bunker-simple">
+        <h2>Inspection robot in action</h2>
+        <video controls playsinline preload="metadata" poster="assets/generated/bunker-mini-studio.png" aria-label="Bimanual Bunker Mini inspection robot in action">
+          <source src="../connected-robots/bimanual-bunker-mini/media/Industrial_Inspection_Demo.mp4" type="video/mp4">
+          <source src="connected-robots/bimanual-bunker-mini/media/Industrial_Inspection_Demo.mp4" type="video/mp4">
+        </video>
       </div>
     </section>
-    <section class="section" id="gallery">
-      <div class="shell">
-        <div class="section-head"><div><span class="section-tag">03 / PROJECT GALLERY</span><h2>How ARGUS could work in the field.</h2></div><p>Visual studies for multi-robot collaboration, immersive teleoperation, and operator handover. Select any image to enlarge it.</p></div>
-        <div class="gallery-grid">
-          <button class="gallery-item wide" type="button" data-lightbox="assets/fleet-collaboration.png" aria-label="Open fleet collaboration concept"><img src="assets/fleet-collaboration.png" alt="Go2, Robot-AR, and Aloha Mini working through one control center" loading="lazy"><span><b>Coordinated fleet</b><small>Task handoff across robot forms</small></span></button>
-          <button class="gallery-item portrait" type="button" data-lightbox="assets/cockpit-design.png" aria-label="Open the current ARGUS cockpit design"><img src="assets/cockpit-design.png" alt="Current ARGUS cockpit design with VR, leader arms, and foot pedals" loading="lazy"><span><b>Current cockpit</b><small>One operator interface for the fleet</small></span></button>
-          <button class="gallery-item" type="button" data-lightbox="assets/go2-view-modes.png" aria-label="Open Go2 viewing modes concept"><img src="assets/go2-view-modes.png" alt="Screen monitoring and VR viewing modes for Go2" loading="lazy"><span><b>Two viewing modes</b><small>Shared screens or first-person VR</small></span></button>
-        </div>
-      </div>
-    </section>
-    <section class="section cad-section" id="cad-lab">
-      <div class="shell">
-        <div class="section-head"><div><span class="section-tag">04 / CAD LAB</span><h2>Rotate the robot concepts.</h2></div><p>Drag to rotate, scroll to zoom, and switch platforms. These lightweight models communicate system layout; they are not fabrication drawings.</p></div>
-        <div class="cad-shell">
-          <div class="cad-stage"><canvas id="cad-canvas" aria-label="Interactive 3D robot concept viewer"></canvas><div class="cad-grid" aria-hidden="true"></div><div class="cad-hud"><span class="live-dot"></span> INTERACTIVE VIEW</div><div class="cad-help">Drag · rotate &nbsp; / &nbsp; Scroll · zoom</div></div>
-          <aside class="cad-panel"><span class="section-tag">SELECT PLATFORM</span><div class="model-picker" role="group" aria-label="Robot model"><button class="model-button active" type="button" data-model="robot-ar"><span>01</span>Robot-AR</button><button class="model-button" type="button" data-model="aloha"><span>02</span>Aloha Mini</button><button class="model-button" type="button" data-model="go2"><span>03</span>Unitree Go2</button><button class="model-button" type="button" data-model="pupper"><span>04</span>Pupper V3</button></div><div class="model-copy" aria-live="polite"><span id="model-kicker">BIMANUAL MOBILE PLATFORM</span><h3 id="model-name">Robot-AR</h3><p id="model-description">A wheeled manipulation platform with two arms, an elevated sensor head, and an onboard control computer.</p></div><div class="cad-controls"><button class="button" type="button" id="reset-view">Reset view</button><label><input type="checkbox" id="auto-rotate" checked> Auto rotate</label></div></aside>
-        </div>
-      </div>
-    </section>
-    <section class="section dark-panel" id="roadmap">
-      <div class="shell">
-        <div class="section-head"><div><span class="section-tag">05 / BUILD PATH</span><h2>Prove one reliable loop, then expand.</h2></div><p>Every milestone should leave repeatable evidence: code, setup notes, safety limits, and an observable acceptance test.</p></div>
-        <div class="roadmap"><article><span>01</span><h3>Perception baseline</h3><p>Stable video, telemetry, battery, and connection state.</p></article><article><span>02</span><h3>Human takeover</h3><p>Clear control authority, motion limits, timeout, and stop behavior.</p></article><article><span>03</span><h3>Mobile manipulation</h3><p>Validate the base and arms on defined supervised tasks.</p></article><article><span>04</span><h3>Fleet expansion</h3><p>Measure what can be reused when each new robot is connected.</p></article></div>
-        <div class="proof-strip"><div><strong>Working foundation</strong><span>Cockpit concept, robot folders, Robot-AR bridge, and public safety guidance.</span></div><div><strong>Next proof</strong><span>A supervised end-to-end task with latency, success, and stop behavior recorded.</span></div></div>
-      </div>
-    </section>
-    <section class="section" id="resources"><div class="shell resource-band"><div><span class="section-tag">06 / OPEN COLLABORATION</span><h2>Build one part. Strengthen the whole system.</h2><p>Students work inside the cockpit or one robot adapter, document what they tested, and merge through review.</p></div><div class="resource-actions"><a class="button primary" href="https://github.com/Kelvinchan324/ARGUS-collaboration" target="_blank" rel="noopener noreferrer">Open repository ↗</a><a class="button" href="https://github.com/Kelvinchan324/ARGUS-collaboration/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer">Contribution guide</a><a class="button" href="ARGUS-Safety-Report-2026.pdf" target="_blank" rel="noopener noreferrer">Safety report PDF</a><a class="button" href="https://github.com/Kelvinchan324/ARGUS-collaboration/tree/main/safety" target="_blank" rel="noopener noreferrer">Safety overview</a></div></div></section>
+
+    <section class="section closing"><div class="shell closing-grid"><div><p class="section-label">OPEN COLLABORATION</p><h2>Build the evidence,<br>not just the demo.</h2></div><div><p>Contribute inside one adapter or the shared cockpit. Document what was tested, what remains unknown and how a person can stop the machine.</p><div class="closing-actions"><a class="button primary" href="https://github.com/Kelvinchan324/ARGUS-collaboration">Open repository <span>↗</span></a><a class="button" href="ARGUS-Safety-Report-2026.pdf">Safety report</a></div></div></div></section>
   </main>
-  <footer><div class="shell footer-inner"><img src="assets/argus-logo.png" alt="ARGUS"><p>ARGUS is an independent robotics research project. Concept visuals describe intended workflows; implementation status is recorded in the repository.</p><a href="#top">Back to top ↑</a></div></footer>
-  <dialog class="lightbox" data-dialog><button type="button" data-close aria-label="Close image">×</button><img data-dialog-image alt=""></dialog>
-  <script src="assets/site.js"></script><script type="module" src="assets/cad-viewer.js"></script>
+
+  <footer><div class="shell footer-inner"><a class="wordmark" href="#top"><span></span>ARGUS</a><p>Human-led robot operations · Research integration platform</p><a href="#top">Back to top ↑</a></div></footer>
+  <script src="assets/site.js"></script>
 </body>
 </html>

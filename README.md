@@ -31,7 +31,7 @@ cd ARGUS-collaboration
 
 | Goal | Start here | What is currently available |
 | --- | --- | --- |
-| Understand or present ARGUS | [`docs/`](docs/) | English static project website |
+| Understand or present ARGUS | [`docs/`](docs/) | English static project website and source-verified STL viewer |
 | Work on the shared cockpit | [`cockpit/`](cockpit/) | Cockpit scope and CAD references |
 | Operate the fleet dashboard | [`cockpit/web/`](cockpit/web/) | Six-platform demo, Robot-AR bridge connection, telemetry and base controls |
 | Explore the working software prototype | [`connected-robots/robot-ar/`](connected-robots/robot-ar/) | Bridge, planner, web controls and tests |
@@ -48,14 +48,15 @@ The public website contains only static HTML, CSS and JavaScript. From the
 repository root, run:
 
 ```bash
-git lfs pull
 python scripts/build_pages.py --output build/pages
 python -m http.server 8000 --directory build/pages
 ```
 
 Use Python 3.11 or newer and a fresh output directory for each build. The build
-includes the Bimanual Bunker Mini video, CAD downloads and complete adaptor ZIP
-from its original folder, so the website does not duplicate these files in Git.
+includes the Bimanual Bunker Mini concept video. The website publishes CAD only
+for Pupper V3 and Open Duck Mini v2 because those exact visualization STLs and
+their upstream revisions are available in `docs/cad/`. Missing robot CAD is
+deliberately left unpublished rather than replaced with approximate geometry.
 
 Then visit [http://127.0.0.1:8000/](http://127.0.0.1:8000/). This local preview
 is useful when editing; ordinary visitors should use the public website link at
@@ -86,11 +87,11 @@ ARGUS-collaboration/
 ├── connected-robots/
 │   ├── robot-ar/              Active bridge and planner prototype
 │   ├── aloha-mini/            Aloha Mini integration area
-│   ├── bimanual-bunker-mini/   Bimanual Bunker Mini CAD and inspection video
+│   ├── bimanual-bunker-mini/   Bimanual Bunker Mini concept video and adapter notes
 │   ├── open-duck-mini/        Open Duck Mini integration area
 │   ├── pupper-v3/             Pupper V3 integration area
 │   └── unitree-go2/           Go2 and dimOS integration area
-├── docs/                      English GitHub Pages website
+├── docs/                      English website and source-verified visualization STLs
 ├── safety/                    Public demonstration safety guidance
 ├── CONTRIBUTING.md            Contributor workflow
 └── PUBLIC_REPOSITORY_SCOPE.md Public/private content rules
@@ -127,9 +128,9 @@ Use these placement rules:
 | --- | --- | --- |
 | Robot-AR | Software bridge and planner prototype imported | Supervised on-robot validation |
 | Aloha Mini | Integration area created | Hardware inventory, maintainer and tested upstream commit |
-| [Bimanual Bunker Mini](connected-robots/bimanual-bunker-mini/) | STEP assembly and Blender inspection concept video available | Hardware adaptor, simulator validation and supervised tests |
-| Open Duck Mini | Integration area created | Runtime, safe-stop behavior and tested commit |
-| Pupper V3 | Integration area created; official documentation and upstream code linked | Hardware inventory, maintainer and tested upstream commit |
+| [Bimanual Bunker Mini](connected-robots/bimanual-bunker-mini/) | Blender inspection concept video available; no CAD published on the website | Verified source CAD, hardware adaptor, simulator validation and supervised tests |
+| Open Duck Mini | Integration area created; source-verified visualization STL set available on the website | Runtime and safe-stop behavior |
+| Pupper V3 | Integration area created; source-verified visualization STL set available on the website | Hardware inventory and maintainer |
 | Unitree Go2 + dimOS | Integration planned | Record dimOS version and migrate tested ARGUS connection code |
 | Cockpit | Six-platform web dashboard; Robot-AR mock bridge and browser tests pass | Supervised hardware validation, operator arbitration and remaining vendor adaptors |
 
