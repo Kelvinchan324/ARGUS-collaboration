@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07121d">
+  <meta name="description" content="ARGUS 多機械人遙距操作研究：VR、Leader Arms、腳踏板、dimOS 連接層、現有原型與研發路線。">
+  <title>ARGUS｜多機械人遙距操作研究</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2307121d'/%3E%3Cpath d='M12 44 27 15h10l15 29M19 34h26' fill='none' stroke='%23fa705c' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+  <a class="skip" href="#main">跳到主要內容</a>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="#top" aria-label="ARGUS 返回頁首"><span class="brand-mark" aria-hidden="true">A</span><span><strong>ARGUS</strong><small>Robotics control research</small></span></a>
+      <nav class="nav" data-nav aria-label="主選單"><a href="#position">定位</a><a href="#architecture">系統架構</a><a href="#fleet">機械人平台</a><a href="#progress">研發進度</a><a href="#roadmap">下一步</a></nav>
+      <div class="actions"><a class="button" href="en/" lang="en">EN</a><button class="button print-button" type="button" data-print>列印摘要</button><button class="button menu" type="button" data-menu aria-expanded="false">選單</button></div>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="hero" id="top"><div class="shell hero-inner">
+      <div><div class="eyebrow">A.T Matrix Studio · 研究原型</div><h1>一個操作介面，<br><span>連接不同形態</span>的機械人。</h1><p class="lede">ARGUS 以 VR 視覺、Leader Arms 及腳踏板構成操作端，並透過 dimOS 連接影像、感測器和機械人控制。目標是讓操作員按任務切換平台，在自動系統未能處理的情況下安全接管。</p><div class="hero-actions"><a class="button primary" href="#architecture">了解系統架構</a><a class="button" href="#progress">查看實際進度</a></div><p class="note">目前屬研究及整合階段：VR 串流和部分感測器讀數已完成；通用控制映射、多機協作及現場可靠性仍待逐項驗證。</p></div>
+      <div class="hero-visual"><img src="assets/argus-cockpit.png" alt="ARGUS cockpit 操作員使用 VR、Leader Arms 和腳踏板的概念圖" width="548" height="564"><span class="image-label">Cockpit 概念圖</span></div>
+    </div></div>
+
+    <div class="shell metrics" aria-label="目前研究範圍"><div class="metric"><strong>01</strong><span>套多模態操作端</span></div><div class="metric"><strong>03</strong><span>個現有研究平台</span></div><div class="metric"><strong>02</strong><span>個組裝中新平台</span></div></div>
+
+    <section class="section" id="position"><div class="shell"><div class="section-head"><div><span class="section-tag">01 / 核心定位</span><h2>ARGUS 研究的是跨平台操作層。</h2></div><p>機械人有不同底盤、手臂和感測器。ARGUS 嘗試為操作員建立一致體驗，同時承認每個平台都需要獨立適配與安全測試。</p></div><div class="intro-grid"><div class="statement">同一套 VR、手臂和腳踏輸入，會按照機械人的能力<strong><em>重新映射</em></strong>。ARGUS 不是另一部機械人，而是逐步擴展的操作入口。</div><div class="cards"><article><strong>操作員端</strong><p>VR 呈現機械人視角；Leader Arms 對應可操作機械臂；腳踏板負責移動或指定任務輸入。</p></article><article><strong>連接與控制端</strong><p>以 dimOS 作資料與命令連接基礎，逐台建立能力描述、指令映射、狀態回傳及安全限制。</p></article><article class="accent"><strong>核心驗證問題</strong><p>在甚麼任務中，ARGUS 能比螢幕和手掣更快、更準或更容易學習？答案需要任務測試，而不只是沉浸感。</p></article></div></div></div></section>
+
+    <section class="section alt" id="architecture"><div class="shell"><div class="section-head"><div><span class="section-tag">02 / 系統架構</span><h2>由人的動作，到機械人的行動。</h2></div><p>以下是目標架構。每一層代表清晰的開發責任；不表示所有平台已經完成端到端控制。</p></div><div class="diagram"><article class="node"><span class="step">INPUT 01</span><h3>操作輸入</h3><p>VR 頭部方向、Leader Arms 姿態，以及腳踏板移動指令。</p></article><article class="node"><span class="step">MAPPING 02</span><h3>ARGUS 映射層</h3><p>按照機械人能力轉換指令，管理速度限制、控制權及停止條件。</p></article><article class="node"><span class="step">BRIDGE 03</span><h3>dimOS 連接層</h3><p>承接串流、感測資料及控制通道；每種機械人需要建立或調整適配器。</p></article><article class="node"><span class="step">ROBOT 04</span><h3>機械人平台</h3><p>Aloha Mini、四臂移動平台、Unitree Go2，以及正在組裝的 Pupper V3 和 Open Duck Mini。</p></article></div><div class="return-flow"><strong>回傳操作員：</strong>攝影機畫面、感測器讀數、機械人狀態和操作回饋。目前已驗證 VR 串流及部分感測器資料讀取。</div><div class="legend"><span class="pill done">已驗證：原型可展示</span><span class="pill progress">整合中：正在接駁或測試</span><span class="pill next">規劃中：未完成端到端驗證</span></div></div></section>
+
+    <section class="section" id="fleet"><div class="shell"><div class="section-head"><div><span class="section-tag">03 / 機械人組合</span><h2>以不同機體驗證同一操作概念。</h2></div><p>團隊會先證明單一平台可以可靠運作，再量度增加新機械人所需的時間和修改。</p></div><div class="fleet"><article class="robot"><span class="pill progress">硬件研究／接駁中</span><h3>Aloha Mini</h3><p>雙 SO-101 機械臂、升降結構及全向輪底盤，適合近距離室內雙臂操作研究。</p><div class="use"><b>驗證重點</b> · 雙臂姿態映射、升降及底盤控制。</div></article><article class="robot featured"><span class="pill progress">自建平台／整合中</span><h3>四臂移動平台</h3><p>由 Aloha Mini 研究延伸，使用較大型自購車底和四隻 SO-101 機械臂，探索長距離移動與多臂操作。</p><div class="use"><b>驗證重點</b> · 四臂控制分配、同步及防碰撞。</div></article><article class="robot"><span class="pill progress">機體已有／連接開發中</span><h3>Unitree Go2</h3><p>四足巡查和遙距視覺展示平台；團隊正以 dimOS 開發資料及控制連接。</p><div class="use"><b>驗證重點</b> · 穩定串流、狀態監察及異常時人手接管。</div></article><article class="robot"><span class="pill next">組裝中</span><h3>Pupper V3</h3><p>小型四足研究平台，用來比較另一套四足接口並檢驗控制層的可移植性。</p><div class="use"><b>下一步</b> · 完成硬件後定義基礎動作與回傳資料。</div></article><article class="robot"><span class="pill next">組裝中</span><h3>Open Duck Mini</h3><p>雙足角色機械人平台，用於探索肢體表達、平衡控制和具身互動。</p><div class="use"><b>下一步</b> · 先完成安全動作，再評估 ARGUS 控制適配。</div></article><article class="robot"><span class="pill next">平台擴展原則</span><h3>能力導向適配</h3><p>接入新機械人時，先識別影像、移動、手臂、感測及停止能力，再決定 cockpit 中哪些模組有實際用途。</p><div class="use"><b>原則</b> · 接上 dimOS 不等於即插即用。</div></article></div></div></section>
+
+    <section class="section alt" id="progress"><div class="shell"><div class="section-head"><div><span class="section-tag">04 / 現況</span><h2>分清已完成、開發中和待驗證。</h2></div><p>對外展示只陳述可重複驗證的成果；狀態應隨團隊的實測紀錄更新。</p></div><div class="status-grid"><article class="status-col"><span class="pill done">已完成</span><h3>可展示基礎</h3><ul><li>VR、Leader Arms 和腳踏板 cockpit 概念及硬件配置。</li><li>VR 畫面串流。</li><li>部分機械人感測器資料讀取。</li><li>三個現有研究機體。</li></ul></article><article class="status-col"><span class="pill progress">正在開發</span><h3>端到端連接</h3><ul><li>以 dimOS 建立更完整的資料和命令通道。</li><li>按平台映射移動、視角及機械臂控制。</li><li>狀態介面、串流穩定性及連線管理。</li><li>Pupper V3 和 Open Duck Mini 組裝。</li></ul></article><article class="status-col"><span class="pill next">需要驗證</span><h3>走向可用系統</h3><ul><li>延遲、精度、斷線和緊急停止。</li><li>四臂同步和碰撞限制。</li><li>多機械人切換及一人監督多機。</li><li>與螢幕／手掣的任務效益比較。</li></ul></article></div><div class="truth">目前成果支持「多模態操作與機械人連接研究原型」的定位；跨平台穩定控制和商業部署仍需逐項實測。</div></div></section>
+
+    <section class="section" id="roadmap"><div class="shell"><div class="section-head"><div><span class="section-tag">05 / 研發路線</span><h2>以可量度的示範逐步證明價值。</h2></div><p>由可靠單機閉環開始，再擴展至雙臂、多臂和不同機體；每一步都保留可檢查的驗收證據。</p></div><div class="roadmap"><article><span class="num">STEP 01</span><h3>Go2 視覺與狀態基線</h3><p>整理影像、感測器、電量和連線狀態，記錄延遲及斷線行為。</p><span class="gate">驗收：可重複完成同一段巡查示範。</span></article><article><span class="num">STEP 02</span><h3>人手接管閉環</h3><p>建立操作權交接、移動限制和緊急停止，並比較一般介面與 cockpit。</p><span class="gate">驗收：遇上指定異常時能安全接管。</span></article><article><span class="num">STEP 03</span><h3>SO-101 雙臂至四臂</h3><p>先以 Aloha Mini 驗證兩臂映射，再為四臂平台設計分配和防碰撞。</p><span class="gate">驗收：完成定義清楚的移動操作任務。</span></article><article><span class="num">STEP 04</span><h3>擴展至新機體</h3><p>為 Pupper V3 和 Open Duck Mini 建立能力表及適配器，量度可重用部分。</p><span class="gate">驗收：新增平台的時間和改動可量度。</span></article></div></div></section>
+
+    <section class="section alt" id="pitch"><div class="shell"><div class="section-head"><div><span class="section-tag">06 / 下一輪 Pitch</span><h2>示範需要回答一個核心問題。</h2></div></div><div class="proof"><div class="proof-card"><span class="pill progress">下一輪驗證</span><h3>甚麼時候值得使用 ARGUS cockpit？</h3><p>選擇一項真實任務，比較螢幕／手掣與 VR／Leader Arms／腳踏板的完成時間、錯誤、學習時間和操作員負擔。</p><ol><li>使用相同任務和操作員條件。</li><li>記錄時間、成功率及安全事件。</li><li>只保留具有明確效益的控制模組。</li></ol></div><div class="quote"><blockquote>「ARGUS 建立可擴展的機械人操作層，讓人在需要判斷和精細操作時，接入最合適的機械人。」</blockquote><p>現階段有原型、有初步串流和資料回傳；下一步以端到端任務和對照測試證明效益。</p></div></div></div></section>
+  </main>
+
+  <footer><div class="shell footer-inner"><p>ARGUS 研發概覽 · 按 2026 年 10 月團隊提供的原型狀態整理。Cockpit 圖像為概念圖；功能狀態以實測紀錄為準。dimOS、SO-101 及各機械人平台屬第三方生態，ARGUS 的跨平台映射仍在開發。</p><div class="footer-links"><a href="https://github.com/Kelvinchan324/ARGUS-collaboration" target="_blank" rel="noopener noreferrer">GitHub</a><a href="https://github.com/dimensionalOS/dimos" target="_blank" rel="noopener noreferrer">dimOS</a></div></div></footer>
+  <script src="assets/site.js"></script>
+</body>
+</html>

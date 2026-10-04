@@ -1,5 +1,14 @@
 # ARGUS Collaboration
 
+[Project website (繁體中文)](docs/index.html) · [Project website (English)](docs/en/index.html)
+
+## Project website
+
+The bilingual static pitch website lives in [`docs/`](docs/). To publish it
+with GitHub Pages, open the repository settings, select **Pages**, choose
+**Deploy from a branch**, and use the `main` branch with the `/docs` folder.
+The Chinese page is the default entry point and links to the English version.
+
 ARGUS is a multi-robot telepresence and control project. This repository is the
 shared integration hub for the cockpit, Robot-AR, Aloha Mini, Open Duck Mini,
 Stanford Pupper V2, and Unitree Go2 through dimOS.
