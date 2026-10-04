@@ -27,6 +27,15 @@ function buildFleet(){for(const r of records.values()){
  const button=document.createElement('button');button.className='robot-option';button.dataset.robot=r.robot.id;button.innerHTML='<span class="robot-avatar"></span><span><strong></strong><small><i></i><span></span></small></span>';
  button.querySelector('.robot-avatar').textContent=r.robot.short;button.querySelector('strong').textContent=r.robot.name;button.onclick=()=>selectRobot(r.robot.id);$('fleet').append(button);
  const option=document.createElement('option');option.value=r.robot.id;option.textContent=r.robot.name;$('connection-robot').append(option);
+ const card=document.createElement('form');card.className='robot-connection-card';card.dataset.connection=r.robot.id;
+ card.innerHTML='<div class="connection-card-title"><h3></h3><span class="connection-status">Not configured</span></div><p class="connection-protocol"></p><label>Bridge address<input type="url" required autocomplete="off" placeholder="https://robot-bridge.example"></label><div class="connection-actions"><button type="submit">Connect</button><button type="button" data-disconnect>Disconnect</button><button type="button" data-options>Options</button></div><p class="connection-card-error" role="alert"></p>';
+ card.querySelector('h3').textContent=r.robot.name;card.querySelector('.connection-protocol').textContent=r.robot.id==='robot-ar'?'Robot-AR bridge · existing integration':'ARGUS v1 · hardware adaptor required';
+ card.querySelector('input').setAttribute('aria-label',`${r.robot.name} bridge address`);
+ if(r.robot.id==='robot-ar'&&location.pathname.startsWith('/cockpit/'))card.querySelector('input').value=location.origin;
+ card.onsubmit=async e=>{e.preventDefault();const error=card.querySelector('.connection-card-error');error.textContent='';try{await connectRobot(r,card.querySelector('input').value,r.config?.token||'');}catch(ex){error.textContent=`Could not connect: ${ex.message}`;}};
+ card.querySelector('[data-disconnect]').onclick=()=>disconnectRobot(r);
+ card.querySelector('[data-options]').onclick=()=>{$('connection-robot').value=r.robot.id;fillConnection();$('endpoint').value=card.querySelector('input').value;$('connection-dialog').showModal();};
+ $('robot-connections-grid').append(card);
 }}
 async function send(r,action,payload={},interrupt=false){
  if(mode==='demo'){
@@ -82,6 +91,14 @@ function drawMap(){
 }
 function render(){
  renderCockpit();
+ $('connection-count').textContent=`${[...records.values()].filter(r=>r.config).length} / 6 CONFIGURED`;
+ for(const item of records.values()){
+  const card=document.querySelector(`[data-connection="${item.robot.id}"]`);
+  card.querySelector('.connection-status').textContent=item.connecting?'Connecting…':!item.config?'Not configured':mode==='demo'?'Paused · demo mode':fresh(item.state)?(item.state.mock?'Bridge simulation':'Connected'):'Offline / stale';
+  card.querySelector('[type=submit]').textContent=item.connecting?'Connecting…':item.config?'Reconnect':'Connect';
+  card.querySelectorAll('button').forEach(b=>b.disabled=!!item.connecting||transition);
+  card.querySelector('[data-disconnect]').disabled=!item.config||!!item.connecting||transition;
+ }
  const r=record(),s=state(r),ok=fresh(s);const live=mode==='connected';
  $('mode-label').textContent=live?'CONNECTED SESSION':'DEMO SESSION';$('clock').textContent=new Date().toLocaleTimeString('en-GB');
  for(const item of records.values()){
@@ -133,18 +150,26 @@ function fillConnection(){
 $('connections').onclick=()=>{$('connection-robot').value=selected;fillConnection();$('connection-dialog').showModal();};$('close-connections').onclick=()=>$('connection-dialog').close();$('connection-robot').onchange=fillConnection;
 $('connection-form').onsubmit=async event=>{
  event.preventDefault();const r=records.get($('connection-robot').value),button=event.submitter;button.disabled=true;$('connection-error').textContent='';
+ try{await connectRobot(r,$('endpoint').value,$('token').value);$('connection-dialog').close();}catch(e){$('connection-error').textContent=`Could not connect: ${e.message}`;}finally{button.disabled=false;render();}
+};
+async function connectRobot(r,address,accessToken){
+ if(r.connecting||transition)throw Error('A connection change is already in progress.');
+ r.connecting=true;render();
  try{
-  const endpoint=validateEndpoint($('endpoint').value,location.protocol),token=$('token').value,kind=r.robot.id==='robot-ar'?'robot-ar':'argus-v1';
+  const endpoint=validateEndpoint(address,location.protocol),token=accessToken,kind=r.robot.id==='robot-ar'?'robot-ar':'argus-v1';
   // Probe without sending any actuator commands.
   const start=performance.now(),raw=await jsonRequest(endpoint+(kind==='robot-ar'?'/state':'/argus/v1/state'),{token});
   const next=kind==='robot-ar'?normalizeAR(raw,performance.now()-start):normalizeGeneric(raw,r.robot.id,performance.now()-start);
   if(mode==='demo')await changeMode('connected');else if(r.config)await halt(r,true);
   r.version++;r.config={endpoint,token,kind};r.state=next;r.authorized=false;r.history=[];
   const config=r.config;r.channel=new CommandChannel(async(action,payload)=>{const [path,body]=commandRequest(config.kind,action,payload);return jsonRequest(config.endpoint+path,{method:'POST',body,token:config.token});});
-  await selectRobot(r.robot.id);log(`${r.robot.name}: telemetry connected (${next.mock?'bridge simulation':'hardware report'}). Control remains disabled.`);notice('Telemetry connection established. Enable control explicitly to operate this robot.');$('connection-dialog').close();
- }catch(e){$('connection-error').textContent=`Could not connect: ${e.message}`;}finally{button.disabled=false;render();}
-};
-$('disconnect').onclick=async()=>{const r=records.get($('connection-robot').value);await halt(r,true);r.version++;r.config=null;r.channel=null;r.state=emptyState();r.history=[];log(`${r.robot.name}: disconnected.`);fillConnection();render();};
+  document.querySelector(`[data-connection="${r.robot.id}"] input`).value=endpoint;
+  document.querySelector(`[data-connection="${r.robot.id}"] .connection-card-error`).textContent='';
+  await selectRobot(r.robot.id);log(`${r.robot.name}: telemetry connected (${next.mock?'bridge simulation':'hardware report'}). Control remains disabled.`);notice('Telemetry connection established. Enable control explicitly to operate this robot.');
+ }finally{r.connecting=false;render();}
+}
+async function disconnectRobot(r){if(r.connecting)return;await halt(r,true);r.version++;r.config=null;r.channel=null;r.state=emptyState();r.history=[];log(`${r.robot.name}: disconnected.`);fillConnection();render();}
+$('disconnect').onclick=()=>disconnectRobot(records.get($('connection-robot').value));
 async function changeMode(next){
  if(mode===next||transition)return;transition=true;render();await stopAll();mode=next;$('mode').value=next;for(const r of records.values()){r.authorized=false;r.history=[];r.version++;}transition=false;
  notice(mode==='demo'?'Demo mode: explore the controls with simulated robots. Nothing is sent to hardware.':'Connected mode: configure robot adaptors to receive telemetry. Missing data stays unavailable.');log(`Data source changed to ${mode}. All local controls locked.`);render();

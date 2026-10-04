@@ -2,6 +2,20 @@
 #robot-image{position:absolute;inset:0;width:100%;height:100%;padding:15px 20px 35px;object-fit:contain}
 .wordmark .argus-logo{display:block;width:172px;height:47px;object-fit:contain}
 .cockpit-status{margin-bottom:22px}
+.robot-connections{margin-bottom:22px}
+#robot-connections-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line)}
+.robot-connection-card{padding:17px;background:var(--panel);min-width:0}
+.connection-card-title{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:7px}
+.connection-card-title h3{font-size:12px;margin:0}
+.connection-status{font-size:9px;color:var(--mint)}
+.connection-protocol{font-size:10px;color:var(--muted);margin:8px 0 14px}
+.robot-connection-card label{display:grid;gap:6px;font-size:10px;color:var(--muted)}
+.robot-connection-card input{width:100%;font-size:11px}
+.connection-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.connection-actions button{font-size:10px;padding:7px 10px}
+.connection-card-error{font-size:10px;color:#ffabb3;margin:8px 0 0;overflow-wrap:anywhere}
+@media(max-width:1180px){#robot-connections-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){#robot-connections-grid{grid-template-columns:1fr}}
 .cockpit-status-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line)}
 .cockpit-status-grid article{padding:16px 19px;background:var(--panel);min-width:0}
 .cockpit-status-grid article>span{display:block;color:var(--muted);font-size:9px;letter-spacing:.8px}

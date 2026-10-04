@@ -10,6 +10,11 @@ const out=path.resolve(__dirname,'../../build/cockpit-qa');fs.mkdirSync(out,{rec
 let enabled=false,stale=false,failStop=false,enableDelay=0;
 const commands=[];
 const fixture=http.createServer(async(req,res)=>{
+ if(req.url.startsWith('/adaptor/')){
+  const robotId=req.url.split('/')[2];res.setHeader('Content-Type','application/json');
+  if(req.method==='GET')res.end(JSON.stringify({protocol:'argus.v1',robot_id:robotId,mode:'simulation',sample_time_ms:Date.now(),connected:true,motor_enabled:false,watchdog_ms:500,capabilities:{drive:true},telemetry:{vx:0,x:0,y:0,yaw:0}}));
+  else res.end(JSON.stringify({ok:true}));return;
+ }
  if(req.url.startsWith('/bridge/')){
   res.setHeader('Content-Type','application/json');
   if(req.url==='/bridge/state'){res.end(JSON.stringify({chassis:{mock:true,connected:false,motor_enabled:enabled,last_rx_age_s:stale?10:.01,voltage:24,vx:0,wz:0,odom_x:0,odom_y:0,odom_th:0},arms:{left:{joints:[0,0,0,0,0,0]}},capabilities:{chassis:{wired:false}}}));return;}
@@ -34,6 +39,7 @@ const fixture=http.createServer(async(req,res)=>{
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto(origin+'/control/');await page.waitForSelector('.robot-option');
   assert.equal(await page.locator('.robot-option').count(),6);assert.equal(commands.length,0);
+  assert.equal(await page.locator('.robot-connection-card').count(),6);
   assert.equal(await page.locator('.argus-logo').evaluate(img=>img.complete&&img.naturalWidth>0),true);
   assert.equal(await page.locator('.cockpit-status-grid article').count(),8);
   assert.equal(await page.locator('#cockpit-readiness').textContent(),'HARDWARE UNVERIFIED');
@@ -64,6 +70,12 @@ const fixture=http.createServer(async(req,res)=>{
   enableDelay=500;await page.locator('#enable').click();await page.locator('[data-robot=bimanual-bunker-mini]').click();await page.waitForFunction(()=>document.querySelector('#robot-code').textContent==='BM');await page.waitForTimeout(900);assert.equal(enabled,false);enableDelay=0;
   // Identity validation rejects a response from the wrong robot.
   await page.locator('#connections').click();await page.locator('#connection-robot').selectOption('pupper-v3');await page.locator('#endpoint').fill(origin+'/wrong');await page.locator('#connection-form button[type=submit]').click();await page.waitForFunction(()=>document.querySelector('#connection-error').textContent.includes('identity'));await page.locator('#close-connections').click();
+  for(const id of ['bimanual-bunker-mini','aloha-mini','unitree-go2','pupper-v3','open-duck-mini']){
+   const card=page.locator(`[data-connection="${id}"]`);await card.locator('input').fill(origin+'/adaptor/'+id);await card.locator('[type=submit]').click();await page.waitForFunction(id=>document.querySelector(`[data-connection="${id}"] .connection-status`).textContent==='Bridge simulation',id);
+  }
+  assert.equal(await page.locator('#connection-count').textContent(),'6 / 6 CONFIGURED');
+  await page.locator('[data-connection=pupper-v3] [data-disconnect]').click();await page.waitForFunction(()=>document.querySelector('#connection-count').textContent==='5 / 6 CONFIGURED');
+  assert.equal(await page.locator('[data-connection=unitree-go2] .connection-status').textContent(),'Bridge simulation');
   assert.equal(errors.length,0,errors.join('\n'));
   console.log(JSON.stringify({robots:6,demoSendsNoCommands:true,holdRelease:true,staleLock:true,failedStopReported:true,pendingEnableCancelled:true,wrongIdentityRejected:true,exportExcludesToken:true,mobileOverflow:false,pageErrors:errors.length,commands:commands.length}));
  }finally{await browser.close();fixture.close();}

@@ -42,6 +42,13 @@ python server.py --mock
 ```
 
 In **Connection settings**, choose Robot-AR and enter the bridge address. The
+dashboard also provides a separate connection card for every robot, with an
+editable bridge address, Connect/Reconnect, Disconnect and token Options.
+Multiple robot links are polled independently; disconnecting one preserves the
+others. The cards distinguish configured, paused, simulated, connected and stale
+states, and display connection errors beside the affected robot.
+
+The
 local `/cockpit/` page suggests its own origin. Connecting probes telemetry only;
 **Enable control** is a separate deliberate action. Hold a direction to drive,
 release to send zero velocity, or use Stop to stop and disable the base.
