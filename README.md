@@ -6,7 +6,7 @@
 
 **[View ARGUS online](https://kelvinchan324.github.io/ARGUS-collaboration/)**
 
-[繁體中文](https://kelvinchan324.github.io/ARGUS-collaboration/) · [English](https://kelvinchan324.github.io/ARGUS-collaboration/en/)
+[Open the English ARGUS website](https://kelvinchan324.github.io/ARGUS-collaboration/)
 
 ARGUS is a multi-robot telepresence and control project. The goal is to give
 one operator a consistent way to receive video and telemetry, select a robot,
@@ -27,7 +27,7 @@ cd ARGUS-collaboration
 
 | Goal | Start here | What is currently available |
 | --- | --- | --- |
-| Understand or present ARGUS | [`docs/`](docs/) | Bilingual static project website |
+| Understand or present ARGUS | [`docs/`](docs/) | English static project website |
 | Work on the shared cockpit | [`cockpit/`](cockpit/) | Cockpit scope and CAD references |
 | Explore the working software prototype | [`connected-robots/robot-ar/`](connected-robots/robot-ar/) | Bridge, planner, web controls and tests |
 | Add a robot integration | [`connected-robots/`](connected-robots/) | One isolated folder per robot |
@@ -75,7 +75,7 @@ ARGUS-collaboration/
 │   ├── open-duck-mini/        Open Duck Mini integration area
 │   ├── pupper-v3/             Pupper V3 integration area
 │   └── unitree-go2/           Go2 and dimOS integration area
-├── docs/                      Bilingual GitHub Pages website
+├── docs/                      English GitHub Pages website
 ├── safety/                    Public demonstration safety guidance
 ├── CONTRIBUTING.md            Contributor workflow
 └── PUBLIC_REPOSITORY_SCOPE.md Public/private content rules
@@ -125,8 +125,8 @@ been completed or safety-validated.
 
 Changes under `docs/` are deployed automatically by the
 [GitHub Pages workflow](.github/workflows/pages.yml) after they reach `main`.
-The workflow also requests first-time Pages enablement. The Chinese page is the
-default entry and links to the English version. If GitHub prevents automatic
+The workflow also requests first-time Pages enablement. English is the default
+entry at the project website root. If GitHub prevents automatic
 enablement for this account or repository, a repository administrator must open
 [Settings → Pages](https://github.com/Kelvinchan324/ARGUS-collaboration/settings/pages),
 set **Source** to **GitHub Actions**, and rerun the workflow.

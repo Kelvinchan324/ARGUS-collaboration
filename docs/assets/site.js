@@ -1,5 +1,7 @@
 const menu = document.querySelector("[data-menu]");
 const nav = document.querySelector("[data-nav]");
+const dialog = document.querySelector("[data-dialog]");
+const dialogImage = document.querySelector("[data-dialog-image]");
 
 menu?.addEventListener("click", () => {
   const open = nav.classList.toggle("open");
@@ -13,4 +15,15 @@ nav?.querySelectorAll("a").forEach((link) => {
   });
 });
 
-document.querySelector("[data-print]")?.addEventListener("click", () => window.print());
+document.querySelectorAll("[data-lightbox]").forEach((button) => {
+  button.addEventListener("click", () => {
+    dialogImage.src = button.dataset.lightbox;
+    dialogImage.alt = button.querySelector("img")?.alt || "ARGUS project visual";
+    dialog?.showModal();
+  });
+});
+
+document.querySelector("[data-close]")?.addEventListener("click", () => dialog?.close());
+dialog?.addEventListener("click", (event) => {
+  if (event.target === dialog) dialog.close();
+});

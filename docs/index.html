@@ -1,50 +1,114 @@
 <!doctype html>
-<html lang="zh-Hant">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#07121d">
-  <meta name="description" content="ARGUS 多機械人遙距操作研究：VR、Leader Arms、腳踏板、dimOS 連接層、現有原型與研發路線。">
-  <title>ARGUS｜多機械人遙距操作研究</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2307121d'/%3E%3Cpath d='M12 44 27 15h10l15 29M19 34h26' fill='none' stroke='%23fa705c' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <meta name="theme-color" content="#05070a">
+  <meta name="description" content="ARGUS is an immersive cockpit for human-in-the-loop control across a growing fleet of robots.">
+  <title>ARGUS · Immersive Robot Control</title>
   <link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
-  <a class="skip" href="#main">跳到主要內容</a>
+  <a class="skip" href="#main">Skip to content</a>
   <header class="topbar">
     <div class="shell topbar-inner">
-      <a class="brand" href="#top" aria-label="ARGUS 返回頁首"><span class="brand-mark" aria-hidden="true">A</span><span><strong>ARGUS</strong><small>Robotics control research</small></span></a>
-      <nav class="nav" data-nav aria-label="主選單"><a href="#position">定位</a><a href="#architecture">架構</a><a href="#fleet">平台</a><a href="#robot-ar">Robot-AR</a><a href="#progress">進度</a><a href="#resources">資源</a></nav>
-      <div class="actions"><a class="button" href="en/" lang="en">EN</a><button class="button print-button" type="button" data-print>列印摘要</button><button class="button menu" type="button" data-menu aria-expanded="false">選單</button></div>
+      <a class="brand" href="#top" aria-label="ARGUS home"><img src="assets/argus-logo.png" alt="ARGUS"></a>
+      <button class="menu" type="button" data-menu aria-expanded="false" aria-controls="primary-nav">Menu</button>
+      <nav class="nav" id="primary-nav" data-nav aria-label="Primary navigation">
+        <a href="#system">System</a><a href="#fleet">Fleet</a><a href="#gallery">Gallery</a><a href="#cad-lab">CAD Lab</a><a href="#roadmap">Roadmap</a>
+      </nav>
+      <a class="button compact" href="https://github.com/Kelvinchan324/ARGUS-collaboration" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
     </div>
   </header>
 
   <main id="main">
-    <div class="hero" id="top"><div class="shell hero-inner">
-      <div><div class="eyebrow">A.T Matrix Studio · 研究原型</div><h1>一個操作介面，<br><span>連接不同形態</span>的機械人。</h1><p class="lede">ARGUS 以 VR 視覺、Leader Arms 及腳踏板構成操作端，並透過 dimOS 連接影像、感測器和機械人控制。目標是讓操作員按任務切換平台，在自動系統未能處理的情況下安全接管。</p><div class="hero-actions"><a class="button primary" href="#architecture">了解系統架構</a><a class="button" href="#progress">查看實際進度</a></div><p class="note">目前屬研究及整合階段：VR 串流和部分感測器讀數已完成；通用控制映射、多機協作及現場可靠性仍待逐項驗證。</p></div>
-      <div class="hero-visual"><img src="assets/argus-cockpit.png" alt="ARGUS cockpit 操作員使用 VR、Leader Arms 和腳踏板的概念圖" width="548" height="564"><span class="image-label">Cockpit 概念圖</span></div>
-    </div></div>
+    <section class="hero" id="top">
+      <div class="shell hero-inner">
+        <div class="hero-copy">
+          <div class="eyebrow"><span></span> Immersive multi-robot control</div>
+          <h1>One cockpit.<br><em>Every robot.</em></h1>
+          <p class="lede">ARGUS brings VR vision, leader arms, foot controls, live telemetry, and robot-specific adapters into one human-in-the-loop control system.</p>
+          <div class="hero-actions"><a class="button primary" href="#cad-lab">Explore the robots</a><a class="button" href="#gallery">See the project</a></div>
+          <p class="note">A research integration platform for safe teleoperation, supervised autonomy, and repeatable cross-robot workflows.</p>
+        </div>
+        <figure class="hero-visual cockpit-visual">
+          <img src="assets/cockpit-design.png" alt="New ARGUS cockpit design with VR headset, leader arms, and foot pedals">
+          <figcaption><span>Current cockpit design</span> VR vision · natural arm control · foot-driven mobility</figcaption>
+        </figure>
+      </div>
+      <div class="shell metrics" aria-label="Project overview">
+        <div><strong>01</strong><span>shared cockpit</span></div><div><strong>05</strong><span>robot platforms</span></div><div><strong>∞</strong><span>extensible adapters</span></div>
+      </div>
+    </section>
 
-    <div class="shell metrics" aria-label="目前研究範圍"><div class="metric"><strong>01</strong><span>套多模態操作端</span></div><div class="metric"><strong>03</strong><span>個現有研究平台</span></div><div class="metric"><strong>02</strong><span>個組裝中新平台</span></div></div>
+    <section class="section" id="system">
+      <div class="shell">
+        <div class="section-head"><div><span class="section-tag">01 / SYSTEM</span><h2>Human judgement stays in the loop.</h2></div><p>ARGUS separates the operator experience from robot-specific control. The cockpit stays familiar while each adapter handles the capabilities and limits of its machine.</p></div>
+        <div class="signal-flow" aria-label="ARGUS control flow">
+          <article><span>INPUT</span><h3>Operator cockpit</h3><p>VR view, leader arms, pedals, and task selection.</p></article><i aria-hidden="true">→</i>
+          <article><span>ORCHESTRATE</span><h3>ARGUS control layer</h3><p>Authority, limits, routing, status, and safe-stop logic.</p></article><i aria-hidden="true">→</i>
+          <article><span>ADAPT</span><h3>Robot adapters</h3><p>Translate common intent into platform-specific commands.</p></article><i aria-hidden="true">↺</i>
+          <article><span>RETURN</span><h3>Live feedback</h3><p>Video, telemetry, robot state, and operator handover.</p></article>
+        </div>
+      </div>
+    </section>
 
-    <section class="section" id="position"><div class="shell"><div class="section-head"><div><span class="section-tag">01 / 核心定位</span><h2>ARGUS 研究的是跨平台操作層。</h2></div><p>機械人有不同底盤、手臂和感測器。ARGUS 嘗試為操作員建立一致體驗，同時承認每個平台都需要獨立適配與安全測試。</p></div><div class="intro-grid"><div class="statement">同一套 VR、手臂和腳踏輸入，會按照機械人的能力<strong><em>重新映射</em></strong>。ARGUS 不是另一部機械人，而是逐步擴展的操作入口。</div><div class="cards"><article><strong>操作員端</strong><p>VR 呈現機械人視角；Leader Arms 對應可操作機械臂；腳踏板負責移動或指定任務輸入。</p></article><article><strong>連接與控制端</strong><p>以 dimOS 作資料與命令連接基礎，逐台建立能力描述、指令映射、狀態回傳及安全限制。</p></article><article class="accent"><strong>核心驗證問題</strong><p>在甚麼任務中，ARGUS 能比螢幕和手掣更快、更準或更容易學習？答案需要任務測試，而不只是沉浸感。</p></article></div></div></div></section>
+    <section class="section dark-panel" id="fleet">
+      <div class="shell">
+        <div class="section-head"><div><span class="section-tag">02 / ROBOT FLEET</span><h2>Different bodies. One control idea.</h2></div><p>Each platform has its own adapter folder, maintainer, setup notes, and validation record.</p></div>
+        <div class="fleet-grid">
+          <a class="fleet-card featured" href="https://github.com/Kelvinchan324/ARGUS-collaboration/tree/main/connected-robots/robot-ar" target="_blank" rel="noopener noreferrer"><img src="assets/robot-ar.png" alt="Robot-AR bimanual wheeled robot"><div><span class="status active">Integration active</span><h3>Robot-AR</h3><p>Large bimanual mobile manipulation platform.</p></div></a>
+          <a class="fleet-card" href="https://github.com/Kelvinchan324/ARGUS-collaboration/tree/main/connected-robots/aloha-mini" target="_blank" rel="noopener noreferrer"><div class="robot-mark">AM</div><div><span class="status build">Adapter area</span><h3>Aloha Mini</h3><p>Compact dual-arm mobile research robot.</p></div></a>
+          <a class="fleet-card" href="https://github.com/Kelvinchan324/ARGUS-collaboration/tree/main/connected-robots/unitree-go2" target="_blank" rel="noopener noreferrer"><div class="robot-mark">G2</div><div><span class="status build">dimOS planned</span><h3>Unitree Go2</h3><p>Quadruped perception and inspection platform.</p></div></a>
+          <a class="fleet-card" href="https://github.com/Kelvinchan324/ARGUS-collaboration/tree/main/connected-robots/pupper-v3" target="_blank" rel="noopener noreferrer"><div class="robot-mark">P3</div><div><span class="status build">In assembly</span><h3>Pupper V3</h3><p>Open-source robotics and AI learning platform.</p></div></a>
+          <a class="fleet-card" href="https://github.com/Kelvinchan324/ARGUS-collaboration/tree/main/connected-robots/open-duck-mini" target="_blank" rel="noopener noreferrer"><div class="robot-mark">OD</div><div><span class="status build">In assembly</span><h3>Open Duck Mini</h3><p>Biped platform for expressive embodied interaction.</p></div></a>
+        </div>
+      </div>
+    </section>
 
-    <section class="section alt" id="architecture"><div class="shell"><div class="section-head"><div><span class="section-tag">02 / 系統架構</span><h2>由人的動作，到機械人的行動。</h2></div><p>以下是目標架構。每一層代表清晰的開發責任；不表示所有平台已經完成端到端控制。</p></div><div class="diagram"><article class="node"><span class="step">INPUT 01</span><h3>操作輸入</h3><p>VR 頭部方向、Leader Arms 姿態，以及腳踏板移動指令。</p></article><article class="node"><span class="step">MAPPING 02</span><h3>ARGUS 映射層</h3><p>按照機械人能力轉換指令，管理速度限制、控制權及停止條件。</p></article><article class="node"><span class="step">BRIDGE 03</span><h3>dimOS 連接層</h3><p>承接串流、感測資料及控制通道；每種機械人需要建立或調整適配器。</p></article><article class="node"><span class="step">ROBOT 04</span><h3>機械人平台</h3><p>Aloha Mini、四臂移動平台、Unitree Go2，以及正在組裝的 Pupper V3 和 Open Duck Mini。</p></article></div><div class="return-flow"><strong>回傳操作員：</strong>攝影機畫面、感測器讀數、機械人狀態和操作回饋。目前已驗證 VR 串流及部分感測器資料讀取。</div><div class="legend"><span class="pill done">已驗證：原型可展示</span><span class="pill progress">整合中：正在接駁或測試</span><span class="pill next">規劃中：未完成端到端驗證</span></div></div></section>
+    <section class="section" id="gallery">
+      <div class="shell">
+        <div class="section-head"><div><span class="section-tag">03 / PROJECT GALLERY</span><h2>How ARGUS could work in the field.</h2></div><p>Visual studies for multi-robot collaboration, immersive teleoperation, and operator handover. Select any image to enlarge it.</p></div>
+        <div class="gallery-grid">
+          <button class="gallery-item wide" type="button" data-lightbox="assets/fleet-collaboration.png" aria-label="Open fleet collaboration concept"><img src="assets/fleet-collaboration.png" alt="Go2, Robot-AR, and Aloha Mini working through one control center" loading="lazy"><span><b>Coordinated fleet</b><small>Task handoff across robot forms</small></span></button>
+          <button class="gallery-item portrait" type="button" data-lightbox="assets/cockpit-design.png" aria-label="Open the current ARGUS cockpit design"><img src="assets/cockpit-design.png" alt="Current ARGUS cockpit design with VR, leader arms, and foot pedals" loading="lazy"><span><b>Current cockpit</b><small>One operator interface for the fleet</small></span></button>
+          <button class="gallery-item" type="button" data-lightbox="assets/go2-view-modes.png" aria-label="Open Go2 viewing modes concept"><img src="assets/go2-view-modes.png" alt="Screen monitoring and VR viewing modes for Go2" loading="lazy"><span><b>Two viewing modes</b><small>Shared screens or first-person VR</small></span></button>
+        </div>
+      </div>
+    </section>
 
-    <section class="section" id="fleet"><div class="shell"><div class="section-head"><div><span class="section-tag">03 / 機械人組合</span><h2>以不同機體驗證同一操作概念。</h2></div><p>團隊會先證明單一平台可以可靠運作，再量度增加新機械人所需的時間和修改。</p></div><div class="fleet"><article class="robot"><span class="pill progress">硬件研究／接駁中</span><h3>Aloha Mini</h3><p>雙 SO-101 機械臂、升降結構及全向輪底盤，適合近距離室內雙臂操作研究。</p><div class="use"><b>驗證重點</b> · 雙臂姿態映射、升降及底盤控制。</div></article><article class="robot featured"><span class="pill progress">自建平台／整合中</span><h3>四臂移動平台</h3><p>由 Aloha Mini 研究延伸，使用較大型自購車底和四隻 SO-101 機械臂，探索長距離移動與多臂操作。</p><div class="use"><b>驗證重點</b> · 四臂控制分配、同步及防碰撞。</div></article><article class="robot"><span class="pill progress">機體已有／連接開發中</span><h3>Unitree Go2</h3><p>四足巡查和遙距視覺展示平台；團隊正以 dimOS 開發資料及控制連接。</p><div class="use"><b>驗證重點</b> · 穩定串流、狀態監察及異常時人手接管。</div></article><article class="robot"><span class="pill next">組裝中</span><h3>Pupper V3</h3><p>小型四足研究平台，用來比較另一套四足接口並檢驗控制層的可移植性。</p><div class="use"><b>下一步</b> · 完成硬件後定義基礎動作與回傳資料。</div></article><article class="robot"><span class="pill next">組裝中</span><h3>Open Duck Mini</h3><p>雙足角色機械人平台，用於探索肢體表達、平衡控制和具身互動。</p><div class="use"><b>下一步</b> · 先完成安全動作，再評估 ARGUS 控制適配。</div></article><article class="robot"><span class="pill next">平台擴展原則</span><h3>能力導向適配</h3><p>接入新機械人時，先識別影像、移動、手臂、感測及停止能力，再決定 cockpit 中哪些模組有實際用途。</p><div class="use"><b>原則</b> · 接上 dimOS 不等於即插即用。</div></article></div></div></section>
+    <section class="section cad-section" id="cad-lab">
+      <div class="shell">
+        <div class="section-head"><div><span class="section-tag">04 / CAD LAB</span><h2>Rotate the robot concepts.</h2></div><p>Drag to rotate, scroll to zoom, and switch platforms. These lightweight models communicate system layout; they are not fabrication drawings.</p></div>
+        <div class="cad-shell">
+          <div class="cad-stage"><canvas id="cad-canvas" aria-label="Interactive 3D robot concept viewer"></canvas><div class="cad-grid" aria-hidden="true"></div><div class="cad-hud"><span class="live-dot"></span> INTERACTIVE VIEW</div><div class="cad-help">Drag · rotate &nbsp; / &nbsp; Scroll · zoom</div></div>
+          <aside class="cad-panel">
+            <span class="section-tag">SELECT PLATFORM</span>
+            <div class="model-picker" role="group" aria-label="Robot model">
+              <button class="model-button active" type="button" data-model="robot-ar"><span>01</span>Robot-AR</button><button class="model-button" type="button" data-model="aloha"><span>02</span>Aloha Mini</button><button class="model-button" type="button" data-model="go2"><span>03</span>Unitree Go2</button><button class="model-button" type="button" data-model="pupper"><span>04</span>Pupper V3</button>
+            </div>
+            <div class="model-copy" aria-live="polite"><span id="model-kicker">BIMANUAL MOBILE PLATFORM</span><h3 id="model-name">Robot-AR</h3><p id="model-description">A wheeled manipulation platform with two arms, an elevated sensor head, and an onboard control computer.</p></div>
+            <div class="cad-controls"><button class="button" type="button" id="reset-view">Reset view</button><label><input type="checkbox" id="auto-rotate" checked> Auto rotate</label></div>
+          </aside>
+        </div>
+      </div>
+    </section>
 
-    <section class="section alt" id="robot-ar"><div class="shell"><div class="section-head"><div><span class="section-tag">04 / ROBOT-AR 整合</span><h2>第一套已公開程式的移動操作平台。</h2></div><p>學生開發的 Robot-AR bridge 已整合至主 repository，並保留作者及來源 commit。現有程式以雙臂配置為基線，四臂控制仍需另行設計和驗證。</p></div><div class="spotlight"><div class="spotlight-visual"><img src="assets/robot-ar.png" alt="Robot-AR 大型雙臂輪式移動操作平台實機照片" width="520" height="520"></div><div class="spotlight-copy"><span class="pill progress">Software prototype · Hardware validation pending</span><h3>Robot-AR Bridge</h3><p>以 NVIDIA Jetson Thor、四輪轉向車底及 SO-101 機械臂為目標平台。Bridge 將硬件存取集中在 HTTP 介面後，提供網頁遙控、命令解析、狀態回傳和安全停止。</p><div class="capabilities"><div class="capability"><strong>已測試</strong>Mock chassis、中文指令 parser、planner tests</div><div class="capability"><strong>已有接口</strong>車底 serial、SO-101、Web UI、OpenClaw skill</div><div class="capability"><strong>安全預設</strong>只綁定 localhost；遙距開發使用 SSH tunnel</div><div class="capability"><strong>尚未完成</strong>Camera perception、VLA 操作、四臂同步</div></div><div class="hero-actions"><a class="button primary" href="https://github.com/Kelvinchan324/ARGUS-collaboration/tree/main/connected-robots/robot-ar" target="_blank" rel="noopener noreferrer">查看 Robot-AR 程式</a></div></div></div></div></section>
+    <section class="section dark-panel" id="roadmap">
+      <div class="shell">
+        <div class="section-head"><div><span class="section-tag">05 / BUILD PATH</span><h2>Prove one reliable loop, then expand.</h2></div><p>Every milestone should leave repeatable evidence: code, setup notes, safety limits, and an observable acceptance test.</p></div>
+        <div class="roadmap"><article><span>01</span><h3>Perception baseline</h3><p>Stable video, telemetry, battery, and connection state.</p></article><article><span>02</span><h3>Human takeover</h3><p>Clear control authority, motion limits, timeout, and stop behavior.</p></article><article><span>03</span><h3>Mobile manipulation</h3><p>Validate the base and arms on defined supervised tasks.</p></article><article><span>04</span><h3>Fleet expansion</h3><p>Measure what can be reused when each new robot is connected.</p></article></div>
+        <div class="proof-strip"><div><strong>Working foundation</strong><span>Cockpit concept, robot folders, Robot-AR bridge, and public safety guidance.</span></div><div><strong>Next proof</strong><span>A supervised end-to-end task with latency, success, and stop behavior recorded.</span></div></div>
+      </div>
+    </section>
 
-    <section class="section" id="progress"><div class="shell"><div class="section-head"><div><span class="section-tag">05 / 現況</span><h2>分清已完成、開發中和待驗證。</h2></div><p>對外展示只陳述可重複驗證的成果；狀態應隨團隊的實測紀錄更新。</p></div><div class="status-grid"><article class="status-col"><span class="pill done">已完成</span><h3>可展示基礎</h3><ul><li>VR、Leader Arms 和腳踏板 cockpit 概念及硬件配置。</li><li>VR 畫面串流及部分感測器資料讀取。</li><li>Robot-AR bridge、Web UI、parser 和 mock 測試。</li><li>Robot-AR 學生程式已整合至主 repository。</li></ul></article><article class="status-col"><span class="pill progress">正在開發</span><h3>端到端連接</h3><ul><li>以 dimOS 建立更完整的資料和命令通道。</li><li>按平台映射移動、視角及機械臂控制。</li><li>Robot-AR 實機車底與 SO-101 驗證。</li><li>Pupper V3 和 Open Duck Mini 組裝。</li></ul></article><article class="status-col"><span class="pill next">需要驗證</span><h3>走向可用系統</h3><ul><li>延遲、精度、斷線和實體緊急停止。</li><li>四臂同步、控制分配和碰撞限制。</li><li>多機械人切換及一人監督多機。</li><li>與螢幕／手掣的任務效益比較。</li></ul></article></div><div class="truth">目前成果支持「多模態操作與機械人連接研究原型」的定位；跨平台穩定控制和商業部署仍需逐項實測。</div></div></section>
-
-    <section class="section alt" id="roadmap"><div class="shell"><div class="section-head"><div><span class="section-tag">06 / 研發路線</span><h2>以可量度的示範逐步證明價值。</h2></div><p>由可靠單機閉環開始，再擴展至雙臂、多臂和不同機體；每一步都保留可檢查的驗收證據。</p></div><div class="roadmap"><article><span class="num">STEP 01</span><h3>Go2 視覺與狀態基線</h3><p>整理影像、感測器、電量和連線狀態，記錄延遲及斷線行為。</p><span class="gate">驗收：可重複完成同一段巡查示範。</span></article><article><span class="num">STEP 02</span><h3>人手接管閉環</h3><p>建立操作權交接、移動限制和緊急停止，並比較一般介面與 cockpit。</p><span class="gate">驗收：遇上指定異常時能安全接管。</span></article><article><span class="num">STEP 03</span><h3>Robot-AR 實機閉環</h3><p>驗證車底、雙臂和 Web bridge，再為四臂平台設計控制分配和防碰撞。</p><span class="gate">驗收：完成定義清楚的移動操作任務。</span></article><article><span class="num">STEP 04</span><h3>擴展至新機體</h3><p>為 Pupper V3 和 Open Duck Mini 建立能力表及適配器，量度可重用部分。</p><span class="gate">驗收：新增平台的時間和改動可量度。</span></article></div></div></section>
-
-    <section class="section" id="resources"><div class="shell"><div class="section-head"><div><span class="section-tag">07 / 公開資源</span><h2>由 pitch 走向可檢查的研發紀錄。</h2></div><p>Repository 只保留可公開、可維護和有明確來源的技術內容。私隱資料、訪談、內部商業簡報和重複輸出不會公開。</p></div><div class="resource-grid"><article class="resource"><span class="type">Software</span><h3>Robot-AR integration</h3><p>Bridge、Web UI、planner、設定、測試、安全預設及學生來源記錄。</p><a href="https://github.com/Kelvinchan324/ARGUS-collaboration/tree/main/connected-robots/robot-ar" target="_blank" rel="noopener noreferrer">查看程式與文件</a></article><article class="resource"><span class="type">Hardware</span><h3>Cockpit CAD references</h3><p>現有 SolidWorks 鋁材及座椅尺寸零件；屬研究參考，並非認證工程圖。</p><a href="https://github.com/Kelvinchan324/ARGUS-collaboration/tree/main/cockpit/cad" target="_blank" rel="noopener noreferrer">查看 CAD 檔案</a></article><article class="resource"><span class="type">Safety</span><h3>Public safety overview</h3><p>不含參加者相片、聯絡資料或場地細節的公開操作邊界、停機及檢查摘要。</p><a href="https://github.com/Kelvinchan324/ARGUS-collaboration/tree/main/safety" target="_blank" rel="noopener noreferrer">查看安全摘要</a></article></div></div></section>
-
-    <section class="section alt" id="pitch"><div class="shell"><div class="section-head"><div><span class="section-tag">08 / 下一輪 Pitch</span><h2>示範需要回答一個核心問題。</h2></div></div><div class="proof"><div class="proof-card"><span class="pill progress">下一輪驗證</span><h3>甚麼時候值得使用 ARGUS cockpit？</h3><p>選擇一項真實任務，比較螢幕／手掣與 VR／Leader Arms／腳踏板的完成時間、錯誤、學習時間和操作員負擔。</p><ol><li>使用相同任務和操作員條件。</li><li>記錄時間、成功率及安全事件。</li><li>只保留具有明確效益的控制模組。</li></ol></div><div class="quote"><blockquote>「ARGUS 建立可擴展的機械人操作層，讓人在需要判斷和精細操作時，接入最合適的機械人。」</blockquote><p>現階段有原型、有初步串流和資料回傳；Robot-AR 程式已公開，下一步以實機閉環任務和對照測試證明效益。</p></div></div></div></section>
+    <section class="section" id="resources">
+      <div class="shell resource-band"><div><span class="section-tag">06 / OPEN COLLABORATION</span><h2>Build one part. Strengthen the whole system.</h2><p>Students work inside the cockpit or one robot adapter, document what they tested, and merge through review.</p></div><div class="resource-actions"><a class="button primary" href="https://github.com/Kelvinchan324/ARGUS-collaboration" target="_blank" rel="noopener noreferrer">Open repository ↗</a><a class="button" href="https://github.com/Kelvinchan324/ARGUS-collaboration/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer">Contribution guide</a><a class="button" href="https://github.com/Kelvinchan324/ARGUS-collaboration/tree/main/safety" target="_blank" rel="noopener noreferrer">Safety overview</a></div></div>
+    </section>
   </main>
 
-  <footer><div class="shell footer-inner"><p>ARGUS 研發概覽 · 按 2026 年 10 月團隊提供的原型狀態整理。Cockpit 圖像為概念圖；功能狀態以實測紀錄為準。dimOS、SO-101 及各機械人平台屬第三方生態，ARGUS 的跨平台映射仍在開發。</p><div class="footer-links"><a href="https://github.com/Kelvinchan324/ARGUS-collaboration" target="_blank" rel="noopener noreferrer">GitHub</a><a href="https://github.com/dimensionalOS/dimos" target="_blank" rel="noopener noreferrer">dimOS</a></div></div></footer>
-  <script src="assets/site.js"></script>
+  <footer><div class="shell footer-inner"><img src="assets/argus-logo.png" alt="ARGUS"><p>ARGUS is an independent robotics research project. Concept visuals describe intended workflows; implementation status is recorded in the repository.</p><a href="#top">Back to top ↑</a></div></footer>
+  <dialog class="lightbox" data-dialog><button type="button" data-close aria-label="Close image">×</button><img data-dialog-image alt=""></dialog>
+  <script src="assets/site.js"></script><script type="module" src="assets/cad-viewer.js"></script>
 </body>
 </html>
