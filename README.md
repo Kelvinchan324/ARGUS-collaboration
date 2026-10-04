@@ -19,6 +19,8 @@ Pupper V3, and Unitree Go2 through dimOS.
 ARGUS-collaboration/
 ├── cockpit/             Shared cockpit application and control code
 ├── connected-robots/    One folder for each robot
+├── safety/              Public, non-site-specific demonstration safety guidance
+├── docs/                Bilingual project website for GitHub Pages
 ├── CONTRIBUTING.md      How students submit work
 └── README.md             Project entry point
 ```
@@ -26,7 +28,11 @@ ARGUS-collaboration/
 - Shared cockpit code belongs in [`cockpit/`](cockpit/).
 - Robot-dependent code belongs in that robot's folder under
   [`connected-robots/`](connected-robots/).
+- Public demonstration controls are summarised in [`safety/`](safety/).
 - A student working on one robot should normally change only that robot folder.
+
+See [`PUBLIC_REPOSITORY_SCOPE.md`](PUBLIC_REPOSITORY_SCOPE.md) before adding
+documents, images, CAD or third-party source to this public repository.
 
 Each robot folder should eventually contain its code, setup instructions,
 dependency list, configuration example, and tests. Keeping these items together
