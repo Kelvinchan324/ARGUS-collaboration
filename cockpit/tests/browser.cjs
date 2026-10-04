@@ -49,6 +49,7 @@ const fixture=http.createServer(async(req,res)=>{
   ]);
   assert.match(await site.locator('.fleet-section .section-heading>p').textContent(),/illustrative/i);
   assert.match(await site.locator('.pilot-boundary').textContent(),/does not certify compliance/i);
+  assert.equal((await site.locator('a[href="ARGUS-Safety-Report-2026.pdf"]').textContent()).trim(),'Draft event safety plan');
   const safety=await site.request.get(origin+'/ARGUS-Safety-Report-2026.pdf');assert.equal(safety.status(),200);assert((await safety.body()).length>10000);
   const conceptVideo=await site.request.get(origin+'/connected-robots/bimanual-bunker-mini/media/Industrial_Inspection_Demo.mp4');assert.equal(conceptVideo.status(),200);assert((await conceptVideo.body()).length>100000);
   for(const image of await site.locator('img').all()){await image.scrollIntoViewIfNeeded();await image.evaluate(img=>img.complete&&img.naturalWidth>0?true:new Promise((resolve,reject)=>{img.addEventListener('load',()=>resolve(true),{once:true});img.addEventListener('error',()=>reject(Error(`Image failed: ${img.src}`)),{once:true});}));}

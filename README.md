@@ -41,8 +41,10 @@ cd ARGUS-collaboration
 | Prepare a supervised demonstration | [`safety/`](safety/) | Public safety overview and checklists |
 | Contribute changes | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Branch, testing and pull-request workflow |
 
-The complete [ARGUS Safety Report 2026](docs/ARGUS-Safety-Report-2026.pdf) is
-also available as a downloadable PDF.
+The [draft Info Day 2026 event safety plan](docs/ARGUS-Safety-Report-2026.pdf)
+is also available as a downloadable PDF. It describes proposed controls for a
+future supervised public demonstration; it is not evidence that the current
+hardware configuration has passed those checks.
 
 ## Investor interview walkthrough
 
