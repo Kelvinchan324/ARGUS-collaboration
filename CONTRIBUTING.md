@@ -4,10 +4,12 @@
 
 1. Create an issue that states the robot, intended behavior, and acceptance test.
 2. Create a short branch from `main`, such as `feat/go2-video-bridge`.
-3. Make a focused change and update the relevant documentation.
-4. Run `python scripts/validate_repo.py`.
+3. Put shared cockpit work in `cockpit/`, or robot-specific work in the matching
+   `connected-robots/<robot-name>/` folder.
+4. Update that folder's README with setup or behavior changes.
 5. Open a pull request using the repository template.
-6. Obtain review from the owner of each affected area before merging.
+6. Ask the student responsible for that robot, plus the project owner when
+   cockpit behavior changes, to review it.
 
 Do not push directly to `main`. The GitHub repository should require pull
 requests and at least one approval.
@@ -20,18 +22,18 @@ requests and at least one approval.
 - Document command limits, timeouts, stop behavior, and loss-of-network behavior.
 - Never commit credentials, API keys, Wi-Fi details, private IP addresses, logs
   containing personal data, or customer recordings.
-- Keep hardware-specific logic inside its adapter. Shared interfaces must remain
-  independent of any one robot.
+- Keep hardware-specific logic inside its robot folder. Cockpit code should not
+  directly depend on one robot's SDK.
 
 ## Third-party projects
 
-Do not copy an upstream project into this repository. Add or update an entry in
-`third_party/dependencies.json`, pin a reviewed commit before deployment, and
-put only ARGUS-specific patches or adapters here. If a fork is truly needed,
+Do not copy an entire upstream project into this repository. Link it in the
+robot's README, record the tested version or commit there, and keep only the
+ARGUS-specific connection code in this repository. If a fork is truly needed,
 create a separately named fork and document why.
 
 ## Documentation expectations
 
-Every robot page should cover ownership, setup, network path, supported
-capabilities, safety limits, known issues, and a last-known-good test record.
-Use diagrams and commands that can be updated as the system changes.
+Every robot README should name the student maintainer and cover setup,
+dependencies, supported controls, safety limits, known issues, and the last
+successful test.

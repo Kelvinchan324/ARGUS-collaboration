@@ -1,4 +1,4 @@
-# Pupper V2 Adapter
+# Pupper V2
 
 <p align="center">
   <img src="https://live.staticflickr.com/65535/49614690753_78edca83bc_4k.jpg" alt="Stanford Pupper quadruped robot" width="650">
@@ -7,7 +7,9 @@
 > Stanford Pupper project image referenced by the
 > [upstream repository](https://github.com/stanfordroboticsclub/StanfordQuadruped).
 
-Status: inventory needed.
+- Student maintainer: To be assigned
+- Status: Inventory needed
+- Tested upstream version/commit: To be recorded
 
-Confirm the exact Pupper hardware revision and current control repository before
-implementation; Pupper generations use different software and electronics.
+Add the Pupper V2–specific ARGUS connection and control code in this folder.
+Confirm the exact hardware revision and control repository before implementation.

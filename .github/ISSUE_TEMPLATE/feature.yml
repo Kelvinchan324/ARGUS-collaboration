@@ -14,7 +14,7 @@ body:
         - Open Duck Mini
         - Pupper V2
         - Unitree Go2 / dimOS
-        - Shared interface
+        - Cockpit / shared code
     validations:
       required: true
   - type: textarea

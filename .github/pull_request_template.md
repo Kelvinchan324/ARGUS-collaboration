@@ -4,13 +4,12 @@
 
 ## Scope
 
-- Robot(s):
-- Interface(s):
+- Area: cockpit / connected robot / documentation
+- Robot (if applicable):
 - Issue:
 
 ## Verification
 
-- [ ] Repository validation passes
 - [ ] Documentation is updated
 - [ ] No secrets, private data, recordings, generated dependencies, or unapproved third-party code are included
 - [ ] Tested in simulation/replay or with actuators disabled

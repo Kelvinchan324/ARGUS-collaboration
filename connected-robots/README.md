@@ -1,0 +1,24 @@
+# Connected Robots
+
+Each robot has one self-contained folder. The student responsible for that robot
+adds and maintains its connection code inside that folder.
+
+| Robot | Folder | Current status |
+| --- | --- | --- |
+| Robot-AR | [`robot-ar/`](robot-ar/) | Inventory needed |
+| Aloha Mini | [`aloha-mini/`](aloha-mini/) | Inventory needed |
+| Open Duck Mini | [`open-duck-mini/`](open-duck-mini/) | Inventory needed |
+| Pupper V2 | [`pupper-v2/`](pupper-v2/) | Inventory needed |
+| Unitree Go2 with dimOS | [`unitree-go2/`](unitree-go2/) | Planned |
+
+## What belongs inside each robot folder
+
+- the ARGUS connection/control code for that robot
+- a README naming the student maintainer
+- setup and run instructions
+- links to external projects and the tested version or commit
+- safe example settings with no passwords, keys, or private addresses
+- robot-specific tests and troubleshooting notes
+
+Do not copy an entire external open-source project here. Link to it and keep only
+the code your team wrote to connect it to the ARGUS cockpit.
