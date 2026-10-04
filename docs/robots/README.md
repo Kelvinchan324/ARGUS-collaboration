@@ -4,7 +4,7 @@ Status describes this repository, not the upstream project's maturity.
 
 | System | Adapter status | Primary role | Upstream |
 | --- | --- | --- | --- |
-| ARGUS robot | Inventory needed | ARGUS mobile/telepresence platform | Project-owned |
+| Robot-AR | Inventory needed | Large ARGUS mobile/telepresence robot | Project-owned |
 | Aloha Mini | Inventory needed | Dual-arm mobile manipulation | [liyiteng/AlohaMini](https://github.com/liyiteng/AlohaMini) |
 | Open Duck Mini | Inventory needed | Biped research/character platform | [apirrone/Open_Duck_Mini](https://github.com/apirrone/Open_Duck_Mini) |
 | Pupper V2 | Inventory needed | Quadruped research platform | [Pupper V2 Interface](https://github.com/stanfordroboticsclub/Pupper-V2-Interface) |

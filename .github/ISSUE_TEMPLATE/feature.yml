@@ -9,7 +9,7 @@ body:
       label: Target system
       options:
         - Cockpit
-        - ARGUS robot
+        - Robot-AR
         - Aloha Mini
         - Open Duck Mini
         - Pupper V2

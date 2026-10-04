@@ -1,7 +1,7 @@
 # ARGUS Collaboration
 
 ARGUS is a multi-robot telepresence and control project. This repository is the
-shared integration hub for the cockpit, ARGUS robot, Aloha Mini, Open Duck Mini,
+shared integration hub for the cockpit, Robot-AR, Aloha Mini, Open Duck Mini,
 Stanford Pupper V2, and Unitree Go2 through dimOS.
 
 The repository owns the code and documentation that connects these systems. It

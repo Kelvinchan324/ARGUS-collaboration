@@ -33,7 +33,7 @@ whether it is the authoritative copy.
 ## Suggested first migration batches
 
 1. Cockpit communication/control source and its current protocol notes
-2. ARGUS robot control source and interface mapping
+2. Robot-AR control source and interface mapping
 3. Small ARGUS-owned cockpit/armrest/foot-pedal CAD, BOM, and assembly exports
 4. One robot adapter at a time, beginning with the currently best-tested link
 5. Test fixtures and sanitized example configuration

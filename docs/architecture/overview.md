@@ -9,7 +9,7 @@ flowchart LR
     Operator --> Cockpit
     Cockpit --> Gateway[ARGUS control gateway]
     Gateway --> Safety[limits, heartbeat, stop]
-    Safety --> A[ARGUS adapter]
+    Safety --> A[Robot-AR adapter]
     Safety --> B[Aloha Mini adapter]
     Safety --> C[Open Duck Mini adapter]
     Safety --> D[Pupper V2 adapter]
