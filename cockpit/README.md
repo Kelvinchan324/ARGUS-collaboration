@@ -17,6 +17,12 @@ Bimanual Bunker Mini, Unitree Go2, Pupper V3 and Open Duck Mini. Launch it from 
 ARGUS website's **Open control center** button. The public page starts in a fully
 local demonstration mode; it does not connect to hardware automatically.
 
+The device-first layout separates **Control**, **Devices**, **Cockpit** and
+**Activity**. Select a robot in the sidebar (or mobile selector), connect it,
+then enable its controls. Setup forms and hardware details stay in their own
+tabs; secondary tools and telemetry expand on demand. Leaving Control requests
+a stop and locks local motion, including an enable request still in flight.
+
 Features include per-robot telemetry, connection freshness, reference/camera-status
 view, Bunker inspection playback, base controls, demo arm/gripper/lift/posture
 controls, odometry, speed history, command acknowledgements, per-robot and fleet

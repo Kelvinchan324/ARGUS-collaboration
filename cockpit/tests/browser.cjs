@@ -40,6 +40,8 @@ const fixture=http.createServer(async(req,res)=>{
   await page.goto(origin+'/control/');await page.waitForSelector('.robot-option');
   assert.equal(await page.locator('.robot-option').count(),6);assert.equal(commands.length,0);
   assert.equal(await page.locator('.robot-connection-card').count(),6);
+  assert.equal(await page.locator('#pane-devices').isVisible(),false);
+  assert.equal(await page.locator('#pane-cockpit').isVisible(),false);
   assert.equal(await page.locator('.argus-logo').evaluate(img=>img.complete&&img.naturalWidth>0),true);
   assert.equal(await page.locator('.cockpit-status-grid article').count(),8);
   assert.equal(await page.locator('#cockpit-readiness').textContent(),'HARDWARE UNVERIFIED');
@@ -48,9 +50,10 @@ const fixture=http.createServer(async(req,res)=>{
   assert.equal(await page.locator('#route-status').textContent(),'Demo control enabled');
   assert.notEqual(await page.locator('#speed').textContent(),'0.00 m/s');await page.mouse.up();await page.waitForTimeout(300);assert.equal(await page.locator('#speed').textContent(),'0.00 m/s');assert.equal(commands.length,0);
   await page.keyboard.down('w');await page.waitForTimeout(350);assert.notEqual(await page.locator('#speed').textContent(),'0.00 m/s');await page.keyboard.up('w');await page.waitForTimeout(300);assert.equal(await page.locator('#speed').textContent(),'0.00 m/s');
-  await page.locator('[data-preset=inspect]').click();assert.match(await page.locator('#joints').textContent(),/55/);
+  await page.locator('.advanced-telemetry summary').click();await page.locator('[data-preset=inspect]').click();assert.match(await page.locator('#joints').textContent(),/55/);await page.locator('.advanced-telemetry summary').click();
   await page.locator('#stop-all').click();await page.waitForFunction(()=>document.querySelector('[data-drive=forward]').disabled);
-  await page.screenshot({path:path.join(out,'desktop.png'),fullPage:true});
+  await page.locator('#enable').click();await page.locator('#tab-cockpit').click();await page.waitForFunction(()=>document.querySelector('#route-status').textContent==='Control locked');assert.equal(await page.locator('#pane-cockpit').isVisible(),true);await page.locator('#tab-control').click();
+  await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:path.join(out,'desktop.png'),fullPage:true});
   for(const id of ['robot-ar','aloha-mini','unitree-go2','pupper-v3','open-duck-mini','bimanual-bunker-mini']){await page.locator(`[data-robot="${id}"]`).click();await page.waitForFunction(id=>document.querySelector(`[data-robot="${id}"]`).getAttribute('aria-current')==='true',id);}
   await page.locator('#video-view').click();assert.equal(await page.locator('#inspection-video').isVisible(),true);await page.locator('#preview-view').click();
   await page.setViewportSize({width:390,height:844});await page.screenshot({path:path.join(out,'mobile.png'),fullPage:true});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
@@ -71,10 +74,11 @@ const fixture=http.createServer(async(req,res)=>{
   // Identity validation rejects a response from the wrong robot.
   await page.locator('#connections').click();await page.locator('#connection-robot').selectOption('pupper-v3');await page.locator('#endpoint').fill(origin+'/wrong');await page.locator('#connection-form button[type=submit]').click();await page.waitForFunction(()=>document.querySelector('#connection-error').textContent.includes('identity'));await page.locator('#close-connections').click();
   for(const id of ['bimanual-bunker-mini','aloha-mini','unitree-go2','pupper-v3','open-duck-mini']){
+   await page.locator('#tab-devices').click();
    const card=page.locator(`[data-connection="${id}"]`);await card.locator('input').fill(origin+'/adaptor/'+id);await card.locator('[type=submit]').click();await page.waitForFunction(id=>document.querySelector(`[data-connection="${id}"] .connection-status`).textContent==='Bridge simulation',id);
   }
   assert.equal(await page.locator('#connection-count').textContent(),'6 / 6 CONFIGURED');
-  await page.locator('[data-connection=pupper-v3] [data-disconnect]').click();await page.waitForFunction(()=>document.querySelector('#connection-count').textContent==='5 / 6 CONFIGURED');
+  await page.locator('#tab-devices').click();await page.locator('[data-connection=pupper-v3] [data-disconnect]').click();await page.waitForFunction(()=>document.querySelector('#connection-count').textContent==='5 / 6 CONFIGURED');
   assert.equal(await page.locator('[data-connection=unitree-go2] .connection-status').textContent(),'Bridge simulation');
   assert.equal(errors.length,0,errors.join('\n'));
   console.log(JSON.stringify({robots:6,demoSendsNoCommands:true,holdRelease:true,staleLock:true,failedStopReported:true,pendingEnableCancelled:true,wrongIdentityRejected:true,exportExcludesToken:true,mobileOverflow:false,pageErrors:errors.length,commands:commands.length}));

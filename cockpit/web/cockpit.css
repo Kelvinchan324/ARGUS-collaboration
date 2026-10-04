@@ -34,3 +34,63 @@ button.danger:hover:not(:disabled){border-color:#ff8a93;background:#6b2633}
 @media(max-width:940px){.main-grid{grid-template-columns:1fr}.sidebar{padding:22px 10px}.view-stage{height:340px}.drive-content{display:grid;grid-template-columns:1fr 1fr;gap:8px 30px}.drive-content>.primary{align-self:center}.drive-content .dpad{grid-column:2;grid-row:1/5;margin:8px auto}.drive-content .speed-limit{grid-column:1}.drive-content .micro{grid-column:1/-1}.position #map{height:235px}.stats{grid-template-columns:repeat(2,1fr)}.workspace-head{align-items:start}.session{display:none}.joints{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:640px){.top{height:64px;padding:0 14px;gap:12px}.wordmark{font-size:20px;gap:8px}.wordmark small{display:none}.stop-all{padding:8px 10px;font-size:10px}.app-shell{display:block}.sidebar{padding:14px;border-right:0;border-bottom:1px solid var(--line)}.rail-title,.rail-note{display:none}#fleet{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.robot-option{padding:9px;min-height:65px}.robot-option strong{font-size:10px}.robot-option small{font-size:9px}.robot-avatar{width:29px;height:29px}.rail-bottom{display:flex;flex-wrap:wrap;gap:10px;padding:10px 0 0}.rail-bottom button{font-size:10px;padding:7px}.rail-bottom>a{font-size:9px;align-self:center}.rail-bottom>span{display:none}main{padding:22px 14px}.workspace-head{flex-direction:column;gap:15px;margin-bottom:17px}.head-actions{flex-direction:row;align-items:end;width:100%;justify-content:space-between}.stats strong{font-size:26px}.stats article{padding:14px}.main-grid{gap:14px}.view-stage{height:280px}.view-toolbar{flex-wrap:wrap}.view-toolbar>span{width:100%;margin:0;font-size:10px}.drive-content{gap:8px 14px;padding:17px 14px}.dpad{width:166px;grid-template-columns:repeat(3,50px);gap:8px}.drive-content>.primary{padding:10px;font-size:11px}.panel-head{padding:14px}.panel-head .tag{font-size:8px}.map-wrap{padding:8px}#map{height:190px!important}.position-values{font-size:9px;padding:12px 8px}.position-values b{margin-left:3px}.workspace-footer{font-size:8px;flex-wrap:wrap}.notice{font-size:10px}.tool-body{padding:16px}.joints{gap:8px}.view-corner b{display:none}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+
+/* Device-first workspace: primary controls stay above the fold. */
+.top{height:64px;padding-inline:22px}
+.wordmark .argus-logo{height:41px;width:150px}
+.app-shell{grid-template-columns:220px minmax(0,1fr);min-height:calc(100vh - 64px)}
+.sidebar{top:64px;height:calc(100vh - 64px);padding:22px 12px}
+.rail-title{margin-bottom:18px}
+.robot-option{padding:12px 9px;gap:9px}
+.robot-option strong{font-size:12px}
+.rail-bottom{padding-top:24px}
+.rail-bottom>span,.rail-bottom>a{display:none}
+.rail-bottom .cockpit-chip{color:#efbd7a;border-color:#564a34;font-size:11px;line-height:1.5}
+main{padding:24px 28px;max-width:1600px}
+.workspace-head{margin-bottom:18px;align-items:center}
+.workspace-head .eyebrow,.workspace-head #robot-kind{display:none}
+h1{font-size:25px;letter-spacing:-.6px}
+.head-actions{flex-direction:row;align-items:center;gap:12px}
+.mode-picker{font-size:0;gap:0}
+.mode-picker select{font-size:12px}
+.head-actions .tag{font-size:10px}
+#selected-connect{font-size:12px}
+.workspace-tabs{display:flex;gap:26px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.workspace-tabs button{border:0;border-bottom:2px solid transparent;border-radius:0;padding:10px 2px;background:transparent;color:var(--muted);font-size:14px}
+.workspace-tabs button.active{border-color:var(--mint);background:transparent;color:var(--text)}
+.notice{padding:8px 12px;margin-bottom:16px;font-size:12px}
+.stats{gap:12px;margin-bottom:16px}
+.stats article{padding:12px 16px}
+.stats article>span{font-size:10px;letter-spacing:.7px}
+.stats strong{font-size:24px;margin:3px 0}
+.stats small{font-size:11px}
+.main-grid.operating-grid{grid-template-columns:minmax(0,1.6fr) minmax(290px,1fr);gap:16px}
+.panel-head{padding:13px 16px;min-height:46px}
+.panel-head h2{font-size:14px}
+.view-stage{height:290px}
+.view-toolbar{min-height:47px}
+.view-toolbar button{font-size:12px}
+.view-toolbar>span{font-size:11px}
+.drive-content{display:block;padding:14px 20px}
+.drive-content>.primary{font-size:13px}
+.drive-content>p{font-size:11px}
+.dpad{margin:10px auto;grid-template-rows:repeat(3,39px)}
+.drive-content .micro{font-size:10px;margin:8px 0 0}
+.advanced-telemetry{margin-top:18px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.advanced-telemetry>summary{padding:13px 16px;cursor:pointer;color:var(--muted);font-size:13px}
+.advanced-telemetry>.main-grid{padding:16px;border-top:1px solid var(--line)}
+.workspace-footer{margin-top:18px}.workspace-footer span:last-child{display:none}
+#pane-devices .connection-protocol{font-size:11px}
+#pane-devices .robot-connection-card{padding:20px}
+#pane-devices .connection-card-title h3{font-size:14px}
+#pane-devices .connection-status{font-size:11px}
+#pane-devices input{font-size:13px}
+#pane-devices .connection-actions button{font-size:12px}
+#pane-cockpit .cockpit-status-grid strong{font-size:15px}
+#pane-cockpit .cockpit-status-grid small{font-size:12px}
+#pane-activity #events{height:480px}
+#pane-activity #events li{font-size:13px}
+#mobile-robot{display:none}
+@media(max-width:1100px){.app-shell{grid-template-columns:195px minmax(0,1fr)}main{padding:22px 18px}.main-grid.operating-grid{grid-template-columns:minmax(0,1fr) 290px}.head-actions{gap:8px}.head-actions .tag{display:none}.robot-option strong{font-size:11px}.robot-option{grid-template-columns:29px 1fr}.robot-avatar{width:28px;height:30px}}
+@media(max-width:850px){.main-grid.operating-grid{grid-template-columns:1fr}.head-actions{flex-wrap:wrap}.workspace-head{align-items:start;gap:13px;flex-direction:column}.view-stage{height:250px}.drive-content{display:grid;grid-template-columns:1fr 1fr;gap:8px 22px}.drive-content .dpad{grid-column:2;grid-row:1/5}.drive-content .micro{grid-column:1/-1}}
+@media(max-width:640px){.app-shell{display:block}.sidebar{position:static;height:auto;padding:12px 14px;display:block}#fleet,.rail-title,.sidebar .rail-bottom{display:none}#mobile-robot{display:block;width:100%;font-size:14px}.top{padding-inline:14px}.wordmark .argus-logo{width:132px}.session{display:none}main{padding:16px 14px}.workspace-head{gap:12px;margin-bottom:8px}h1{font-size:23px}.head-actions{width:100%;justify-content:space-between}.head-actions .tag{display:inline-flex}.workspace-tabs{gap:23px;margin-bottom:12px}.workspace-tabs button{font-size:13px}.notice{font-size:11px}.stats strong{font-size:23px}.stats small{font-size:10px}.view-stage{height:230px}.view-toolbar>span{width:auto;margin-left:auto}.drive-content{padding:14px}.advanced-telemetry>.main-grid{padding:10px}.workspace-footer{line-height:1.5}}

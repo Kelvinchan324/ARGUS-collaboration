@@ -1,3 +1,4 @@
+import './layout.mjs';
 import {ROBOTS,STALE_MS,emptyState,demoState,fresh,finite,clamp,normalizeAR,normalizeGeneric,validateEndpoint,commandRequest,jsonRequest,CommandChannel} from './core.mjs';
 const $=id=>document.getElementById(id);
 let selected=ROBOTS[0].id,mode='demo',hold=null,transition=false,videoMode=false;
@@ -22,8 +23,9 @@ const fmt=(v,unit='',digits=0)=>finite(v)===null?'—':`${v.toFixed(digits)}${un
 function notice(text,error=false){$('notice').textContent=text;$('notice').classList.toggle('error',error);}
 function log(message,error=false){logs.unshift({time:new Date().toLocaleTimeString('en-GB'),message,error});logs.splice(100);const li=document.createElement('li');if(error)li.className='error';const t=document.createElement('time');t.textContent=logs[0].time;const span=document.createElement('span');span.textContent=message;li.append(t,span);$('events').prepend(li);while($('events').children.length>100)$('events').lastChild.remove();}
 function configured(r){return mode==='demo'||!!r.config;}
-function canDrive(r){const s=state(r);return !transition&&fresh(s)&&s.capabilities.drive&&r.authorized&&s.enabled;}
+function canDrive(r){const s=state(r);return !$('pane-control').hidden&&!transition&&fresh(s)&&s.capabilities.drive&&r.authorized&&s.enabled;}
 function buildFleet(){for(const r of records.values()){
+ const mobileOption=document.createElement('option');mobileOption.value=r.robot.id;mobileOption.textContent=r.robot.name;$('mobile-robot').append(mobileOption);
  const button=document.createElement('button');button.className='robot-option';button.dataset.robot=r.robot.id;button.innerHTML='<span class="robot-avatar"></span><span><strong></strong><small><i></i><span></span></small></span>';
  button.querySelector('.robot-avatar').textContent=r.robot.short;button.querySelector('strong').textContent=r.robot.name;button.onclick=()=>selectRobot(r.robot.id);$('fleet').append(button);
  const option=document.createElement('option');option.value=r.robot.id;option.textContent=r.robot.name;$('connection-robot').append(option);
@@ -62,9 +64,10 @@ async function stopAll(){
 async function selectRobot(id){
  if(id===selected)return;
  const previous=record();if(previous.authorized||previous.busy||hold?.id===selected)await halt(previous,true);
- selected=id;videoMode=false;$('inspection-video').pause();updateSelection();render();
+ selected=id;videoMode=false;$('inspection-video').pause();updateSelection();render();document.dispatchEvent(new Event('cockpit-select-robot'));
 }
 function updateSelection(){
+ $('mobile-robot').value=selected;
  const r=record(),robot=r.robot;$('robot-name').textContent=robot.name;$('robot-code').textContent=robot.short;$('robot-kind').textContent=`${robot.kind} · ${robot.status}`;
  $('view-robot').textContent=`${robot.short} / ${String(ROBOTS.indexOf(robot)+1).padStart(2,'0')}`;
  $('robot-image').hidden=!robot.image;if(robot.image)$('robot-image').src=robot.image;
@@ -121,7 +124,7 @@ function render(){
  $('gripper').value=s.gripper??58;$('lift').value=s.lift??0;$('gripper-value').textContent=fmt(s.gripper,' mm');$('lift-value').textContent=fmt(s.lift,' mm');
  const toolsEnabled=!live&&r.authorized;document.querySelectorAll('[data-preset],[data-posture],#gripper,#lift').forEach(b=>b.disabled=!toolsEnabled);
  $('tools-label').textContent=live?'TELEMETRY ONLY':'DEMO CONTROLS';$('tool-note').textContent=live?'Arm, lift and posture commands await validated robot-specific adaptors.':'Demo joint values illustrate the interface, not calibrated hardware limits.';
- $('camera-status').textContent='Camera stream not implemented';$('view-caption').textContent='Reference only · not a live camera';
+ $('camera-status').textContent='Camera offline';$('view-caption').textContent='Reference · not live';
  const pts=r.history.map((v,i)=>`${i*500/59},${135-Math.min(v,.25)/.25*110}`).join(' ');$('speed-line').setAttribute('points',pts);
  $('session-note').textContent=live?'Commands go only to explicitly configured adaptors.':'Simulated telemetry · no robot commands';$('footer-summary').textContent=`6 platforms · ${live?[...records.values()].filter(i=>i.config&&fresh(i.state)).length+' fresh connections':'demonstration session'}`;
  drawMap();
@@ -180,7 +183,7 @@ $('enable').onclick=async()=>{
  try{if(r.authorized)await halt(r,true);else{
   if(!fresh(state(r))||!state(r).capabilities.drive)throw Error('Current drive telemetry is required');
   const epoch=r.controlEpoch,source=mode;await send(r,'enable',{enabled:true});
-  if(epoch!==r.controlEpoch||selected!==r.robot.id||mode!==source||transition){await halt(r,true,true);return;}
+  if(epoch!==r.controlEpoch||selected!==r.robot.id||mode!==source||transition||$('pane-control').hidden){await halt(r,true,true);return;}
   r.authorized=true;if(mode==='demo')r.demo.enabled=true;
   log(`${r.robot.name}: ${mode==='demo'?'demo':'bridge'} control enabled.`);
  }}catch(e){r.authorized=false;notice(e.message,true);log(`${r.robot.name}: enable failed — ${e.message}`,true);await halt(r,true,true);}finally{r.busy=false;render();}
@@ -218,7 +221,9 @@ for(const name of ['gripper','lift']){$(name).oninput=()=>{if(mode!=='demo'||!re
 document.querySelectorAll('[data-posture]').forEach(button=>button.onclick=()=>{if(mode!=='demo'||!record().authorized)return;record().demo.task=button.dataset.posture;log(`${record().robot.name}: simulated ${button.dataset.posture.toLowerCase()} posture.`);});
 $('clear-log').onclick=()=>{logs.length=0;$('events').replaceChildren();};
 $('export').onclick=()=>{const snapshot={exported_at:new Date().toISOString(),source:mode,cockpit:cockpitSnapshot(),robots:[...records.values()].map(r=>({id:r.robot.id,name:r.robot.name,state:state(r),fresh:fresh(state(r)),history:r.history})),events:logs};const url=URL.createObjectURL(new Blob([JSON.stringify(snapshot,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='argus-telemetry.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);log('Telemetry snapshot exported. Connection tokens are excluded.');};
-buildFleet();updateSelection();log('ARGUS cockpit ready. Six simulated platforms; no hardware commands.');render();
+$('mobile-robot').onchange=()=>selectRobot($('mobile-robot').value);
+document.addEventListener('cockpit-view-change',e=>{if(e.detail!=='control'){if(hold)halt(records.get(hold.id),true);else if(record().authorized||record().busy)halt(record(),true);$('inspection-video').pause();}});
+buildFleet();updateSelection();log('ARGUS ready. Demo mode.');render();
 setInterval(motionTick,150);
 setInterval(()=>{
  for(const r of records.values()){
