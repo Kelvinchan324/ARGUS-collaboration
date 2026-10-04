@@ -1,0 +1,37 @@
+name: Cockpit checks
+on:
+  pull_request:
+    paths:
+      - "cockpit/**"
+      - "scripts/build_pages.py"
+      - "connected-robots/robot-ar/robot_bridge/server.py"
+      - ".github/workflows/cockpit-tests.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cockpit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          lfs: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Protocol and command ordering tests
+        run: node --test cockpit/tests/core.test.mjs
+      - name: Build the website
+        run: python scripts/build_pages.py --output build/pages-control
+      - name: Install browser test runtime
+        run: |
+          npm install --prefix "$RUNNER_TEMP/cockpit-runtime" playwright@1.62.1
+          "$RUNNER_TEMP/cockpit-runtime/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Isolated browser tests
+        env:
+          PLAYWRIGHT_MODULE: ${{ runner.temp }}/cockpit-runtime/node_modules/playwright
+        run: node cockpit/tests/browser.cjs

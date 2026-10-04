@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "docs/**"
+      - "cockpit/web/**"
       - "connected-robots/bimanual-bunker-mini/**"
       - "scripts/build_pages.py"
       - ".gitattributes"

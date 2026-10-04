@@ -36,6 +36,16 @@ vla: VLARuntime | None = None
 app = FastAPI(title="bimanual robot_bridge", version="0.3.0")
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
 
+# Shared fleet cockpit, served on the bridge origin to avoid opening CORS.
+REPOSITORY = ROOT.parents[2]
+COCKPIT_WEB = REPOSITORY / "cockpit" / "web"
+if COCKPIT_WEB.is_dir():
+    app.mount("/cockpit", StaticFiles(directory=COCKPIT_WEB, html=True), name="cockpit")
+    app.mount("/assets", StaticFiles(directory=REPOSITORY / "docs" / "assets"), name="cockpit-assets")
+    bunker_media = REPOSITORY / "connected-robots" / "bimanual-bunker-mini" / "media"
+    if bunker_media.is_dir():
+        app.mount("/connected-robots/bimanual-bunker-mini/media", StaticFiles(directory=bunker_media), name="bunker-media")
+
 
 class CmdVel(BaseModel):
     vx: float = 0.0

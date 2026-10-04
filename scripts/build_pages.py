@@ -21,6 +21,7 @@ def build(output):
     if output.exists():
         raise FileExistsError(f"Choose a new output directory: {output}")
     shutil.copytree(root / "docs", output)
+    shutil.copytree(root / "cockpit/web", output / "control")
     shutil.copytree(robot, output / "connected-robots" / robot.name)
     downloads = output / "downloads"
     downloads.mkdir()

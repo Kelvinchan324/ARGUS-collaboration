@@ -33,6 +33,7 @@ cd ARGUS-collaboration
 | --- | --- | --- |
 | Understand or present ARGUS | [`docs/`](docs/) | English static project website |
 | Work on the shared cockpit | [`cockpit/`](cockpit/) | Cockpit scope and CAD references |
+| Operate the fleet dashboard | [`cockpit/web/`](cockpit/web/) | Six-platform demo, Robot-AR bridge connection, telemetry and base controls |
 | Explore the working software prototype | [`connected-robots/robot-ar/`](connected-robots/robot-ar/) | Bridge, planner, web controls and tests |
 | Add a robot integration | [`connected-robots/`](connected-robots/) | One isolated folder per robot |
 | Prepare a supervised demonstration | [`safety/`](safety/) | Public safety overview and checklists |
@@ -81,7 +82,7 @@ power cut, low speed limits and a second person observing the robot.
 
 ```text
 ARGUS-collaboration/
-├── cockpit/                   Shared operator interface, controls and CAD
+├── cockpit/                   Fleet web dashboard, controls, tests and CAD
 ├── connected-robots/
 │   ├── robot-ar/              Active bridge and planner prototype
 │   ├── aloha-mini/            Aloha Mini integration area
@@ -130,7 +131,7 @@ Use these placement rules:
 | Open Duck Mini | Integration area created | Runtime, safe-stop behavior and tested commit |
 | Pupper V3 | Integration area created; official documentation and upstream code linked | Hardware inventory, maintainer and tested upstream commit |
 | Unitree Go2 + dimOS | Integration planned | Record dimOS version and migrate tested ARGUS connection code |
-| Cockpit | CAD references and public system description available | Migrate shared application code with repeatable tests |
+| Cockpit | Six-platform web dashboard; Robot-AR mock bridge and browser tests pass | Supervised hardware validation, operator arbitration and remaining vendor adaptors |
 
 This table deliberately separates working public code from planned integration.
 Do not interpret a folder's presence as proof that its hardware connection has

@@ -1,0 +1,63 @@
+// Run against an isolated HTTP fixture, never robot hardware.
+// PLAYWRIGHT_MODULE: optional absolute module path; BROWSER_CHANNEL: e.g. msedge.
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const http=require('node:http');
+const root=path.resolve(__dirname,'../../build/pages-control');
+const out=path.resolve(__dirname,'../../build/cockpit-qa');fs.mkdirSync(out,{recursive:true});
+let enabled=false,stale=false,failStop=false,enableDelay=0;
+const commands=[];
+const fixture=http.createServer(async(req,res)=>{
+ if(req.url.startsWith('/bridge/')){
+  res.setHeader('Content-Type','application/json');
+  if(req.url==='/bridge/state'){res.end(JSON.stringify({chassis:{mock:true,connected:false,motor_enabled:enabled,last_rx_age_s:stale?10:.01,voltage:24,vx:0,wz:0,odom_x:0,odom_y:0,odom_th:0},arms:{left:{joints:[0,0,0,0,0,0]}},capabilities:{chassis:{wired:false}}}));return;}
+  let body='';for await(const chunk of req)body+=chunk;
+  const data=JSON.parse(body||'{}');commands.push({url:req.url,data});
+  if(req.url==='/bridge/motor'){if(enableDelay)await new Promise(r=>setTimeout(r,enableDelay));enabled=data.enabled;}
+  if(req.url==='/bridge/stop'){if(failStop){res.writeHead(503);res.end(JSON.stringify({ok:false}));return;}enabled=false;}
+  res.end(JSON.stringify({ok:true}));return;
+ }
+ if(req.url==='/wrong/argus/v1/state'){res.setHeader('Content-Type','application/json');res.end(JSON.stringify({protocol:'argus.v1',robot_id:'wrong-robot',mode:'hardware',sample_time_ms:Date.now()}));return;}
+ let rel=decodeURIComponent(req.url.split('?')[0]);if(rel.endsWith('/'))rel+='index.html';
+ const file=path.resolve(root,'.'+rel);
+ if(!file.startsWith(root+path.sep)||!fs.existsSync(file)){res.writeHead(404);res.end();return;}
+ res.setHeader('Content-Type',({'.html':'text/html','.mjs':'application/javascript','.js':'application/javascript','.css':'text/css','.png':'image/png','.mp4':'video/mp4'})[path.extname(file)]||'application/octet-stream');
+ fs.createReadStream(file).pipe(res);
+});
+(async()=>{
+ await new Promise(r=>fixture.listen(0,'127.0.0.1',r));const origin=`http://127.0.0.1:${fixture.address().port}`;
+ const browser=await chromium.launch({headless:true,...(process.env.BROWSER_CHANNEL?{channel:process.env.BROWSER_CHANNEL}:{})});
+ try{
+  const page=await browser.newPage({viewport:{width:1536,height:1080}}),errors=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.goto(origin+'/control/');await page.waitForSelector('.robot-option');
+  assert.equal(await page.locator('.robot-option').count(),6);assert.equal(commands.length,0);
+  await page.locator('#enable').click();
+  const forward=page.locator('[data-drive=forward]');await forward.hover();await page.mouse.down();await page.waitForTimeout(650);
+  assert.notEqual(await page.locator('#speed').textContent(),'0.00 m/s');await page.mouse.up();await page.waitForTimeout(300);assert.equal(await page.locator('#speed').textContent(),'0.00 m/s');assert.equal(commands.length,0);
+  await page.keyboard.down('w');await page.waitForTimeout(350);assert.notEqual(await page.locator('#speed').textContent(),'0.00 m/s');await page.keyboard.up('w');await page.waitForTimeout(300);assert.equal(await page.locator('#speed').textContent(),'0.00 m/s');
+  await page.locator('[data-preset=inspect]').click();assert.match(await page.locator('#joints').textContent(),/55/);
+  await page.locator('#stop-all').click();await page.waitForFunction(()=>document.querySelector('[data-drive=forward]').disabled);
+  await page.screenshot({path:path.join(out,'desktop.png'),fullPage:true});
+  for(const id of ['robot-ar','aloha-mini','unitree-go2','pupper-v3','open-duck-mini','bimanual-bunker-mini']){await page.locator(`[data-robot="${id}"]`).click();await page.waitForFunction(id=>document.querySelector(`[data-robot="${id}"]`).getAttribute('aria-current')==='true',id);}
+  await page.locator('#video-view').click();assert.equal(await page.locator('#inspection-video').isVisible(),true);await page.locator('#preview-view').click();
+  await page.setViewportSize({width:390,height:844});await page.screenshot({path:path.join(out,'mobile.png'),fullPage:true});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+  await page.setViewportSize({width:1536,height:1080});
+  await page.locator('#connections').click();await page.locator('#connection-robot').selectOption('robot-ar');await page.locator('#endpoint').fill(origin+'/bridge');await page.locator('#token').fill('test-only-token');await page.locator('#connection-form button[type=submit]').click();await page.waitForFunction(()=>!document.querySelector('#connection-dialog').open);
+  assert.equal(await page.locator('#mode').inputValue(),'connected');assert.match(await page.locator('#robot-status').textContent(),/SIMULATION/);assert.equal(commands.length,0);assert.equal(await page.locator('#battery').textContent(),'—');assert.equal(await page.locator('#gripper').isDisabled(),true);
+  await page.locator('#enable').click();await page.waitForFunction(()=>!document.querySelector('[data-drive=forward]').disabled);await forward.hover();await page.mouse.down();await page.waitForTimeout(550);await page.mouse.up();await page.waitForTimeout(300);
+  assert(commands.some(c=>c.url.endsWith('/cmd_vel')&&c.data.vx>0));assert.equal(commands.at(-1).data.vx,0);
+  // Export includes no bearer token or connection configuration.
+  const downloadPromise=page.waitForEvent('download');await page.locator('#export').click();const download=await downloadPromise;await download.saveAs(path.join(out,'export.json'));assert(!fs.readFileSync(path.join(out,'export.json'),'utf8').includes('test-only-token'));
+  stale=true;await page.waitForFunction(()=>document.querySelector('#authority').textContent==='LOCKED');assert.equal(await forward.isDisabled(),true);assert(commands.some(c=>c.url.endsWith('/stop')));stale=false;
+  await page.waitForFunction(()=>!document.querySelector('#enable').disabled);failStop=true;await page.locator('#stop-selected').click();await page.waitForFunction(()=>document.querySelector('#events').textContent.includes('STOP NOT CONFIRMED'));failStop=false;
+  // Switching away during a pending enable must not leave that robot armed.
+  enableDelay=500;await page.locator('#enable').click();await page.locator('[data-robot=bimanual-bunker-mini]').click();await page.waitForFunction(()=>document.querySelector('#robot-code').textContent==='BM');await page.waitForTimeout(900);assert.equal(enabled,false);enableDelay=0;
+  // Identity validation rejects a response from the wrong robot.
+  await page.locator('#connections').click();await page.locator('#connection-robot').selectOption('pupper-v3');await page.locator('#endpoint').fill(origin+'/wrong');await page.locator('#connection-form button[type=submit]').click();await page.waitForFunction(()=>document.querySelector('#connection-error').textContent.includes('identity'));await page.locator('#close-connections').click();
+  assert.equal(errors.length,0,errors.join('\n'));
+  console.log(JSON.stringify({robots:6,demoSendsNoCommands:true,holdRelease:true,staleLock:true,failedStopReported:true,pendingEnableCancelled:true,wrongIdentityRejected:true,exportExcludesToken:true,mobileOverflow:false,pageErrors:errors.length,commands:commands.length}));
+ }finally{await browser.close();fixture.close();}
+})().catch(e=>{console.error(e);fixture.close();process.exitCode=1;});
