@@ -83,6 +83,7 @@ section { scroll-margin-top: 86px; }
 .fleet-card:hover, .fleet-card:focus-visible { transform: translateY(-5px); border-color: #62707e; box-shadow: 0 22px 40px rgb(0 0 0 / .26); }
 .fleet-card.featured { grid-column: span 2; flex-direction: row; align-items: center; border-color: #653136; background: radial-gradient(circle at 25% 50%, rgb(255 43 43 / .17), transparent 45%), #10161e; }
 .fleet-card.featured img { width: 47%; height: 220px; object-fit: contain; filter: drop-shadow(0 24px 26px rgb(0 0 0 / .45)); }
+.fleet-card.has-photo img { width: 100%; height: 112px; border-radius: 10px; background: #e7ecef; object-fit: contain; }
 .fleet-card h3 { margin: 13px 0 5px; font-size: 1.4rem; }
 .fleet-card p { margin: 0; color: var(--muted); font-size: .9rem; }
 .robot-mark { width: 78px; height: 78px; display: grid; place-items: center; border: 1px solid #354654; border-radius: 18px; background: linear-gradient(145deg, #142330, #090e14); color: var(--cyan); font-size: 1.25rem; font-weight: 900; letter-spacing: .08em; box-shadow: inset 0 0 24px rgb(82 219 255 / .08); }

@@ -1,5 +1,9 @@
 # ARGUS Collaboration
 
+<p align="center">
+  <img src="docs/assets/argus-logo.png" alt="ARGUS" width="520">
+</p>
+
 [![Deploy GitHub Pages](https://github.com/Kelvinchan324/ARGUS-collaboration/actions/workflows/pages.yml/badge.svg)](https://github.com/Kelvinchan324/ARGUS-collaboration/actions/workflows/pages.yml)
 
 ## Open the project website
@@ -33,6 +37,9 @@ cd ARGUS-collaboration
 | Add a robot integration | [`connected-robots/`](connected-robots/) | One isolated folder per robot |
 | Prepare a supervised demonstration | [`safety/`](safety/) | Public safety overview and checklists |
 | Contribute changes | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Branch, testing and pull-request workflow |
+
+The complete [ARGUS Safety Report 2026](docs/ARGUS-Safety-Report-2026.pdf) is
+also available as a downloadable PDF.
 
 ### 3. Preview the website locally
 

@@ -14,13 +14,10 @@
     <div class="shell topbar-inner">
       <a class="brand" href="#top" aria-label="ARGUS home"><img src="assets/argus-logo.png" alt="ARGUS"></a>
       <button class="menu" type="button" data-menu aria-expanded="false" aria-controls="primary-nav">Menu</button>
-      <nav class="nav" id="primary-nav" data-nav aria-label="Primary navigation">
-        <a href="#system">System</a><a href="#fleet">Fleet</a><a href="#gallery">Gallery</a><a href="#cad-lab">CAD Lab</a><a href="#roadmap">Roadmap</a>
-      </nav>
+      <nav class="nav" id="primary-nav" data-nav aria-label="Primary navigation"><a href="#system">System</a><a href="#fleet">Fleet</a><a href="#gallery">Gallery</a><a href="#cad-lab">CAD Lab</a><a href="#roadmap">Roadmap</a></nav>
       <a class="button compact" href="https://github.com/Kelvinchan324/ARGUS-collaboration" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
     </div>
   </header>
-
   <main id="main">
     <section class="hero" id="top">
       <div class="shell hero-inner">
@@ -36,36 +33,26 @@
           <figcaption><span>Current cockpit design</span> VR vision · natural arm control · foot-driven mobility</figcaption>
         </figure>
       </div>
-      <div class="shell metrics" aria-label="Project overview">
-        <div><strong>01</strong><span>shared cockpit</span></div><div><strong>05</strong><span>robot platforms</span></div><div><strong>∞</strong><span>extensible adapters</span></div>
-      </div>
+      <div class="shell metrics" aria-label="Project overview"><div><strong>01</strong><span>shared cockpit</span></div><div><strong>05</strong><span>robot platforms</span></div><div><strong>∞</strong><span>extensible adapters</span></div></div>
     </section>
-
     <section class="section" id="system">
       <div class="shell">
         <div class="section-head"><div><span class="section-tag">01 / SYSTEM</span><h2>Human judgement stays in the loop.</h2></div><p>ARGUS separates the operator experience from robot-specific control. The cockpit stays familiar while each adapter handles the capabilities and limits of its machine.</p></div>
-        <div class="signal-flow" aria-label="ARGUS control flow">
-          <article><span>INPUT</span><h3>Operator cockpit</h3><p>VR view, leader arms, pedals, and task selection.</p></article><i aria-hidden="true">→</i>
-          <article><span>ORCHESTRATE</span><h3>ARGUS control layer</h3><p>Authority, limits, routing, status, and safe-stop logic.</p></article><i aria-hidden="true">→</i>
-          <article><span>ADAPT</span><h3>Robot adapters</h3><p>Translate common intent into platform-specific commands.</p></article><i aria-hidden="true">↺</i>
-          <article><span>RETURN</span><h3>Live feedback</h3><p>Video, telemetry, robot state, and operator handover.</p></article>
-        </div>
+        <div class="signal-flow" aria-label="ARGUS control flow"><article><span>INPUT</span><h3>Operator cockpit</h3><p>VR view, leader arms, pedals, and task selection.</p></article><i aria-hidden="true">→</i><article><span>ORCHESTRATE</span><h3>ARGUS control layer</h3><p>Authority, limits, routing, status, and safe-stop logic.</p></article><i aria-hidden="true">→</i><article><span>ADAPT</span><h3>Robot adapters</h3><p>Translate common intent into platform-specific commands.</p></article><i aria-hidden="true">↺</i><article><span>RETURN</span><h3>Live feedback</h3><p>Video, telemetry, robot state, and operator handover.</p></article></div>
       </div>
     </section>
-
     <section class="section dark-panel" id="fleet">
       <div class="shell">
         <div class="section-head"><div><span class="section-tag">02 / ROBOT FLEET</span><h2>Different bodies. One control idea.</h2></div><p>Each platform has its own adapter folder, maintainer, setup notes, and validation record.</p></div>
         <div class="fleet-grid">
           <a class="fleet-card featured" href="https://github.com/Kelvinchan324/ARGUS-collaboration/tree/main/connected-robots/robot-ar" target="_blank" rel="noopener noreferrer"><img src="assets/robot-ar.png" alt="Robot-AR bimanual wheeled robot"><div><span class="status active">Integration active</span><h3>Robot-AR</h3><p>Large bimanual mobile manipulation platform.</p></div></a>
-          <a class="fleet-card" href="https://github.com/Kelvinchan324/ARGUS-collaboration/tree/main/connected-robots/aloha-mini" target="_blank" rel="noopener noreferrer"><div class="robot-mark">AM</div><div><span class="status build">Adapter area</span><h3>Aloha Mini</h3><p>Compact dual-arm mobile research robot.</p></div></a>
+          <a class="fleet-card has-photo" href="https://github.com/Kelvinchan324/ARGUS-collaboration/tree/main/connected-robots/aloha-mini" target="_blank" rel="noopener noreferrer"><img src="assets/aloha-mini.png" alt="Aloha Mini dual-arm mobile robot" loading="lazy"><div><span class="status build">Adapter area</span><h3>Aloha Mini</h3><p>Compact dual-arm mobile research robot.</p></div></a>
           <a class="fleet-card" href="https://github.com/Kelvinchan324/ARGUS-collaboration/tree/main/connected-robots/unitree-go2" target="_blank" rel="noopener noreferrer"><div class="robot-mark">G2</div><div><span class="status build">dimOS planned</span><h3>Unitree Go2</h3><p>Quadruped perception and inspection platform.</p></div></a>
           <a class="fleet-card" href="https://github.com/Kelvinchan324/ARGUS-collaboration/tree/main/connected-robots/pupper-v3" target="_blank" rel="noopener noreferrer"><div class="robot-mark">P3</div><div><span class="status build">In assembly</span><h3>Pupper V3</h3><p>Open-source robotics and AI learning platform.</p></div></a>
           <a class="fleet-card" href="https://github.com/Kelvinchan324/ARGUS-collaboration/tree/main/connected-robots/open-duck-mini" target="_blank" rel="noopener noreferrer"><div class="robot-mark">OD</div><div><span class="status build">In assembly</span><h3>Open Duck Mini</h3><p>Biped platform for expressive embodied interaction.</p></div></a>
         </div>
       </div>
     </section>
-
     <section class="section" id="gallery">
       <div class="shell">
         <div class="section-head"><div><span class="section-tag">03 / PROJECT GALLERY</span><h2>How ARGUS could work in the field.</h2></div><p>Visual studies for multi-robot collaboration, immersive teleoperation, and operator handover. Select any image to enlarge it.</p></div>
@@ -76,24 +63,15 @@
         </div>
       </div>
     </section>
-
     <section class="section cad-section" id="cad-lab">
       <div class="shell">
         <div class="section-head"><div><span class="section-tag">04 / CAD LAB</span><h2>Rotate the robot concepts.</h2></div><p>Drag to rotate, scroll to zoom, and switch platforms. These lightweight models communicate system layout; they are not fabrication drawings.</p></div>
         <div class="cad-shell">
           <div class="cad-stage"><canvas id="cad-canvas" aria-label="Interactive 3D robot concept viewer"></canvas><div class="cad-grid" aria-hidden="true"></div><div class="cad-hud"><span class="live-dot"></span> INTERACTIVE VIEW</div><div class="cad-help">Drag · rotate &nbsp; / &nbsp; Scroll · zoom</div></div>
-          <aside class="cad-panel">
-            <span class="section-tag">SELECT PLATFORM</span>
-            <div class="model-picker" role="group" aria-label="Robot model">
-              <button class="model-button active" type="button" data-model="robot-ar"><span>01</span>Robot-AR</button><button class="model-button" type="button" data-model="aloha"><span>02</span>Aloha Mini</button><button class="model-button" type="button" data-model="go2"><span>03</span>Unitree Go2</button><button class="model-button" type="button" data-model="pupper"><span>04</span>Pupper V3</button>
-            </div>
-            <div class="model-copy" aria-live="polite"><span id="model-kicker">BIMANUAL MOBILE PLATFORM</span><h3 id="model-name">Robot-AR</h3><p id="model-description">A wheeled manipulation platform with two arms, an elevated sensor head, and an onboard control computer.</p></div>
-            <div class="cad-controls"><button class="button" type="button" id="reset-view">Reset view</button><label><input type="checkbox" id="auto-rotate" checked> Auto rotate</label></div>
-          </aside>
+          <aside class="cad-panel"><span class="section-tag">SELECT PLATFORM</span><div class="model-picker" role="group" aria-label="Robot model"><button class="model-button active" type="button" data-model="robot-ar"><span>01</span>Robot-AR</button><button class="model-button" type="button" data-model="aloha"><span>02</span>Aloha Mini</button><button class="model-button" type="button" data-model="go2"><span>03</span>Unitree Go2</button><button class="model-button" type="button" data-model="pupper"><span>04</span>Pupper V3</button></div><div class="model-copy" aria-live="polite"><span id="model-kicker">BIMANUAL MOBILE PLATFORM</span><h3 id="model-name">Robot-AR</h3><p id="model-description">A wheeled manipulation platform with two arms, an elevated sensor head, and an onboard control computer.</p></div><div class="cad-controls"><button class="button" type="button" id="reset-view">Reset view</button><label><input type="checkbox" id="auto-rotate" checked> Auto rotate</label></div></aside>
         </div>
       </div>
     </section>
-
     <section class="section dark-panel" id="roadmap">
       <div class="shell">
         <div class="section-head"><div><span class="section-tag">05 / BUILD PATH</span><h2>Prove one reliable loop, then expand.</h2></div><p>Every milestone should leave repeatable evidence: code, setup notes, safety limits, and an observable acceptance test.</p></div>
@@ -101,12 +79,8 @@
         <div class="proof-strip"><div><strong>Working foundation</strong><span>Cockpit concept, robot folders, Robot-AR bridge, and public safety guidance.</span></div><div><strong>Next proof</strong><span>A supervised end-to-end task with latency, success, and stop behavior recorded.</span></div></div>
       </div>
     </section>
-
-    <section class="section" id="resources">
-      <div class="shell resource-band"><div><span class="section-tag">06 / OPEN COLLABORATION</span><h2>Build one part. Strengthen the whole system.</h2><p>Students work inside the cockpit or one robot adapter, document what they tested, and merge through review.</p></div><div class="resource-actions"><a class="button primary" href="https://github.com/Kelvinchan324/ARGUS-collaboration" target="_blank" rel="noopener noreferrer">Open repository ↗</a><a class="button" href="https://github.com/Kelvinchan324/ARGUS-collaboration/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer">Contribution guide</a><a class="button" href="https://github.com/Kelvinchan324/ARGUS-collaboration/tree/main/safety" target="_blank" rel="noopener noreferrer">Safety overview</a></div></div>
-    </section>
+    <section class="section" id="resources"><div class="shell resource-band"><div><span class="section-tag">06 / OPEN COLLABORATION</span><h2>Build one part. Strengthen the whole system.</h2><p>Students work inside the cockpit or one robot adapter, document what they tested, and merge through review.</p></div><div class="resource-actions"><a class="button primary" href="https://github.com/Kelvinchan324/ARGUS-collaboration" target="_blank" rel="noopener noreferrer">Open repository ↗</a><a class="button" href="https://github.com/Kelvinchan324/ARGUS-collaboration/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer">Contribution guide</a><a class="button" href="ARGUS-Safety-Report-2026.pdf" target="_blank" rel="noopener noreferrer">Safety report PDF</a><a class="button" href="https://github.com/Kelvinchan324/ARGUS-collaboration/tree/main/safety" target="_blank" rel="noopener noreferrer">Safety overview</a></div></div></section>
   </main>
-
   <footer><div class="shell footer-inner"><img src="assets/argus-logo.png" alt="ARGUS"><p>ARGUS is an independent robotics research project. Concept visuals describe intended workflows; implementation status is recorded in the repository.</p><a href="#top">Back to top ↑</a></div></footer>
   <dialog class="lightbox" data-dialog><button type="button" data-close aria-label="Close image">×</button><img data-dialog-image alt=""></dialog>
   <script src="assets/site.js"></script><script type="module" src="assets/cad-viewer.js"></script>
