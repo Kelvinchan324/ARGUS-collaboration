@@ -10,13 +10,15 @@
 
 **[View ARGUS online](https://kelvinchan324.github.io/ARGUS-collaboration/)**
 
-[Open the English ARGUS website](https://kelvinchan324.github.io/ARGUS-collaboration/)
+ARGUS is a supervised multi-robot inspection and telepresence prototype. The
+goal is to give one operator a consistent way to receive video and telemetry,
+select a robot, and intervene safely through a modular cockpit. This repository
+is the public integration hub for the cockpit, Robot-AR, Aloha Mini, Open Duck
+Mini, Pupper V3, Bimanual Bunker Mini, and Unitree Go2/dimOS work.
 
-ARGUS is a multi-robot telepresence and control project. The goal is to give
-one operator a consistent way to receive video and telemetry, select a robot,
-and intervene safely through a modular cockpit. This repository is the public
-integration hub for the cockpit, Robot-AR, Aloha Mini, Open Duck Mini, Pupper V3,
-Bimanual Bunker Mini, and Unitree Go2/dimOS work.
+Generated website images are labeled as illustrative concept imagery; they are
+not evidence of a field deployment. Integration status and validation limits
+come from the repository and its automated tests.
 
 ## Start here
 
