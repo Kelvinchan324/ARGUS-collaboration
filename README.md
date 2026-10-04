@@ -16,7 +16,7 @@ ARGUS is a multi-robot telepresence and control project. The goal is to give
 one operator a consistent way to receive video and telemetry, select a robot,
 and intervene safely through a modular cockpit. This repository is the public
 integration hub for the cockpit, Robot-AR, Aloha Mini, Open Duck Mini, Pupper V3,
-and Unitree Go2/dimOS work.
+Bimanual Bunker Mini, and Unitree Go2/dimOS work.
 
 ## Start here
 
@@ -79,6 +79,7 @@ ARGUS-collaboration/
 ├── connected-robots/
 │   ├── robot-ar/              Active bridge and planner prototype
 │   ├── aloha-mini/            Aloha Mini integration area
+│   ├── bimanual-bunker-mini/   Bimanual Bunker Mini CAD and inspection video
 │   ├── open-duck-mini/        Open Duck Mini integration area
 │   ├── pupper-v3/             Pupper V3 integration area
 │   └── unitree-go2/           Go2 and dimOS integration area
@@ -119,6 +120,7 @@ Use these placement rules:
 | --- | --- | --- |
 | Robot-AR | Software bridge and planner prototype imported | Supervised on-robot validation |
 | Aloha Mini | Integration area created | Hardware inventory, maintainer and tested upstream commit |
+| [Bimanual Bunker Mini](connected-robots/bimanual-bunker-mini/) | STEP assembly and Blender inspection concept video available | Hardware adaptor, simulator validation and supervised tests |
 | Open Duck Mini | Integration area created | Runtime, safe-stop behavior and tested commit |
 | Pupper V3 | Integration area created; official documentation and upstream code linked | Hardware inventory, maintainer and tested upstream commit |
 | Unitree Go2 + dimOS | Integration planned | Record dimOS version and migrate tested ARGUS connection code |

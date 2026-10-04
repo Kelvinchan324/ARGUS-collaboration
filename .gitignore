@@ -38,6 +38,7 @@ log/
 *.mp4
 *.mov
 *.avi
+!connected-robots/bimanual-bunker-mini/media/Industrial_Inspection_Demo.mp4
 
 # CAD lock/recovery files
 ~$*

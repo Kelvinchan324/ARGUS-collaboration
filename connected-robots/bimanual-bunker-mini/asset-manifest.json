@@ -1,0 +1,25 @@
+{
+  "robot": "Bimanual Bunker Mini",
+  "verified_on": "2026-10-04",
+  "assets": [
+    {
+      "path": "cad/bunker_mini_stepper_lift.STEP",
+      "bytes": 143755720,
+      "sha256": "11c3a4b6063b0dffacd8c12e0583a742e7fa515166c65d5d704544f67d9daf49"
+    },
+    {
+      "path": "media/Industrial_Inspection_Demo.mp4",
+      "bytes": 2520281,
+      "sha256": "53d2ab66d24e143a2a934a511deb2413c5ce8bc8959acb15e15be4b78535c640"
+    }
+  ],
+  "video": {
+    "status": "Authored kinematic concept animation",
+    "frames": 864,
+    "duration_seconds": 36,
+    "width": 1280,
+    "codec": "h264",
+    "height": 720,
+    "fps": 24
+  }
+}
