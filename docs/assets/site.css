@@ -36,6 +36,7 @@ img { display: block; max-width: 100%; }
 .topbar { position: sticky; top: 0; z-index: 20; background: rgb(7 18 29 / .9); border-bottom: 1px solid rgb(99 220 231 / .16); backdrop-filter: blur(18px); }
 .topbar-inner { min-height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 22px; }
 .brand { display: flex; align-items: center; gap: 12px; }
+.brand-logo { width: 168px; height: auto; max-height: 46px; object-fit: contain; }
 .brand-mark { width: 34px; height: 34px; display: grid; place-items: center; border: 2px solid var(--coral); border-radius: 9px; color: var(--coral); font-weight: 900; }
 .brand strong { display: block; font-size: 1.15rem; letter-spacing: .14em; }
 .brand small { display: block; color: var(--dim); font-size: .69rem; letter-spacing: .1em; text-transform: uppercase; }
@@ -99,6 +100,7 @@ section { scroll-margin-top: 88px; }
 
 .fleet { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .robot { min-height: 273px; display: flex; flex-direction: column; padding: 24px; }
+.robot-image { width: 100%; height: 190px; margin-bottom: 20px; border-radius: 11px; background: #edf1f3; object-fit: contain; }
 .robot.featured { border-color: #9d6254; background: linear-gradient(150deg, #39242a, #122735 58%); }
 .robot h3 { margin: 16px 0 8px; font-size: 1.28rem; line-height: 1.3; }
 .robot p { margin-bottom: 17px; }
@@ -118,6 +120,8 @@ section { scroll-margin-top: 88px; }
 .resource h3 { margin: 13px 0 8px; font-size: 1.25rem; }
 .resource p { margin: 0 0 18px; color: var(--muted); }
 .resource a { width: fit-content; margin-top: auto; color: var(--cyan); font-weight: 760; text-decoration: underline; text-underline-offset: 4px; }
+.resource-actions { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: auto; }
+.resource-actions a { margin-top: 0; }
 .status-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .status-col { padding: 26px; }
 .status-col h3 { margin: 16px 0; font-size: 1.28rem; }
@@ -160,6 +164,7 @@ footer { padding-block: 31px 44px; border-top: 1px solid var(--line); color: var
   .shell { width: min(calc(100% - 30px), var(--max)); }
   .topbar-inner { min-height: 66px; }
   .brand small { display: none; }
+  .brand-logo { width: 132px; max-height: 40px; }
   .nav { display: none; position: absolute; inset: 66px 0 auto; flex-direction: column; align-items: flex-start; padding: 17px 21px; border-bottom: 1px solid var(--line); background: #0d2030; }
   .nav.open { display: flex; }
   .menu { display: inline-flex; }

@@ -3,10 +3,10 @@
 > [Open the ARGUS website](https://kelvinchan324.github.io/ARGUS-collaboration/) · [English](https://kelvinchan324.github.io/ARGUS-collaboration/en/)
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/liyiteng/AlohaMini/main/AlohaMini1/docs/media/alohamini_git.png" alt="Aloha Mini dual-arm mobile robot" width="720">
+  <img src="aloha-mini.png" alt="ARGUS Robot 1 — Aloha Mini dual-arm mobile robot" width="560">
 </p>
 
-> Image and upstream project: [liyiteng/AlohaMini](https://github.com/liyiteng/AlohaMini).
+> ARGUS Robot 1 prototype. Upstream project: [liyiteng/AlohaMini](https://github.com/liyiteng/AlohaMini).
 
 - Student maintainer: To be assigned
 - Status: Inventory needed

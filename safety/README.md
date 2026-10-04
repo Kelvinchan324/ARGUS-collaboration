@@ -2,6 +2,8 @@
 
 > [Open the ARGUS website](https://kelvinchan324.github.io/ARGUS-collaboration/) · [English](https://kelvinchan324.github.io/ARGUS-collaboration/en/)
 
+[Open the full ARGUS Safety Report 2026 (PDF)](../docs/ARGUS-Safety-Report-2026.pdf)
+
 This overview summarises the controls used for supervised ARGUS demonstrations
 without publishing participant photographs, private contacts, venue-specific
 details or signed records. It supports planning only and does not replace a
