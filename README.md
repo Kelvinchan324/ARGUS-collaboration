@@ -125,8 +125,9 @@ been completed or safety-validated.
 
 Changes under `docs/` are deployed automatically by the
 [GitHub Pages workflow](.github/workflows/pages.yml) after they reach `main`.
-The Chinese page is the default entry and links to the English version. If the
-first deployment has not yet been enabled, a repository administrator must open
+The workflow also requests first-time Pages enablement. The Chinese page is the
+default entry and links to the English version. If GitHub prevents automatic
+enablement for this account or repository, a repository administrator must open
 [Settings → Pages](https://github.com/Kelvinchan324/ARGUS-collaboration/settings/pages),
 set **Source** to **GitHub Actions**, and rerun the workflow.
 
