@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "robot_id": "replace-me",
+  "adapter": "replace-me",
+  "connection": {
+    "host": "ROBOT_HOST_FROM_ENVIRONMENT"
+  },
+  "safety": {
+    "heartbeat_timeout_ms": 500,
+    "max_linear_speed_mps": 0.1,
+    "max_angular_speed_rps": 0.2
+  }
+}

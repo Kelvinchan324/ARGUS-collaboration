@@ -1,0 +1,53 @@
+# Secrets and machine-specific configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+secrets*.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+
+# JavaScript
+node_modules/
+dist/
+build/
+
+# ROS / robotics logs and captures
+install/
+log/
+*.bag
+*.bag.active
+*.mcap
+*.db3
+
+# Generated media and archives
+*.zip
+*.7z
+*.tar
+*.tar.gz
+*.mp4
+*.mov
+*.avi
+
+# CAD lock/recovery files
+~$*
+*.bak
+*.autosave
+
+# OS and editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo

@@ -1,0 +1,38 @@
+name: Integration feature
+description: Propose a cockpit, interface, or robot integration change
+title: "[Integration]: "
+labels: ["integration"]
+body:
+  - type: dropdown
+    id: robot
+    attributes:
+      label: Target system
+      options:
+        - Cockpit
+        - ARGUS robot
+        - Aloha Mini
+        - Open Duck Mini
+        - Pupper V2
+        - Unitree Go2 / dimOS
+        - Shared interface
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: What should a user be able to do after this is complete?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance test
+      description: Give an observable, safe test.
+    validations:
+      required: true
+  - type: textarea
+    id: safety
+    attributes:
+      label: Safety and privacy notes
+      description: Motion, network, recording, and credential risks.
