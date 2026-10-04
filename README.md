@@ -1,142 +1,152 @@
 # ARGUS Collaboration
 
-[Project website (繁體中文)](docs/index.html) · [Project website (English)](docs/en/index.html)
+[![Deploy GitHub Pages](https://github.com/Kelvinchan324/ARGUS-collaboration/actions/workflows/pages.yml/badge.svg)](https://github.com/Kelvinchan324/ARGUS-collaboration/actions/workflows/pages.yml)
 
-## Project website
+## Open the project website
 
-The bilingual static pitch website lives in [`docs/`](docs/). To publish it
-with GitHub Pages, open the repository settings, select **Pages**, choose
-**Deploy from a branch**, and use the `main` branch with the `/docs` folder.
-The Chinese page is the default entry point and links to the English version.
+**[View ARGUS online](https://kelvinchan324.github.io/ARGUS-collaboration/)**
 
-ARGUS is a multi-robot telepresence and control project. This repository is the
-shared integration hub for the cockpit, Robot-AR, Aloha Mini, Open Duck Mini,
-Pupper V3, and Unitree Go2 through dimOS.
+[繁體中文](https://kelvinchan324.github.io/ARGUS-collaboration/) · [English](https://kelvinchan324.github.io/ARGUS-collaboration/en/)
 
-## Where work goes
+ARGUS is a multi-robot telepresence and control project. The goal is to give
+one operator a consistent way to receive video and telemetry, select a robot,
+and intervene safely through a modular cockpit. This repository is the public
+integration hub for the cockpit, Robot-AR, Aloha Mini, Open Duck Mini, Pupper V3,
+and Unitree Go2/dimOS work.
+
+## Start here
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/Kelvinchan324/ARGUS-collaboration.git
+cd ARGUS-collaboration
+```
+
+### 2. Choose the part you need
+
+| Goal | Start here | What is currently available |
+| --- | --- | --- |
+| Understand or present ARGUS | [`docs/`](docs/) | Bilingual static project website |
+| Work on the shared cockpit | [`cockpit/`](cockpit/) | Cockpit scope and CAD references |
+| Explore the working software prototype | [`connected-robots/robot-ar/`](connected-robots/robot-ar/) | Bridge, planner, web controls and tests |
+| Add a robot integration | [`connected-robots/`](connected-robots/) | One isolated folder per robot |
+| Prepare a supervised demonstration | [`safety/`](safety/) | Public safety overview and checklists |
+| Contribute changes | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Branch, testing and pull-request workflow |
+
+### 3. Preview the website locally
+
+The public website contains only static HTML, CSS and JavaScript. From the
+repository root, run:
+
+```bash
+python -m http.server 8000 --directory docs
+```
+
+Then visit [http://127.0.0.1:8000/](http://127.0.0.1:8000/). This local preview
+is useful when editing; ordinary visitors should use the public website link at
+the top of this README.
+
+### 4. Try the Robot-AR software prototype
+
+Robot-AR is the most complete public integration in this repository. On a
+Linux/Jetson development computer:
+
+```bash
+cd connected-robots/robot-ar
+bash scripts/install_deps.sh
+bash scripts/run_tests.sh
+bash scripts/bringup.sh
+```
+
+The bridge binds to `127.0.0.1:8080` by default. Read the
+[Robot-AR instructions](connected-robots/robot-ar/README.md) before connecting
+real hardware. Never perform first-motion testing without a reachable physical
+power cut, low speed limits and a second person observing the robot.
+
+## Understand the repository
 
 ```text
 ARGUS-collaboration/
-├── cockpit/             Shared cockpit application and control code
-├── connected-robots/    One folder for each robot
-├── safety/              Public, non-site-specific demonstration safety guidance
-├── docs/                Bilingual project website for GitHub Pages
-├── CONTRIBUTING.md      How students submit work
-└── README.md             Project entry point
+├── cockpit/                   Shared operator interface, controls and CAD
+├── connected-robots/
+│   ├── robot-ar/              Active bridge and planner prototype
+│   ├── aloha-mini/            Aloha Mini integration area
+│   ├── open-duck-mini/        Open Duck Mini integration area
+│   ├── pupper-v3/             Pupper V3 integration area
+│   └── unitree-go2/           Go2 and dimOS integration area
+├── docs/                      Bilingual GitHub Pages website
+├── safety/                    Public demonstration safety guidance
+├── CONTRIBUTING.md            Contributor workflow
+└── PUBLIC_REPOSITORY_SCOPE.md Public/private content rules
 ```
 
-- Shared cockpit code belongs in [`cockpit/`](cockpit/).
-- Robot-dependent code belongs in that robot's folder under
-  [`connected-robots/`](connected-robots/).
-- Public demonstration controls are summarised in [`safety/`](safety/).
-- A student working on one robot should normally change only that robot folder.
-
-See [`PUBLIC_REPOSITORY_SCOPE.md`](PUBLIC_REPOSITORY_SCOPE.md) before adding
-documents, images, CAD or third-party source to this public repository.
-
-Each robot folder should eventually contain its code, setup instructions,
-dependency list, configuration example, and tests. Keeping these items together
-makes it easy for a student to understand and maintain one complete integration.
-
-## How the system connects
-
-The cockpit is the shared main application. Each connected robot has a small
-robot-specific integration that translates cockpit requests into that robot's
-commands and returns telemetry or video.
+The cockpit sends common requests such as connect, stop, move, select camera
+and read status. Each robot adapter translates only the requests that its
+hardware safely supports and returns a clear error for unsupported commands.
 
 ```mermaid
 flowchart LR
-    Operator --> Cockpit
-    Cockpit --> AR[Robot-AR folder]
-    Cockpit --> Aloha[Aloha Mini folder]
-    Cockpit --> Duck[Open Duck Mini folder]
-    Cockpit --> Pupper[Pupper V3 folder]
-    Cockpit --> Go2[Go2 / dimOS folder]
+    Operator[Operator controls] --> Cockpit[ARGUS cockpit]
+    Cockpit --> AR[Robot-AR adapter]
+    Cockpit --> Aloha[Aloha Mini adapter]
+    Cockpit --> Duck[Open Duck Mini adapter]
+    Cockpit --> Pupper[Pupper V3 adapter]
+    Cockpit --> Go2[Go2 / dimOS adapter]
+    AR & Aloha & Duck & Pupper & Go2 --> Feedback[Video and telemetry]
+    Feedback --> Cockpit
 ```
 
-The working rule is simple:
+Use these placement rules:
 
-- If code is shared by multiple robots, put it in `cockpit/`.
-- If code depends on one robot, put it in that robot's folder.
-- If a change affects both, update both areas in the same pull request and ask
-  both maintainers to review it.
+- Put reusable operator-interface and communication code in `cockpit/`.
+- Put vendor SDK calls and hardware-specific behavior inside that robot's folder.
+- Keep third-party projects in their original repositories; record the tested
+  link and commit instead of copying the whole project here.
+- When a change affects both the cockpit and an adapter, update and test both in
+  the same pull request.
 
-The cockpit should send common requests such as connect, stop, move, select
-camera, and read status. Each robot folder decides how to perform supported
-requests safely. Unsupported requests should return a clear error.
+## Current integration status
 
-## Connected robots
+| Platform | Status | Next evidence needed |
+| --- | --- | --- |
+| Robot-AR | Software bridge and planner prototype imported | Supervised on-robot validation |
+| Aloha Mini | Integration area created | Hardware inventory, maintainer and tested upstream commit |
+| Open Duck Mini | Integration area created | Runtime, safe-stop behavior and tested commit |
+| Pupper V3 | Integration area created; official documentation and upstream code linked | Hardware inventory, maintainer and tested upstream commit |
+| Unitree Go2 + dimOS | Integration planned | Record dimOS version and migrate tested ARGUS connection code |
+| Cockpit | CAD references and public system description available | Migrate shared application code with repeatable tests |
 
-- [Robot-AR](connected-robots/robot-ar/)
-- [Aloha Mini](connected-robots/aloha-mini/)
-- [Open Duck Mini](connected-robots/open-duck-mini/)
-- [Pupper V3](connected-robots/pupper-v3/)
-- [Unitree Go2 with dimOS](connected-robots/unitree-go2/)
+This table deliberately separates working public code from planned integration.
+Do not interpret a folder's presence as proof that its hardware connection has
+been completed or safety-validated.
 
-The robot folders are currently placeholders. Their maintainers should add only
-the ARGUS-specific code they use. Keep full external open-source projects in
-their original repositories and link to them from the robot README.
+## Website publishing
 
-## Moving existing work into the repository
+Changes under `docs/` are deployed automatically by the
+[GitHub Pages workflow](.github/workflows/pages.yml) after they reach `main`.
+The workflow also requests first-time Pages enablement. The Chinese page is the
+default entry and links to the English version. If GitHub prevents automatic
+enablement for this account or repository, a repository administrator must open
+[Settings → Pages](https://github.com/Kelvinchan324/ARGUS-collaboration/settings/pages),
+set **Source** to **GitHub Actions**, and rerun the workflow.
 
-Migrate one working component at a time:
+## Safety and public-repository boundaries
 
-1. Start with the shared cockpit communication and control code. Put it in
-   `cockpit/` and add run instructions.
-2. Choose the best-tested robot connection. Put only your ARGUS-specific code in
-   that robot's folder under `connected-robots/`.
-3. Add safe example settings, dependency links, and the exact tested versions to
-   that robot's README.
-4. Open a pull request and have another person review it before merging.
+Robots can injure people or damage equipment. Test adapters first with mock
+drivers, simulation or disabled actuators. Keep one active command source,
+timeouts, speed/workspace limits and an accessible emergency stop. Follow the
+full [public safety overview](safety/README.md).
 
-Do not migrate dependency folders, downloaded open-source projects, ZIP files,
-presentations, interviews, customer material, videos, build output, passwords,
-API keys, Wi-Fi credentials, or private network addresses.
-
-Large original CAD should be added only when the team confirms ownership and
-that it is necessary for building the system. Use Git LFS for approved binary
-CAD files.
-
-## Safety
-
-Robots can injure people or damage equipment. Test new integrations in
-simulation or with actuators disabled and keep an accessible emergency stop.
-
-### Before power
-
-- [ ] Correct robot, hardware revision, and code version identified
-- [ ] Test area clear; robot restrained or lifted when appropriate
-- [ ] Emergency stop or physical power disconnect reachable
-- [ ] Battery condition confirmed
-- [ ] Speed/command limits and timeout configured
-- [ ] Only one active command source
-
-### Before motion
-
-- [ ] Robot identity and connection confirmed
-- [ ] Telemetry is current
-- [ ] Stop tested with actuators disabled or at minimal power
-- [ ] Directions checked one axis at a time
-- [ ] Operator and observer agree on abort conditions
-
-### After the test
-
-- [ ] Return the robot to a safe state
-- [ ] Record code version, result, faults, date, and tester in its README or issue
-- [ ] Store large logs and recordings outside Git
-
-Never perform unattended first-motion testing.
+Before adding source, documents, CAD or media, read
+[`PUBLIC_REPOSITORY_SCOPE.md`](PUBLIC_REPOSITORY_SCOPE.md). Do not commit
+passwords, API keys, Wi-Fi details, private addresses, participant records,
+customer material, raw interview data or unlicensed third-party files.
 
 ## Licensing
 
 No project-wide license has been selected yet. Until the maintainers add one,
-the original authors retain all rights to ARGUS-owned material. Every upstream
-dependency keeps its own license.
-
-Before importing a file, confirm who created it and whether university, sponsor,
-customer, employment, or upstream terms affect ownership. Keep upstream license
-notices and links in the relevant robot README.
-
-After a decision, add a root `LICENSE` for ARGUS-owned software and, if needed,
-a separate license for original hardware/CAD. This is project organization
-guidance, not legal advice.
+the original authors retain all rights to ARGUS-owned material, and every
+upstream dependency keeps its own license. Confirm ownership and applicable
+university, sponsor, customer, employment and upstream terms before importing
+files or reusing this work.

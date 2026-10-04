@@ -1,5 +1,7 @@
 # Pupper V3
 
+> [Open the ARGUS website](https://kelvinchan324.github.io/ARGUS-collaboration/) · [English](https://kelvinchan324.github.io/ARGUS-collaboration/en/)
+
 <p align="center">
   <img src="https://pupper-v3-documentation.readthedocs.io/en/latest/_images/pupper_spin.gif" alt="Pupper V3 quadruped robot" width="650">
 </p>

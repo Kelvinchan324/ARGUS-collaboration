@@ -1,5 +1,7 @@
 # Robot-AR
 
+> [Open the ARGUS website](https://kelvinchan324.github.io/ARGUS-collaboration/) · [English](https://kelvinchan324.github.io/ARGUS-collaboration/en/)
+
 <p align="center">
   <img src="robot-ar.png" alt="Robot-AR bimanual mobile robot" width="520">
 </p>
