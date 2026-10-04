@@ -15,6 +15,12 @@ nav?.querySelectorAll("a").forEach((link) => {
   });
 });
 
+const inspectionVideo = document.querySelector("[data-local-src]");
+if (inspectionVideo && window.location.protocol === "file:") {
+  inspectionVideo.src = inspectionVideo.dataset.localSrc;
+  inspectionVideo.load();
+}
+
 document.querySelectorAll("[data-lightbox]").forEach((button) => {
   button.addEventListener("click", () => {
     dialogImage.src = button.dataset.lightbox;

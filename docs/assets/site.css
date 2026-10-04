@@ -60,7 +60,9 @@ h1 em { color: var(--red); font-style: italic; }
 .assurance b { margin-right: 16px; color: var(--red); }
 
 .section { padding-block: 118px; }
-.statement-grid, .section-heading, .closing-grid { display: grid; grid-template-columns: .42fr 1.58fr; gap: 70px; }
+.statement-grid, .section-heading, .closing-grid { display: grid; gap: 70px; }
+.statement-grid { grid-template-columns: .42fr 1.58fr; }
+.section-heading, .closing-grid { grid-template-columns: 1.15fr .85fr; }
 .section-label { color: var(--red); }
 h2 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: clamp(2.8rem, 5.5vw, 5.6rem); font-weight: 400; line-height: .98; letter-spacing: -.055em; }
 .section-intro, .section-heading > p { max-width: 690px; margin: 28px 0 0; color: var(--muted); font-size: 1.08rem; }
@@ -130,7 +132,8 @@ footer { border-top: 1px solid var(--line); padding-block: 36px; }
   .hero-copy { padding-bottom: 20px; }
   .hero-media { min-height: 520px; }
   .hero-media img { min-height: 520px; }
-  .statement-grid, .section-heading, .closing-grid { grid-template-columns: .3fr 1.7fr; gap: 35px; }
+  .statement-grid { grid-template-columns: .3fr 1.7fr; gap: 35px; }
+  .section-heading, .closing-grid { grid-template-columns: 1.1fr .9fr; gap: 35px; }
   .system-media { grid-template-columns: 1.2fr 82px .8fr; }
   .fleet-grid { grid-template-columns: repeat(2, 1fr); }
 }
