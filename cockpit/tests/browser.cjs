@@ -40,6 +40,17 @@ const fixture=http.createServer(async(req,res)=>{
   site.on('pageerror',e=>errors.push(e.message));
   await site.goto(origin+'/');await site.waitForSelector('#pilot');
   assert.equal(await site.locator('.pilot-metrics article').count(),4);
+  const projectLinks=await site.locator('.robot-card a[target="_blank"]').evaluateAll(links=>links.map(link=>link.href));
+  assert.deepEqual(projectLinks,[
+   'https://github.com/liyiteng/AlohaMini',
+   'https://github.com/dimensionalOS/dimos/blob/main/docs/platforms/quadruped/go2/setup.md',
+   'https://github.com/Nate711/pupperv3-monorepo',
+   'https://github.com/apirrone/Open_Duck_Mini/tree/v2'
+  ]);
+  assert.match(await site.locator('.fleet-section .section-heading>p').textContent(),/illustrative/i);
+  assert.match(await site.locator('.pilot-boundary').textContent(),/does not certify compliance/i);
+  const safety=await site.request.get(origin+'/ARGUS-Safety-Report-2026.pdf');assert.equal(safety.status(),200);assert((await safety.body()).length>10000);
+  const conceptVideo=await site.request.get(origin+'/connected-robots/bimanual-bunker-mini/media/Industrial_Inspection_Demo.mp4');assert.equal(conceptVideo.status(),200);assert((await conceptVideo.body()).length>100000);
   for(const image of await site.locator('img').all()){await image.scrollIntoViewIfNeeded();await image.evaluate(img=>img.complete&&img.naturalWidth>0?true:new Promise((resolve,reject)=>{img.addEventListener('load',()=>resolve(true),{once:true});img.addEventListener('error',()=>reject(Error(`Image failed: ${img.src}`)),{once:true});}));}
   await site.setViewportSize({width:390,height:844});
   assert.equal(await site.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
@@ -92,6 +103,6 @@ const fixture=http.createServer(async(req,res)=>{
   await page.locator('#tab-devices').click();await page.locator('[data-connection=pupper-v3] [data-disconnect]').click();await page.waitForFunction(()=>document.querySelector('#connection-count').textContent==='5 / 6 CONFIGURED');
   assert.equal(await page.locator('[data-connection=unitree-go2] .connection-status').textContent(),'Bridge simulation');
   assert.equal(errors.length,0,errors.join('\n'));
-  console.log(JSON.stringify({robots:6,demoSendsNoCommands:true,holdRelease:true,staleLock:true,failedStopReported:true,pendingEnableCancelled:true,wrongIdentityRejected:true,exportExcludesToken:true,mobileOverflow:false,pageErrors:errors.length,commands:commands.length}));
+  console.log(JSON.stringify({robots:6,projectLinks:projectLinks.length,safetyReport:true,conceptVideo:true,demoSendsNoCommands:true,holdRelease:true,staleLock:true,failedStopReported:true,pendingEnableCancelled:true,wrongIdentityRejected:true,exportExcludesToken:true,mobileOverflow:false,pageErrors:errors.length,commands:commands.length}));
  }finally{await browser.close();fixture.close();}
 })().catch(e=>{console.error(e);fixture.close();process.exitCode=1;});
