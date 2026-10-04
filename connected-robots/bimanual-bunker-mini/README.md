@@ -3,6 +3,11 @@
 Bunker Mini mobile base with a lift and two robot arms, prepared as a new
 ARGUS robot adaptor area for industrial inspection.
 
+The [Bimanual Bunker Mini website section](https://kelvinchan324.github.io/ARGUS-collaboration/#bimanual-bunker-mini)
+embeds the inspection video, shows the CAD preview and provides individual files
+and a complete adaptor-folder ZIP. The Pages build publishes these files directly
+from this folder, including the full STEP model retrieved through Git LFS.
+
 - Student maintainer: To be assigned
 - Status: CAD and concept animation available; hardware connection code pending
 - Intended simulation targets: MuJoCo or Isaac Sim

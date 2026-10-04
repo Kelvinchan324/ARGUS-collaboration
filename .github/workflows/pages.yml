@@ -6,6 +6,9 @@ on:
       - main
     paths:
       - "docs/**"
+      - "connected-robots/bimanual-bunker-mini/**"
+      - "scripts/build_pages.py"
+      - ".gitattributes"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 
@@ -27,6 +30,11 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
+        with:
+          lfs: true
+
+      - name: Build website with robot materials
+        run: python3 scripts/build_pages.py --output "${{ runner.temp }}/argus-pages"
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
@@ -36,7 +44,7 @@ jobs:
       - name: Upload website
         uses: actions/upload-pages-artifact@v4
         with:
-          path: ./docs
+          path: ${{ runner.temp }}/argus-pages
 
       - name: Deploy website
         id: deployment

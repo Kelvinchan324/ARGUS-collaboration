@@ -47,8 +47,14 @@ The public website contains only static HTML, CSS and JavaScript. From the
 repository root, run:
 
 ```bash
-python -m http.server 8000 --directory docs
+git lfs pull
+python scripts/build_pages.py --output build/pages
+python -m http.server 8000 --directory build/pages
 ```
+
+Use Python 3.11 or newer and a fresh output directory for each build. The build
+includes the Bimanual Bunker Mini video, CAD downloads and complete adaptor ZIP
+from its original folder, so the website does not duplicate these files in Git.
 
 Then visit [http://127.0.0.1:8000/](http://127.0.0.1:8000/). This local preview
 is useful when editing; ordinary visitors should use the public website link at

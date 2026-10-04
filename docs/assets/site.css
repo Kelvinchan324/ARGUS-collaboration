@@ -90,6 +90,27 @@ section { scroll-margin-top: 86px; }
 .status { display: inline-flex; padding: 4px 8px; border: 1px solid #384b5c; border-radius: 99px; color: #a9bbc9; font-size: .65rem; font-weight: 850; letter-spacing: .07em; text-transform: uppercase; }
 .status.active { border-color: #754044; background: #2b171b; color: #ff8888; }
 
+.robot-detail { background: radial-gradient(circle at 80% 30%, #142331, #080c11 65%); }
+.inspection-video, .assembly-preview { margin: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 15px; background: var(--panel); }
+.inspection-video video { display: block; width: 100%; aspect-ratio: 16 / 9; background: #000; }
+.inspection-video figcaption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; padding: 16px 20px; color: var(--muted); font-size: .82rem; }
+.inspection-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 0; margin: 24px 0 40px; list-style: none; }
+.inspection-steps li { padding: 20px; border-left: 2px solid var(--red); background: #101923; }
+.inspection-steps b, .inspection-steps span { display: block; }
+.inspection-steps span { margin-top: 8px; color: var(--muted); font-size: .9rem; }
+.robot-materials { display: grid; grid-template-columns: 1fr 1fr; align-items: start; gap: 36px; }
+.robot-materials > * { min-width: 0; }
+.assembly-preview button { display: block; width: 100%; padding: 0; border: 0; background: transparent; }
+.assembly-preview img { width: 100%; }
+.assembly-preview figcaption { padding: 14px 18px; color: var(--muted); font-size: .8rem; }
+.material-copy h3 { margin: 12px 0; font-size: clamp(1.7rem, 3vw, 2.4rem); line-height: 1.15; letter-spacing: -.03em; }
+.material-copy p, .material-copy ul { color: var(--muted); }
+.material-downloads { display: flex; flex-wrap: wrap; gap: 12px; margin-block: 24px; }
+.material-copy details { border-top: 1px solid var(--line); padding-top: 18px; }
+.material-copy summary { cursor: pointer; font-weight: 750; }
+.text-link { color: var(--cyan); text-decoration: underline; text-underline-offset: 4px; }
+@media (max-width: 760px) { .inspection-steps, .robot-materials { grid-template-columns: 1fr; } }
+
 .gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
 .gallery-item { position: relative; min-height: 330px; padding: 0; overflow: hidden; border: 1px solid #303b46; border-radius: 16px; background: #0c1117; text-align: left; }
 .gallery-item.wide { grid-column: span 2; min-height: 475px; }
