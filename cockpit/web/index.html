@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#080d14"><title>ARGUS · Fleet Control</title><link rel="stylesheet" href="cockpit.css"></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#080d14"><meta name="description" content="ARGUS supervised multi-robot inspection control prototype"><title>ARGUS · Fleet Control</title><link rel="icon" href="../assets/argus-logo.png" type="image/png"><link rel="stylesheet" href="cockpit.css?v=investor-1"></head>
 <body>
 <a class="skip" href="#workspace">Skip to robot controls</a>
 <header class="top"><a class="wordmark" href="../" aria-label="ARGUS home"><img class="argus-logo" src="../assets/argus-logo.png" alt="ARGUS"><small>CONTROL CENTER</small></a><div class="session"><span class="pulse"></span><span id="mode-label">DEMO SESSION</span><time id="clock"></time></div><button class="stop-all danger" id="stop-all">■ Stop all robots</button></header>
@@ -21,7 +21,13 @@
     <article><span>INPUT DEVICES</span><strong id="input-status">Keyboard / pointer</strong><small id="input-detail">Gamepad detection available</small></article>
     <article><span>PHYSICAL EMERGENCY STOP</span><strong class="unverified">Unverified</strong><small>No physical stop feedback channel</small></article>
    </div>
-   <p class="cockpit-status-note">Cockpit hardware readiness is separate from robot connectivity. Leader arms, pedals, headset sessions and physical stop feedback require their own integrations.</p>
+   <div class="verification-grid" aria-label="Automated prototype checks">
+    <article><span>HOLD-TO-RUN</span><strong>Browser tested</strong><small>Releasing keyboard or pointer input returns commanded speed to zero.</small></article>
+    <article><span>STALE TELEMETRY</span><strong>Browser tested</strong><small>Expired samples lock motion and request a stop.</small></article>
+    <article><span>STOP PRIORITY</span><strong>Unit tested</strong><small>A stop invalidates queued motion and follows an in-flight request.</small></article>
+    <article><span>SAFE EXPORT</span><strong>Browser tested</strong><small>Exported telemetry excludes the connection access token.</small></article>
+   </div>
+   <p class="cockpit-status-note">These checks verify software behavior, not robot hardware. Leader arms, pedals, headset sessions, physical stop feedback and on-site route reliability remain unverified.</p>
   </section>
   <section class="panel robot-connections" aria-labelledby="connections-title"><div class="panel-head"><h2 id="connections-title">Robot connections</h2><span class="tag muted" id="connection-count">0 CONFIGURED</span></div><div id="robot-connections-grid"></div><p class="cockpit-status-note">Connect each robot independently. Connecting reads telemetry only; motion requires Enable control. Options provides the optional access token. Hardware adaptors are still required for platforms beyond Robot-AR.</p></section>
   <section class="stats" aria-label="Selected robot telemetry"><article><span>BATTERY</span><strong id="battery">—</strong><small id="voltage">—</small></article><article><span>BASE SPEED</span><strong id="speed">—</strong><small id="speed-note">Simulated velocity</small></article><article><span>ROUND-TRIP</span><strong id="latency">—</strong><small id="freshness">Waiting for telemetry</small></article><article><span>COMPUTE TEMP</span><strong id="temperature">—</strong><small id="control-state">Control disabled</small></article></section>
@@ -37,5 +43,5 @@
  </main>
 </div>
 <dialog id="connection-dialog"><form id="connection-form"><div class="panel-head"><h2>Robot connections</h2><button type="button" id="close-connections" aria-label="Close settings">×</button></div><p>Connect Robot-AR using its existing bridge. Other robots need an adaptor implementing the ARGUS interface. Addresses and access tokens stay in this browser session.</p><label>Robot<select id="connection-robot"></select></label><label>Bridge address<input id="endpoint" type="url" placeholder="https://robot-bridge.example" autocomplete="off"></label><label>Access token (optional)<input id="token" type="password" autocomplete="off"></label><p class="micro" id="adapter-note"></p><p class="form-error" id="connection-error" role="alert"></p><div class="dialog-actions"><button type="button" id="disconnect">Disconnect</button><button class="primary" type="submit">Connect telemetry</button></div><p class="micro">Public GitHub Pages is a client, not a robot gateway. Remote bridges must provide HTTPS, authentication and an allowed browser origin. The local Robot-AR cockpit can use the same-origin bridge.</p></form></dialog>
-<script type="module" src="app.mjs"></script>
+<script type="module" src="app.mjs?v=investor-1"></script>
 </body></html>

@@ -28,14 +28,23 @@ const fixture=http.createServer(async(req,res)=>{
  let rel=decodeURIComponent(req.url.split('?')[0]);if(rel.endsWith('/'))rel+='index.html';
  const file=path.resolve(root,'.'+rel);
  if(!file.startsWith(root+path.sep)||!fs.existsSync(file)){res.writeHead(404);res.end();return;}
- res.setHeader('Content-Type',({'.html':'text/html','.mjs':'application/javascript','.js':'application/javascript','.css':'text/css','.png':'image/png','.mp4':'video/mp4'})[path.extname(file)]||'application/octet-stream');
+ res.setHeader('Content-Type',({'.html':'text/html','.mjs':'application/javascript','.js':'application/javascript','.css':'text/css','.png':'image/png','.jpg':'image/jpeg','.gif':'image/gif','.mp4':'video/mp4'})[path.extname(file)]||'application/octet-stream');
  fs.createReadStream(file).pipe(res);
 });
 (async()=>{
  await new Promise(r=>fixture.listen(0,'127.0.0.1',r));const origin=`http://127.0.0.1:${fixture.address().port}`;
  const browser=await chromium.launch({headless:true,...(process.env.BROWSER_CHANNEL?{channel:process.env.BROWSER_CHANNEL}:{})});
  try{
-  const page=await browser.newPage({viewport:{width:1536,height:1080}}),errors=[];
+  const errors=[];
+  const site=await browser.newPage({viewport:{width:1536,height:1080}});
+  site.on('pageerror',e=>errors.push(e.message));
+  await site.goto(origin+'/');await site.waitForSelector('#pilot');
+  assert.equal(await site.locator('.pilot-metrics article').count(),4);
+  for(const image of await site.locator('img').all()){await image.scrollIntoViewIfNeeded();await image.evaluate(img=>img.complete&&img.naturalWidth>0?true:new Promise((resolve,reject)=>{img.addEventListener('load',()=>resolve(true),{once:true});img.addEventListener('error',()=>reject(Error(`Image failed: ${img.src}`)),{once:true});}));}
+  await site.setViewportSize({width:390,height:844});
+  assert.equal(await site.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+  await site.close();
+  const page=await browser.newPage({viewport:{width:1536,height:1080}});
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto(origin+'/control/');await page.waitForSelector('.robot-option');
   assert.equal(await page.locator('.robot-option').count(),6);assert.equal(commands.length,0);
@@ -44,6 +53,8 @@ const fixture=http.createServer(async(req,res)=>{
   assert.equal(await page.locator('#pane-cockpit').isVisible(),false);
   assert.equal(await page.locator('.argus-logo').evaluate(img=>img.complete&&img.naturalWidth>0),true);
   assert.equal(await page.locator('.cockpit-status-grid article').count(),8);
+  assert.equal(await page.locator('.verification-grid article').count(),4);
+  assert.match(await page.locator('.cockpit-status-note').first().textContent(),/not robot hardware/);
   assert.equal(await page.locator('#cockpit-readiness').textContent(),'HARDWARE UNVERIFIED');
   await page.locator('#enable').click();
   const forward=page.locator('[data-drive=forward]');await forward.hover();await page.mouse.down();await page.waitForTimeout(650);
@@ -54,7 +65,7 @@ const fixture=http.createServer(async(req,res)=>{
   await page.locator('#stop-all').click();await page.waitForFunction(()=>document.querySelector('[data-drive=forward]').disabled);
   await page.locator('#enable').click();await page.locator('#tab-cockpit').click();await page.waitForFunction(()=>document.querySelector('#route-status').textContent==='Control locked');assert.equal(await page.locator('#pane-cockpit').isVisible(),true);await page.locator('#tab-control').click();
   await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:path.join(out,'desktop.png'),fullPage:true});
-  for(const id of ['robot-ar','aloha-mini','unitree-go2','pupper-v3','open-duck-mini','bimanual-bunker-mini']){await page.locator(`[data-robot="${id}"]`).click();await page.waitForFunction(id=>document.querySelector(`[data-robot="${id}"]`).getAttribute('aria-current')==='true',id);}
+  for(const id of ['robot-ar','aloha-mini','unitree-go2','pupper-v3','open-duck-mini','bimanual-bunker-mini']){await page.locator(`[data-robot="${id}"]`).click();await page.waitForFunction(id=>document.querySelector(`[data-robot="${id}"]`).getAttribute('aria-current')==='true',id);await page.waitForFunction(()=>{const img=document.querySelector('#robot-image');return img.complete&&img.naturalWidth>0;});assert.equal(await page.locator('#robot-image').evaluate(img=>getComputedStyle(img).objectFit),'contain');}
   await page.locator('#video-view').click();assert.equal(await page.locator('#inspection-video').isVisible(),true);await page.locator('#preview-view').click();
   await page.setViewportSize({width:390,height:844});await page.screenshot({path:path.join(out,'mobile.png'),fullPage:true});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
   await page.setViewportSize({width:1536,height:1080});

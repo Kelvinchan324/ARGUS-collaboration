@@ -23,8 +23,15 @@
 .cockpit-status-grid small{display:block;color:var(--muted);font-size:10px;line-height:1.5}
 .cockpit-status-grid .unverified{color:#efbd7a}
 .cockpit-status-note{padding:11px 19px;margin:0;color:var(--muted);font-size:10px;border-top:1px solid var(--line)}
+.verification-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border-top:1px solid var(--line)}
+.verification-grid article{padding:16px 19px;background:#0d1821;min-width:0}
+.verification-grid span{display:block;color:var(--muted);font-size:9px;letter-spacing:.8px}
+.verification-grid strong{display:block;margin:7px 0 4px;color:var(--mint);font-size:13px;font-weight:650}
+.verification-grid small{display:block;color:var(--muted);font-size:10px;line-height:1.5}
 @media(max-width:1180px){.cockpit-status-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:1180px){.verification-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:640px){.wordmark .argus-logo{width:132px;height:39px}.cockpit-status-grid article{padding:13px}.cockpit-status .panel-head{flex-wrap:wrap}.cockpit-status-grid strong{font-size:12px}}
+@media(max-width:640px){.verification-grid{grid-template-columns:1fr}.verification-grid article{padding:13px}}
 .top{position:sticky;top:0;z-index:20}
 .sidebar{position:sticky;top:76px;height:calc(100vh - 76px);align-self:start;overflow-y:auto}
 @media(max-width:640px){.sidebar{position:static;height:auto;overflow:visible}}

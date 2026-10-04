@@ -1,10 +1,10 @@
 export const ROBOTS = [
-  {id:'bimanual-bunker-mini',name:'Bimanual Bunker Mini',short:'BM',kind:'Tracked · dual arm',arms:true,lift:true,status:'CAD + inspection concept',image:'../connected-robots/bimanual-bunker-mini/media/model-preview.png'},
-  {id:'robot-ar',name:'Robot-AR',short:'AR',kind:'Wheeled · dual arm',arms:true,status:'Bridge prototype',image:'../assets/robot-ar.png'},
-  {id:'aloha-mini',name:'Aloha Mini',short:'AM',kind:'Wheeled · dual arm',arms:true,status:'Inventory pending',image:'../assets/aloha-mini.png'},
-  {id:'unitree-go2',name:'Unitree Go2',short:'G2',kind:'Quadruped · inspection',legs:true,status:'dimOS integration planned'},
-  {id:'pupper-v3',name:'Pupper V3',short:'P3',kind:'Quadruped · research',legs:true,status:'Integration area'},
-  {id:'open-duck-mini',name:'Open Duck Mini',short:'OD',kind:'Biped · research',legs:true,status:'Integration area'},
+  {id:'bimanual-bunker-mini',name:'Bimanual Bunker Mini',short:'BM',kind:'Tracked · dual arm',arms:true,lift:true,status:'Inspection concept',image:'../assets/generated/bunker-mini-studio.png'},
+  {id:'robot-ar',name:'Robot-AR',short:'AR',kind:'Wheeled · dual arm',arms:true,status:'Bridge prototype',image:'../assets/generated/robot-ar-studio.png'},
+  {id:'aloha-mini',name:'Aloha Mini',short:'AM',kind:'Wheeled · dual arm',arms:true,status:'Adaptor not verified',image:'../assets/generated/aloha-mini-studio.png'},
+  {id:'unitree-go2',name:'Unitree Go2',short:'G2',kind:'Quadruped · inspection',legs:true,status:'dimOS path identified',image:'../assets/fleet/unitree-go2.jpg'},
+  {id:'pupper-v3',name:'Pupper V3',short:'P3',kind:'Quadruped · research',legs:true,status:'Adaptor not verified',image:'../assets/fleet/pupper-v3.gif'},
+  {id:'open-duck-mini',name:'Open Duck Mini v2',short:'OD',kind:'Biped · research',legs:true,status:'Adaptor not verified',image:'../assets/fleet/open-duck-mini-v2.png'},
 ];
 export const STALE_MS=2500;
 export const finite = v => typeof v==='number' && Number.isFinite(v) ? v : null;

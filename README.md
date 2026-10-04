@@ -31,7 +31,7 @@ cd ARGUS-collaboration
 
 | Goal | Start here | What is currently available |
 | --- | --- | --- |
-| Understand or present ARGUS | [`docs/`](docs/) | English static project website and source-verified STL viewer |
+| Understand or present ARGUS | [`docs/`](docs/) | English project website, pilot narrative and safety report |
 | Work on the shared cockpit | [`cockpit/`](cockpit/) | Cockpit scope and CAD references |
 | Operate the fleet dashboard | [`cockpit/web/`](cockpit/web/) | Six-platform demo, Robot-AR bridge connection, telemetry and base controls |
 | Explore the working software prototype | [`connected-robots/robot-ar/`](connected-robots/robot-ar/) | Bridge, planner, web controls and tests |
@@ -41,6 +41,30 @@ cd ARGUS-collaboration
 
 The complete [ARGUS Safety Report 2026](docs/ARGUS-Safety-Report-2026.pdf) is
 also available as a downloadable PDF.
+
+## Investor interview walkthrough
+
+ARGUS is being tested as a supervised inspection system for commercial and
+industrial properties. The current hypothesis is deliberately narrow: one
+operator may improve coverage beyond fixed CCTV, reduce repetitive patrol work,
+take over when the robot is uncertain, and retain a useful evidence trail.
+
+Use the public materials in this order after completing the interview's initial
+problem-discovery questions:
+
+1. Open the website to explain the operator-adaptor-robot loop and the honest
+   integration status of each platform.
+2. Use the pilot section to discuss one robot, one building and one defined
+   route over six to eight weeks.
+3. Open the control center in Demo mode to show robot selection, simulated
+   telemetry, hold-to-run control, stop behavior and takeover boundaries.
+4. Review the Cockpit tab to separate automated software checks from unverified
+   physical hardware and site reliability.
+
+The proposed pilot measures patrol effort, useful findings, verification time,
+human interventions, route completion and evidence usefulness. ARGUS does not
+claim to certify fire-safety or hygiene compliance, replace registered
+inspections, or prove hardware readiness through a browser demonstration.
 
 ### 3. Preview the website locally
 
@@ -53,10 +77,11 @@ python -m http.server 8000 --directory build/pages
 ```
 
 Use Python 3.11 or newer and a fresh output directory for each build. The build
-includes the Bimanual Bunker Mini concept video. The website publishes CAD only
-for Pupper V3 and Open Duck Mini v2 because those exact visualization STLs and
-their upstream revisions are available in `docs/cad/`. Missing robot CAD is
-deliberately left unpublished rather than replaced with approximate geometry.
+includes the Bimanual Bunker Mini concept video. The investor-facing website
+does not present CAD downloads. Source-referenced visualisation files for Pupper
+V3 and Open Duck Mini v2 remain in `docs/cad/` for repository work because their
+exact upstream revisions are recorded. Missing robot CAD is deliberately left
+absent rather than replaced with approximate geometry.
 
 Then visit [http://127.0.0.1:8000/](http://127.0.0.1:8000/). This local preview
 is useful when editing; ordinary visitors should use the public website link at
@@ -129,8 +154,8 @@ Use these placement rules:
 | Robot-AR | Software bridge and planner prototype imported | Supervised on-robot validation |
 | Aloha Mini | Integration area created | Hardware inventory, maintainer and tested upstream commit |
 | [Bimanual Bunker Mini](connected-robots/bimanual-bunker-mini/) | Blender inspection concept video available; no CAD published on the website | Verified source CAD, hardware adaptor, simulator validation and supervised tests |
-| Open Duck Mini | Integration area created; source-verified visualization STL set available on the website | Runtime and safe-stop behavior |
-| Pupper V3 | Integration area created; source-verified visualization STL set available on the website | Hardware inventory and maintainer |
+| Open Duck Mini | Integration area created; source-referenced visualization STLs retained in the repository | Runtime and safe-stop behavior |
+| Pupper V3 | Integration area created; source-referenced visualization STLs retained in the repository | Hardware inventory and maintainer |
 | Unitree Go2 + dimOS | Integration planned | Record dimOS version and migrate tested ARGUS connection code |
 | Cockpit | Six-platform web dashboard; Robot-AR mock bridge and browser tests pass | Supervised hardware validation, operator arbitration and remaining vendor adaptors |
 
