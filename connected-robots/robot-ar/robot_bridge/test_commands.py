@@ -44,6 +44,30 @@ def test_parse_strafe_and_close():
     assert close["steps"][1]["action"] == "stop"
 
 
+def test_parse_nudge_back_no_turn():
+    from commands import parse_command
+
+    plan = parse_command("往後一點然後輪子準備右轉（但別轉")
+    assert plan["steps"][0]["action"] == "move"
+    assert plan["steps"][0]["vx"] < 0
+    assert abs(plan["steps"][0]["vx"] + 0.08) < 1e-6
+    assert abs(plan["steps"][0]["duration"] - 0.25) < 1e-6
+    assert plan["steps"][1]["action"] == "stop"
+    assert not any(s.get("action") == "move" and float(s.get("wz", 0)) != 0 for s in plan["steps"])
+
+
+def test_parse_forward_then_turn_right():
+    from commands import parse_command
+
+    plan = parse_command("往前一點，然後輪子轉右")
+    assert plan["steps"][0]["action"] == "move"
+    assert plan["steps"][0]["vx"] > 0
+    assert plan["steps"][0]["wz"] == 0.0
+    assert plan["steps"][1]["action"] == "move"
+    assert plan["steps"][1]["vx"] == 0.0
+    assert plan["steps"][1]["wz"] < 0
+
+
 def test_mock_chassis_moves_odom():
     d = ChassisDriver(mock=True)
     d.start()
@@ -56,6 +80,27 @@ def test_mock_chassis_moves_odom():
     d.close()
     assert st.mock
     assert st.odom_x != 0.0 or st.ok_frames > 0
+
+
+def test_multi_arm_and_lift_configuration_fails_closed_in_mock_mode():
+    from arms import DualArmDriver
+    from linear_actuators import LinearActuatorDriver
+
+    arm_driver = DualArmDriver(mock=True)
+    arm_state = arm_driver.snapshot()
+    assert arm_state["sides"] == ["left", "right", "left2", "right2"]
+    assert all(arm_state[side]["mock"] for side in arm_state["sides"])
+
+    lift_driver = LinearActuatorDriver(mock=True)
+    lift_state = lift_driver.snapshot()
+    assert lift_state["sides"] == ["left", "right"]
+    assert all(lift_state[side]["mock"] for side in lift_state["sides"])
+    try:
+        lift_driver.nudge("left", 120)
+    except ValueError as exc:
+        assert "not wired" in str(exc)
+    else:
+        raise AssertionError("mock lift nudge should fail closed")
 
 
 if __name__ == "__main__":

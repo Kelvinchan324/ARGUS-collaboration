@@ -1,19 +1,51 @@
-# Fill ports after:  bash scripts/detect_ports.sh
-# Persistent by-id paths survive USB reorder. ttyACM0/1 are fallbacks.
+# Persistent by-id paths survive USB reorder.
+# Four follower buses on Mini PC. right2 is currently incomplete (IDs 1-4 only).
 
-robot_type: so101_follower   # change to so100_follower if your arms are SO-100
+robot_type: so101_follower
 
 arms:
   left:
     id: left_follower
-    port: /dev/ttyACM0
+    port: /dev/serial/by-id/usb-1a86_USB_Single_Serial_5AE6054196-if00
     enabled: true
+    gripper_ids: [6]
+    gripper_closed: [3600]
+    gripper_open: [0]
   right:
     id: right_follower
-    port: /dev/ttyACM1
+    port: /dev/serial/by-id/usb-1a86_USB_Single_Serial_5B91027522-if00
     enabled: true
+    gripper_ids: [6]
+    gripper_closed: [3600]
+    gripper_open: [0]
+  left2:
+    id: left2_follower
+    port: /dev/serial/by-id/usb-1a86_USB_Single_Serial_5B91030497-if00
+    enabled: true
+    gripper_ids: [6]
+    gripper_closed: [3600]
+    gripper_open: [0]
+  right2:
+    id: right2_follower
+    port: /dev/serial/by-id/usb-1a86_USB_Single_Serial_5AE6082932-if00
+    enabled: true
+    gripper_ids: [6]
+    gripper_closed: [3600]
+    gripper_open: [0]
 
-# Leader arms (optional). Leave enabled: false if you only have followers.
+# Physical left/right linear actuators (NOT arm shoulder_lift).
+# Dual-motor per side on a separate Feetech bus. signs flip a motor if the
+# lead-screw pair needs opposite rotation.
+lifts:
+  enabled: true
+  port: /dev/serial/by-id/usb-1a86_USB_Single_Serial_5AB0180435-if00
+  left:
+    ids: [1, 2]
+    signs: [1, -1]
+  right:
+    ids: [11, 12]
+    signs: [1, -1]
+
 leaders:
   left:
     type: so101_leader
@@ -25,5 +57,3 @@ leaders:
     id: right_leader
     port: /dev/ttyACM3
     enabled: false
-
-# Feetech bus: 6× STS3215 per arm, id 1–6, gripper = id 6 (parallel jaw).

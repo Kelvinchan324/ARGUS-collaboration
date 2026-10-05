@@ -49,21 +49,25 @@ class TaskRunner:
     def cancel(self) -> None:
         self.chassis.stop()
         self.chassis.enable_motor(False)
+        self.arms.estop()
         with self._lock:
             self.status["running"] = False
             self.status["error"] = "cancelled"
             self.status["finished"] = True
 
     def _run(self, steps: list[dict[str, Any]]) -> None:
+        need_drive = any(step.get("action") == "move" for step in steps)
         try:
-            self.chassis.enable_motor(True)
+            if need_drive:
+                self.chassis.enable_motor(True)
             for i, step in enumerate(steps):
                 with self._lock:
                     if not self.status["running"]:
                         return
                     self.status["index"] = i
                 self._exec(step)
-            self.chassis.stop()
+            if need_drive:
+                self.chassis.stop()
             with self._lock:
                 self.status["running"] = False
                 self.status["finished"] = True
@@ -71,6 +75,7 @@ class TaskRunner:
         except Exception as exc:
             self.chassis.stop()
             self.chassis.enable_motor(False)
+            self.arms.estop()
             with self._lock:
                 self.status["running"] = False
                 self.status["finished"] = True
@@ -99,7 +104,6 @@ class TaskRunner:
             return
         if action == "stop":
             self.chassis.stop()
-            self.chassis.enable_motor(False)
             return
         if action == "motor":
             self.chassis.enable_motor(bool(step.get("enabled", True)))

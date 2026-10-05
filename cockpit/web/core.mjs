@@ -1,6 +1,6 @@
 export const ROBOTS = [
   {id:'bimanual-bunker-mini',name:'Bimanual Bunker Mini',short:'BM',kind:'Tracked · dual arm',arms:true,lift:true,status:'Inspection concept',image:'../assets/generated/bunker-mini-studio.jpg'},
-  {id:'robot-ar',name:'Robot-AR',short:'AR',kind:'Wheeled · dual arm',arms:true,status:'Bridge prototype',image:'../assets/generated/robot-ar-studio.jpg'},
+  {id:'robot-ar',name:'Robot-AR',short:'AR',kind:'Wheeled · four arm',arms:true,status:'Bridge prototype',image:'../assets/generated/robot-ar-studio.jpg'},
   {id:'aloha-mini',name:'Aloha Mini',short:'AM',kind:'Wheeled · dual arm',arms:true,status:'Adaptor not verified',image:'../assets/generated/aloha-mini-studio.jpg'},
   {id:'unitree-go2',name:'Unitree Go2',short:'G2',kind:'Quadruped · inspection',legs:true,status:'dimOS path identified',image:'../assets/fleet/unitree-go2.jpg'},
   {id:'pupper-v3',name:'Pupper V3',short:'P3',kind:'Quadruped · research',legs:true,status:'Adaptor not verified',image:'../assets/fleet/pupper-v3.jpg'},
@@ -18,9 +18,9 @@ export function normalizeAR(raw,latency,now=Date.now()){
  const s=emptyState();
  Object.assign(s,{connected:c.connected||c.mock,mock:c.mock,enabled:c.motor_enabled===true,voltage:finite(c.voltage),vx:finite(c.vx),wz:finite(c.wz),x:finite(c.odom_x),y:finite(c.odom_y),yaw:finite(c.odom_th),received:now,latency,
  sourceAge:finite(c.last_rx_age_s)!==null?Math.max(0,c.last_rx_age_s*1000):Infinity,
- task:raw.task?.status||'No active task',joints:Array.isArray(raw.arms?.left?.joints)?raw.arms.left.joints.map(finite):[],
+ task:raw.task?.status||'No active task',joints:Array.isArray(raw.arms?.left?.joints)?raw.arms.left.joints.map(finite):[],camera:raw.camera?.frame===true?'frame available':null,
  capabilities:{drive:c.mock||raw.capabilities?.chassis?.wired===true,arms:false,lift:false,posture:false}});
- // Existing arm and camera slots are mock-only / unwired. Never advertise them as live.
+ // The public fleet cockpit keeps hardware arm and lift commands disabled until supervised validation.
  return s;
 }
 export function normalizeGeneric(raw,robotId,latency,now=Date.now()){

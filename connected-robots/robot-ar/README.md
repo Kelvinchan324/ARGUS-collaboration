@@ -1,41 +1,44 @@
 # Robot-AR
 
-> [Open the ARGUS website](https://kelvinchan324.github.io/ARGUS-collaboration/) · [English](https://kelvinchan324.github.io/ARGUS-collaboration/en/)
+> [Open the ARGUS website](https://kelvinchan324.github.io/ARGUS-collaboration/)
 
 <p align="center">
   <img src="robot-ar.png" alt="ARGUS Robot 2 — Robot-AR prototype" width="520">
 </p>
 
 > Robot-AR prototype photographed for ARGUS Report Back Session 1. Robot-AR is
-> the team's large bimanual mobile robot; it is separate from Aloha Mini.
+> the team's large four-arm mobile robot; it is separate from Aloha Mini.
 
-Robot-AR is the large ARGUS mobile-manipulation research platform: a
-four-wheel-steer chassis, two SO-ARM100/101 arms, Robonine parallel grippers,
-and an NVIDIA Jetson Thor control computer. This folder contains the student's
-ARGUS-specific bridge, web teleoperation UI, command planner, configuration,
-tests, and integration documentation.
+Robot-AR is the large ARGUS mobile-manipulation research platform. The latest
+student stack targets a four-wheel-steer chassis, four configured
+SO-ARM100/101 follower buses, two paired linear-lift axes, Robonine parallel
+grippers, USB camera capture and a Mini PC controller. This folder contains the
+student's ARGUS-specific bridge, web teleoperation UI, command planner,
+configuration, tests and integration documentation.
 
 ## Ownership and import record
 
 - Student maintainer: [Lycheee-Lychee](https://github.com/Lycheee-Lychee)
 - Upstream repository: [Lycheee-Lychee/ARGUS](https://github.com/Lycheee-Lychee/ARGUS)
-- Imported upstream commit: `de276622567aaca2de8fad79aae158fc5749b71a`
-- Import date: 2026-10-04
-- Current status: software bridge and planner prototype; hardware-dependent
-  functions still require on-robot validation
+- Imported upstream commit: `9c3640c8a4eccf60600850a46a4ae24e62b2fc6b`
+- Import date: 2026-10-05
+- Current status: the bridge now includes four-arm, lift and camera support.
+  Hardware-specific behavior still requires supervised on-robot validation in
+  this integration repository.
 
-The upstream `vendor/` directory was deliberately not copied. It contains
-complete firmware and ROS2 source trees that should remain in their original
-repository until ownership, licensing, provenance, and the exact required
-files are confirmed. Keep this folder focused on ARGUS-owned integration code.
+The upstream `vendor/` and duplicated `ros2_ws/` source trees were deliberately
+not copied. Complete firmware and external ROS2 packages should remain in the
+upstream repository until ownership, licensing, provenance and the exact
+required files are confirmed. Keep this folder focused on ARGUS-owned
+integration code.
 
 ## Current software
 
 | Path | Role |
 | --- | --- |
-| `robot_bridge/` | FastAPI bridge, web teleoperation UI, chassis and arm adapters |
+| `robot_bridge/` | FastAPI bridge, web teleoperation UI, chassis, arm, lift and camera adapters |
 | `agent/` | Rule-based and optional local/cloud language planner |
-| `config/ports.yaml` | Example SO-101 serial-port mapping |
+| `config/ports.yaml` | Four-arm and paired-lift serial-port mapping from the imported hardware stack |
 | `docs/` | Architecture, emergency-stop and task-readiness notes |
 | `scripts/` | Dependency setup, bring-up, calibration and test helpers |
 | `sim/` | Placeholder for optional SO-ARM simulation work |
@@ -62,18 +65,20 @@ place.
 
 ## Implemented and planned capabilities
 
-- Implemented in software: mock chassis, command parser, web controls,
-  `/stop`, command timeout, arm-adapter slots and planner tests.
-- Hardware dependent: chassis serial control, SO-101 connection and calibration.
-- Not yet wired: camera perception and `vla_act` visual manipulation.
+- Implemented in software: mock chassis, bilingual command parser, web controls,
+  `/stop`, command timeout, four-arm Feetech bus support, paired linear-lift
+  nudges, USB camera frame capture and planner/command tests.
+- Hardware dependent: chassis serial control, exact arm/lift port mapping,
+  gripper ranges, lift directions and camera-device compatibility.
+- Not yet wired: `vla_act` visual manipulation.
 - Refused until wired and validated: open-door, pick-and-place and search tasks.
 
 ## Safety
 
 `POST /stop` cancels the current task, stops and disables the chassis, and
-disconnects the arm buses. It is not a substitute for a reachable physical
-power cut. Complete the parent repository's pre-power and pre-motion checklist
-before enabling hardware.
+removes torque from the connected arm and lift buses. It is not a substitute
+for a reachable physical power cut. Complete the parent repository's pre-power
+and pre-motion checklist before enabling hardware.
 
 ## Configuration and secrets
 

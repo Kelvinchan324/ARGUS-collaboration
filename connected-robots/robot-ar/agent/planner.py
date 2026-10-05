@@ -28,8 +28,14 @@ ALLOWED_ACTIONS = {
 
 SYSTEM = """You control a bimanual wheeled robot through JSON steps only.
 Each step MUST have an "action" field. Do not use the action name as a key.
+Sign convention is mandatory:
+- +vx forward, -vx backward. 後/往後/後退/back MUST use negative vx.
+- +vy left, -vy right. 左平移 positive vy.
+- +wz CCW, -wz CW.
+- 一點/一下 = duration 0.2–0.3 and |vx|,|vy| <= 0.2
+- 別轉/不要轉 = wz 0, do not add a turn step
 Allowed actions:
-- move: vx, vy, wz, duration (seconds). +x forward, +y left, +wz CCW. |vx|,|vy|<=0.5, |wz|<=1.2
+- move: vx, vy, wz, duration (seconds). |vx|,|vy|<=0.5, |wz|<=1.2
 - wait: duration
 - stop
 - motor: enabled bool
@@ -40,7 +46,7 @@ Allowed actions:
 If the user wants a visual skill you cannot do (find object, open door, tidy, camera, search),
 return {"error":"needs camera and vla_act; not wired"}.
 Return ONLY JSON, for example:
-{"steps":[{"action":"move","vx":0.3,"vy":0,"wz":0,"duration":1.5},{"action":"stop"}]}
+{"steps":[{"action":"move","vx":-0.15,"vy":0,"wz":0,"duration":0.25},{"action":"stop"}]}
 """
 
 
@@ -92,6 +98,36 @@ def _normalize_step(step: Any) -> dict[str, Any]:
     raise ValueError(f"LLM returned invalid step: {step!r}")
 
 
+def _apply_language_guards(steps: list[dict[str, Any]], text: str) -> list[dict[str, Any]]:
+    back = bool(re.search(r"(往後|向後|後退|倒車|backward|reverse|\bback\b)", text, re.I))
+    fwd = bool(re.search(r"(往前|向前|前進|forward)", text, re.I))
+    nudge = bool(re.search(r"(一點點|一點|一下|稍微)", text))
+    no_turn = bool(re.search(r"(別轉|不要轉|但別轉|不要轉彎)", text))
+    out: list[dict[str, Any]] = []
+    for step in steps:
+        if step.get("action") == "motor" and step.get("enabled") is True:
+            continue
+        if step.get("action") != "move":
+            out.append(step)
+            continue
+        vx = float(step.get("vx", 0.0))
+        vy = float(step.get("vy", 0.0))
+        wz = float(step.get("wz", 0.0))
+        if back and not fwd and vx > 0:
+            vx = -abs(vx)
+        if fwd and not back and vx < 0:
+            vx = abs(vx)
+        if no_turn:
+            wz = 0.0
+        if nudge:
+            vx = max(-0.12, min(0.12, vx))
+            vy = max(-0.12, min(0.12, vy))
+            step["duration"] = max(0.2, min(0.3, float(step.get("duration", 0.25))))
+        step["vx"], step["vy"], step["wz"] = vx, vy, wz
+        out.append(step)
+    return out or steps
+
+
 def _validate(planned: dict[str, Any], text: str, source: str) -> dict[str, Any]:
     if planned.get("error"):
         raise ValueError(str(planned["error"]))
@@ -105,6 +141,7 @@ def _validate(planned: dict[str, Any], text: str, source: str) -> dict[str, Any]
     if steps[0].get("action") == "error":
         raise ValueError(str(steps[0].get("message") or "needs camera and vla_act; not wired"))
     planned["steps"] = [_normalize_step(step) for step in steps]
+    planned["steps"] = _apply_language_guards(planned["steps"], text)
     for step in planned["steps"]:
         if step["action"] == "move":
             for k in ("vx", "vy", "wz"):

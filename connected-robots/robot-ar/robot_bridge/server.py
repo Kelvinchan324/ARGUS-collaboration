@@ -5,8 +5,12 @@ from __future__ import annotations
 
 import argparse
 import glob
+import json
 import os
 import sys
+import time
+import urllib.error
+import urllib.request
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
@@ -16,6 +20,7 @@ from pydantic import BaseModel, Field
 
 from arms import DualArmDriver
 from chassis_serial import ChassisDriver
+from linear_actuators import LinearActuatorDriver
 from perception import CameraHub
 from tasks import TaskRunner
 from vla import VLARuntime
@@ -29,22 +34,13 @@ from planner import plan as plan_command
 
 driver: ChassisDriver | None = None
 arms: DualArmDriver | None = None
+lifts: LinearActuatorDriver | None = None
 runner: TaskRunner | None = None
 cameras: CameraHub | None = None
 vla: VLARuntime | None = None
 
 app = FastAPI(title="bimanual robot_bridge", version="0.3.0")
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
-
-# Shared fleet cockpit, served on the bridge origin to avoid opening CORS.
-REPOSITORY = ROOT.parents[2]
-COCKPIT_WEB = REPOSITORY / "cockpit" / "web"
-if COCKPIT_WEB.is_dir():
-    app.mount("/cockpit", StaticFiles(directory=COCKPIT_WEB, html=True), name="cockpit")
-    app.mount("/assets", StaticFiles(directory=REPOSITORY / "docs" / "assets"), name="cockpit-assets")
-    bunker_media = REPOSITORY / "connected-robots" / "bimanual-bunker-mini" / "media"
-    if bunker_media.is_dir():
-        app.mount("/connected-robots/bimanual-bunker-mini/media", StaticFiles(directory=bunker_media), name="bunker-media")
 
 
 class CmdVel(BaseModel):
@@ -67,6 +63,15 @@ class GripperCommand(BaseModel):
     open: float = 0.0
 
 
+class NudgeBody(BaseModel):
+    joint: int = Field(description="servo id 1-5")
+    delta: int = 80
+
+
+class LiftNudgeBody(BaseModel):
+    delta: int = 120
+
+
 class CommandBody(BaseModel):
     text: str
     plan_only: bool = False
@@ -86,6 +91,30 @@ def list_serial_ports() -> list[str]:
     ports = sorted(glob.glob("/dev/ttyUSB*") + glob.glob("/dev/ttyACM*"))
     by_id = sorted(glob.glob("/dev/serial/by-id/*"))
     return by_id or ports
+
+
+_ollama_cache: tuple[float, dict] = (0.0, {})
+
+
+def ollama_status() -> dict:
+    global _ollama_cache
+    now = time.monotonic()
+    ts, cached = _ollama_cache
+    if cached and now - ts < 15:
+        return cached
+    host = os.environ.get("OLLAMA_HOST", "http://127.0.0.1:11434").rstrip("/")
+    model = os.environ.get("OLLAMA_MODEL", "qwen2.5:7b")
+    out = {"ollama": False, "host": host, "model": model, "models": []}
+    try:
+        with urllib.request.urlopen(host + "/api/tags", timeout=0.6) as resp:
+            body = json.loads(resp.read().decode())
+        names = [m.get("name") or m.get("model") for m in body.get("models") or []]
+        out["models"] = [n for n in names if n]
+        out["ollama"] = any(n == model or n.startswith(model.split(":")[0]) for n in out["models"])
+    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, OSError):
+        out["ollama"] = False
+    _ollama_cache = (now, out)
+    return out
 
 
 def pick_chassis_port(requested: str | None) -> tuple[str, bool]:
@@ -122,6 +151,7 @@ def state():
         "chassis": st.__dict__,
         "serial_ports": list_serial_ports(),
         "arms": arms.snapshot(),
+        "lifts": lifts.snapshot(),
         "task": runner.snapshot(),
         "camera": cameras.status(),
         "vla": vla.capabilities(),
@@ -133,31 +163,92 @@ def state():
 @app.get("/capabilities")
 def capabilities():
     st = driver.snapshot()
+    snap = arms.snapshot()
+    arm_caps = {}
+    any_wired = False
+    for side in snap.get("sides") or ["left", "right"]:
+        a = snap.get(side) or {}
+        wired = (not a.get("mock")) and a.get("ready")
+        any_wired = any_wired or bool(wired)
+        arm_caps[side] = {
+            "wired": bool(wired),
+            "port": a.get("port"),
+            "ids": list(a.get("ids") or []),
+            "error": a.get("error"),
+        }
+    lift_snap = lifts.snapshot()
+    lift_caps = {}
+    any_lift = False
+    for side in lift_snap.get("sides") or ["left", "right"]:
+        L = lift_snap.get(side) or {}
+        wired = (not L.get("mock")) and L.get("ready")
+        any_lift = any_lift or bool(wired)
+        lift_caps[side] = {
+            "wired": bool(wired),
+            "port": L.get("port") or lift_snap.get("port"),
+            "ids": list(L.get("ids") or []),
+            "error": L.get("error"),
+        }
     return {
         "chassis": {"wired": st.connected and not st.mock, "mode": "serial" if st.connected and not st.mock else "mock"},
-        "arms": {"wired": False, "mode": "mock"},
+        "arms": {
+            "wired": any_wired,
+            "mode": "serial" if any_wired else "mock",
+            "sides": list(arm_caps.keys()),
+            **arm_caps,
+        },
+        "lifts": {
+            "wired": any_lift,
+            "mode": "serial" if any_lift else "mock",
+            "sides": list(lift_caps.keys()),
+            **lift_caps,
+        },
         "camera": cameras.status(),
         "vla_act": vla.capabilities(),
+        "planner": ollama_status(),
     }
 
 
 @app.get("/inventory")
 def inventory():
     st = driver.snapshot()
+    snap = arms.snapshot()
     chassis_on = bool(st.connected and not st.mock)
-    arm_on = False
-    cam_on = bool(cameras.status().get("devices"))
-    return [
-        {"part": "Compute", "model": "NVIDIA Jetson Thor", "role": "Onboard computer", "status": "connected"},
+    labels = {
+        "left": ("Left arm", "Left gripper", "Left manipulator", "Left grasp"),
+        "right": ("Right arm", "Right gripper", "Right manipulator", "Right grasp"),
+        "left2": ("Left arm 2", "Left gripper 2", "Left manipulator 2", "Left grasp 2"),
+        "right2": ("Right arm 2", "Right gripper 2", "Right manipulator 2", "Right grasp 2"),
+    }
+    rows = [
+        {"part": "Compute", "model": "Mini PC · NucBox G2", "role": "Onboard computer", "status": "connected"},
         {"part": "Chassis MCU", "model": "STM32 USB-UART 115200", "role": "Wheelbase controller", "status": "connected" if chassis_on else "disconnected"},
         {"part": "Drive motors", "model": "4× steer-drive", "role": "Locomotion", "status": "connected" if chassis_on else "disconnected"},
-        {"part": "Left arm", "model": "SO-ARM100/101 · STS3215 ×6", "role": "Left manipulator", "status": "connected" if arm_on else "disconnected"},
-        {"part": "Right arm", "model": "SO-ARM100/101 · STS3215 ×6", "role": "Right manipulator", "status": "connected" if arm_on else "disconnected"},
-        {"part": "Left gripper", "model": "Robonine parallel · STS3215", "role": "Left grasp", "status": "connected" if arm_on else "disconnected"},
-        {"part": "Right gripper", "model": "Robonine parallel · STS3215", "role": "Right grasp", "status": "connected" if arm_on else "disconnected"},
-        {"part": "Camera", "model": "USB / RealSense", "role": "Perception", "status": "connected" if cam_on else "disconnected"},
-        {"part": "VLA", "model": "vla_act slot", "role": "Contact policy", "status": "connected" if vla.capabilities()["wired"] else "disconnected"},
     ]
+    for side in snap.get("sides") or ["left", "right"]:
+        a = snap.get(side) or {}
+        on = (not a.get("mock")) and a.get("ready")
+        grip_on = on and (6 in (a.get("ids") or []))
+        arm_name, grip_name, arm_role, grip_role = labels.get(
+            side, (f"Arm {side}", f"Gripper {side}", f"Manipulator {side}", f"Grasp {side}")
+        )
+        rows.append({"part": arm_name, "model": "SO-ARM100/101 · STS3215 ×6", "role": arm_role, "status": "connected" if on else "disconnected"})
+        rows.append({"part": grip_name, "model": "Robonine parallel · STS3215", "role": grip_role, "status": "connected" if grip_on else "disconnected"})
+    lift_snap = lifts.snapshot()
+    lift_labels = {"left": "Left lift", "right": "Right lift"}
+    for side in lift_snap.get("sides") or ["left", "right"]:
+        L = lift_snap.get(side) or {}
+        on = (not L.get("mock")) and L.get("ready")
+        rows.append({
+            "part": lift_labels.get(side, f"Lift {side}"),
+            "model": "Linear actuator · STS3215 ×2",
+            "role": f"{side} vertical lift",
+            "status": "connected" if on else "disconnected",
+        })
+    cam_on = bool(cameras.status().get("devices"))
+    rows.append({"part": "Camera", "model": "USB / RealSense", "role": "Perception", "status": "connected" if cam_on else "disconnected"})
+    rows.append({"part": "VLA", "model": "vla_act slot", "role": "Contact policy", "status": "connected" if vla.capabilities()["wired"] else "disconnected"})
+    return rows
 
 
 @app.get("/camera/latest")
@@ -166,12 +257,13 @@ def camera_latest():
 
 
 @app.get("/camera/snapshot.svg")
+@app.get("/camera/frame.jpg")
 def camera_snapshot():
+    data = cameras.jpeg() if hasattr(cameras, "jpeg") else None
+    if data:
+        return Response(content=data, media_type="image/jpeg")
     st = cameras.latest()
-    if st.get("devices") and st.get("frame") is None:
-        label = "device present · capture not wired"
-    else:
-        label = "camera disconnected"
+    label = (st.get("reason") or "camera disconnected").replace("<", "")
     svg = (
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">'
         '<rect width="640" height="360" fill="#0c0c0c"/>'
@@ -201,6 +293,8 @@ def stop():
     runner.cancel()
     driver.stop()
     driver.enable_motor(False)
+    arms.estop()
+    lifts.estop()
     return {"ok": True, "stopped": True}
 
 
@@ -218,10 +312,16 @@ def reset_odom():
     return {"ok": True}
 
 
+def _valid_arm_side(side: str) -> bool:
+    if side == "both":
+        return True
+    return side in arms.arm_names()
+
+
 @app.post("/arm/{side}")
 def arm(side: str, body: ArmCommand):
-    if side not in {"left", "right", "both"}:
-        raise HTTPException(400, "side must be left, right, or both")
+    if not _valid_arm_side(side):
+        raise HTTPException(400, f"side must be one of {arms.arm_names()} or both")
     try:
         if body.preset:
             arms.set_preset(side, body.preset)
@@ -234,10 +334,40 @@ def arm(side: str, body: ArmCommand):
     return {"ok": True, "arms": arms.snapshot()}
 
 
+@app.post("/arm/{side}/nudge")
+def arm_nudge(side: str, body: NudgeBody):
+    if not _valid_arm_side(side):
+        raise HTTPException(400, f"side must be one of {arms.arm_names()} or both")
+    try:
+        info = arms.nudge(side, body.joint, body.delta)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(500, str(exc)) from exc
+    return {"ok": True, "nudge": info, "arms": arms.snapshot()}
+
+
+def _valid_lift_side(side: str) -> bool:
+    return side in lifts.side_names()
+
+
+@app.post("/lift/{side}/nudge")
+def lift_nudge(side: str, body: LiftNudgeBody):
+    if not _valid_lift_side(side):
+        raise HTTPException(400, f"lift side must be one of {lifts.side_names()}")
+    try:
+        info = lifts.nudge(side, body.delta)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(500, str(exc)) from exc
+    return {"ok": True, "nudge": info, "lifts": lifts.snapshot()}
+
+
 @app.post("/gripper/{side}")
 def gripper(side: str, body: GripperCommand):
-    if side not in {"left", "right", "both"}:
-        raise HTTPException(400, "side must be left, right, or both")
+    if not _valid_arm_side(side):
+        raise HTTPException(400, f"side must be one of {arms.arm_names()} or both")
     try:
         arms.set_gripper(side, body.open)
     except ValueError as exc:
@@ -276,7 +406,7 @@ def task_status():
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser()
-    p.add_argument("--host", default="127.0.0.1")
+    p.add_argument("--host", default="0.0.0.0")
     p.add_argument("--port", type=int, default=8080)
     p.add_argument("--serial", default=os.environ.get("CHASSIS_PORT", "auto"))
     p.add_argument("--baud", type=int, default=115200)
@@ -286,7 +416,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
-    global driver, arms, runner, cameras, vla
+    global driver, arms, lifts, runner, cameras, vla
     args = parse_args()
     port, missing = pick_chassis_port(None if args.serial == "auto" else args.serial)
     mock = args.mock
@@ -294,12 +424,13 @@ def main() -> None:
         print(f"[robot_bridge] {port} not present yet; waiting for USB (not mock)")
     driver = ChassisDriver(port=port, baud=args.baud, timeout_ms=args.timeout_ms, mock=mock)
     driver.start()
-    arms = DualArmDriver(mock=True)
+    arms = DualArmDriver(mock=False)
+    lifts = LinearActuatorDriver(mock=False)
     runner = TaskRunner(driver, arms)
     cameras = CameraHub()
     vla = VLARuntime(cameras, arms, driver)
     mode = "MOCK (no chassis USB)" if mock else f"SERIAL {port}"
-    print(f"[robot_bridge] {mode}  http://{args.host}:{args.port}/")
+    print(f"[robot_bridge] {mode}  http://0.0.0.0:{args.port}/")
     import uvicorn
 
     uvicorn.run(app, host=args.host, port=args.port, log_level="info")

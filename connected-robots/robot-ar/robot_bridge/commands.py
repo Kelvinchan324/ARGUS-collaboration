@@ -10,24 +10,27 @@ DURATION = re.compile(
     r"(?:(?P<ms>[\d.]+)\s*ms)",
     re.I,
 )
+NUDGE = re.compile(r"(一點點|一點|一下|稍微)")
 
 MOVE = [
-    (re.compile(r"(前進|向前|forward|go forward)", re.I), {"vx": 0.30, "vy": 0.0, "wz": 0.0}),
-    (re.compile(r"(後退|向後|back|backward|reverse)", re.I), {"vx": -0.30, "vy": 0.0, "wz": 0.0}),
+    (re.compile(r"(前進|向前|往前|forward|go forward)", re.I), {"vx": 0.30, "vy": 0.0, "wz": 0.0}),
+    (re.compile(r"(後退|向後|往後|倒車|back|backward|reverse)", re.I), {"vx": -0.30, "vy": 0.0, "wz": 0.0}),
     (re.compile(r"(左移|向左平移|往左平移|strafe left|left strafe)", re.I), {"vx": 0.0, "vy": 0.30, "wz": 0.0}),
     (re.compile(r"(右移|向右平移|往右平移|strafe right|right strafe)", re.I), {"vx": 0.0, "vy": -0.30, "wz": 0.0}),
-    (re.compile(r"(左轉|逆時針|turn left|rotate left)", re.I), {"vx": 0.0, "vy": 0.0, "wz": 0.70}),
-    (re.compile(r"(右轉|順時針|turn right|rotate right)", re.I), {"vx": 0.0, "vy": 0.0, "wz": -0.70}),
+    (re.compile(r"(左轉|轉左|逆時針|turn left|rotate left)", re.I), {"vx": 0.0, "vy": 0.0, "wz": 0.70}),
+    (re.compile(r"(右轉|轉右|順時針|turn right|rotate right)", re.I), {"vx": 0.0, "vy": 0.0, "wz": -0.70}),
 ]
 
 
 def _duration(text: str, default: float = 1.0) -> float:
     m = DURATION.search(text)
-    if not m:
-        return default
-    if m.group("sec"):
-        return max(0.05, float(m.group("sec")))
-    return max(0.05, float(m.group("ms")) / 1000.0)
+    if m:
+        if m.group("sec"):
+            return max(0.05, float(m.group("sec")))
+        return max(0.05, float(m.group("ms")) / 1000.0)
+    if NUDGE.search(text):
+        return 0.25
+    return default
 
 
 def _side(text: str) -> str:
@@ -43,12 +46,11 @@ def parse_command(text: str) -> dict[str, Any]:
     if not raw:
         raise ValueError("empty command")
 
-    parts = re.split(r"\s*(?:然後|接着|接著|and then|,|;|再)\s*", raw)
+    parts = re.split(r"\s*(?:然後|接着|接著|and then|,|，|;|再)\s*", raw)
     parts = [p.strip() for p in parts if p.strip()]
     steps: list[dict[str, Any]] = []
 
     for part in parts:
-        low = part.lower()
         if re.search(r"^(停|停止|急停|stop|halt|estop)$", part, re.I):
             steps.append({"action": "stop"})
             continue
@@ -76,11 +78,27 @@ def parse_command(text: str) -> dict[str, Any]:
         if re.search(r"(等|wait|pause)", part, re.I):
             steps.append({"action": "wait", "duration": _duration(part, 1.0)})
             continue
+        if re.search(r"(別轉|不要轉|但別轉|不要轉彎)", part):
+            steps.append({"action": "stop"})
+            continue
 
         matched = False
         for pat, twist in MOVE:
             if pat.search(part):
                 step = {"action": "move", "duration": _duration(part, 1.0), **twist}
+                if NUDGE.search(part) and not DURATION.search(part):
+                    step["duration"] = 0.25
+                    for key in ("vx", "vy", "wz"):
+                        if float(step[key]) == 0.0:
+                            continue
+                        sign = 1.0 if float(step[key]) > 0 else -1.0
+                        step[key] = 0.08 * sign
+                elif re.search(r"(轉左|轉右|左轉|右轉)", part) and not DURATION.search(part):
+                    step["duration"] = 0.8
+                    step["vx"] = 0.0
+                    step["vy"] = 0.0
+                    if float(step["wz"]) != 0.0:
+                        step["wz"] = 0.25 if float(step["wz"]) > 0 else -0.25
                 steps.append(step)
                 matched = True
                 break

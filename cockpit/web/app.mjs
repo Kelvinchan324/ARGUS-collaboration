@@ -1,5 +1,5 @@
-import './layout.mjs?v=investor-3';
-import {ROBOTS,STALE_MS,emptyState,demoState,fresh,finite,clamp,normalizeAR,normalizeGeneric,validateEndpoint,commandRequest,jsonRequest,CommandChannel} from './core.mjs?v=investor-3';
+import './layout.mjs?v=robot-ar-1';
+import {ROBOTS,STALE_MS,emptyState,demoState,fresh,finite,clamp,normalizeAR,normalizeGeneric,validateEndpoint,commandRequest,jsonRequest,CommandChannel} from './core.mjs?v=robot-ar-1';
 const $=id=>document.getElementById(id);
 let selected=ROBOTS[0].id,mode='demo',hold=null,transition=false,videoMode=false;
 const records=new Map(ROBOTS.map((robot,i)=>[robot.id,{robot,demo:demoState(robot,i),state:emptyState(),config:null,channel:null,version:0,controlEpoch:0,polling:false,authorized:false,busy:false,history:[],rightJoints:[0,-12,24,0,12,0],leftJoints:[0,-12,24,0,12,0],lastError:''}]));
@@ -124,7 +124,7 @@ function render(){
  $('gripper').value=s.gripper??58;$('lift').value=s.lift??0;$('gripper-value').textContent=fmt(s.gripper,' mm');$('lift-value').textContent=fmt(s.lift,' mm');
  const toolsEnabled=!live&&r.authorized;document.querySelectorAll('[data-preset],[data-posture],#gripper,#lift').forEach(b=>b.disabled=!toolsEnabled);
  $('tools-label').textContent=live?'TELEMETRY ONLY':'DEMO CONTROLS';$('tool-note').textContent=live?'Arm, lift and posture commands await validated robot-specific adaptors.':'Demo joint values illustrate the interface, not calibrated hardware limits.';
- $('camera-status').textContent='Camera offline';$('view-caption').textContent='Reference · not live';
+ $('camera-status').textContent=live&&r.robot.id==='robot-ar'&&s.camera?'Camera frame available at bridge':'Camera offline';$('view-caption').textContent='Reference · not live';
  const pts=r.history.map((v,i)=>`${i*500/59},${135-Math.min(v,.25)/.25*110}`).join(' ');$('speed-line').setAttribute('points',pts);
  $('session-note').textContent=live?'Commands go only to explicitly configured adaptors.':'Simulated telemetry · no robot commands';$('footer-summary').textContent=`6 platforms · ${live?[...records.values()].filter(i=>i.config&&fresh(i.state)).length+' fresh connections':'demonstration session'}`;
  drawMap();

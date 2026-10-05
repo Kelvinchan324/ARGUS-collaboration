@@ -17,7 +17,7 @@ const fixture=http.createServer(async(req,res)=>{
  }
  if(req.url.startsWith('/bridge/')){
   res.setHeader('Content-Type','application/json');
-  if(req.url==='/bridge/state'){res.end(JSON.stringify({chassis:{mock:true,connected:false,motor_enabled:enabled,last_rx_age_s:stale?10:.01,voltage:24,vx:0,wz:0,odom_x:0,odom_y:0,odom_th:0},arms:{left:{joints:[0,0,0,0,0,0]}},capabilities:{chassis:{wired:false}}}));return;}
+  if(req.url==='/bridge/state'){res.end(JSON.stringify({chassis:{mock:true,connected:false,motor_enabled:enabled,last_rx_age_s:stale?10:.01,voltage:24,vx:0,wz:0,odom_x:0,odom_y:0,odom_th:0},arms:{left:{joints:[0,0,0,0,0,0]}},camera:{frame:true},capabilities:{chassis:{wired:false}}}));return;}
   let body='';for await(const chunk of req)body+=chunk;
   const data=JSON.parse(body||'{}');commands.push({url:req.url,data});
   if(req.url==='/bridge/motor'){if(enableDelay)await new Promise(r=>setTimeout(r,enableDelay));enabled=data.enabled;}
@@ -84,6 +84,7 @@ const fixture=http.createServer(async(req,res)=>{
   await page.locator('#connections').click();await page.locator('#connection-robot').selectOption('robot-ar');await page.locator('#endpoint').fill(origin+'/bridge');await page.locator('#token').fill('test-only-token');await page.locator('#connection-form button[type=submit]').click();await page.waitForFunction(()=>!document.querySelector('#connection-dialog').open);
   assert.equal(await page.locator('#mode').inputValue(),'connected');assert.match(await page.locator('#robot-status').textContent(),/SIMULATION/);assert.equal(commands.length,0);assert.equal(await page.locator('#battery').textContent(),'—');assert.equal(await page.locator('#gripper').isDisabled(),true);
   assert.equal(await page.locator('#links-status').textContent(),'1 / 6 fresh links');
+  assert.equal(await page.locator('#camera-status').textContent(),'Camera frame available at bridge');
   assert.equal(await page.locator('#vr-status').textContent(),'Not connected');
   assert.equal(await page.locator('#cockpit-readiness').textContent(),'HARDWARE UNVERIFIED');
   await page.locator('#enable').click();await page.waitForFunction(()=>!document.querySelector('[data-drive=forward]').disabled);await forward.hover();await page.mouse.down();await page.waitForTimeout(550);await page.mouse.up();await page.waitForTimeout(300);

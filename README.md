@@ -155,7 +155,7 @@ Use these placement rules:
 
 | Platform | Status | Next evidence needed |
 | --- | --- | --- |
-| Robot-AR | Software bridge and planner prototype imported | Supervised on-robot validation |
+| [Robot-AR](connected-robots/robot-ar/) | Student bridge synced from [`Lycheee-Lychee/ARGUS`](https://github.com/Lycheee-Lychee/ARGUS) at `9c3640c`; four-arm, paired-lift and live-camera support is present in software | Supervised on-robot validation of ports, ranges, lift directions and stop behavior |
 | Aloha Mini | Integration area created | Hardware inventory, maintainer and tested upstream commit |
 | [Bimanual Bunker Mini](connected-robots/bimanual-bunker-mini/) | Blender inspection concept video available; no CAD published on the website | Verified source CAD, hardware adaptor, simulator validation and supervised tests |
 | Open Duck Mini | Integration area created; source-referenced visualization STLs retained in the repository | Runtime and safe-stop behavior |

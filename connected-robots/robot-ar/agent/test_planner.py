@@ -80,6 +80,18 @@ def test_error_action_from_llm():
     raise AssertionError("expected ValueError")
 
 
+def test_guard_flips_backward_sign():
+    out = planner._validate(
+        {"steps": [{"action": "move", "vx": 0.4, "vy": 0, "wz": 0, "duration": 0.5}, {"action": "motor", "enabled": True}]},
+        "往後一點然後輪子準備右轉（但別轉",
+        "ollama",
+    )
+    assert out["steps"][0]["vx"] < 0
+    assert out["steps"][0]["wz"] == 0.0
+    assert 0.2 <= out["steps"][0]["duration"] <= 0.3
+    assert all(s.get("action") != "motor" for s in out["steps"])
+
+
 if __name__ == "__main__":
     for name, fn in list(globals().items()):
         if name.startswith("test_") and callable(fn):
