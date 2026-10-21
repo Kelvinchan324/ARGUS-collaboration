@@ -5,6 +5,7 @@ on:
       - "cockpit/**"
       - "scripts/build_pages.py"
       - "connected-robots/robot-ar/robot_bridge/server.py"
+      - "connected-robots/so101/**"
       - ".github/workflows/cockpit-tests.yml"
   workflow_dispatch:
 permissions:
@@ -25,6 +26,8 @@ jobs:
           python-version: "3.12"
       - name: Protocol and command ordering tests
         run: node --test cockpit/tests/core.test.mjs
+      - name: SO-101 bridge protocol tests
+        run: python -m unittest discover -s connected-robots/so101/tests -v
       - name: Build the website
         run: python scripts/build_pages.py --output build/pages-control
       - name: Install browser test runtime

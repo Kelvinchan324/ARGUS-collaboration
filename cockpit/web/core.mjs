@@ -5,11 +5,12 @@ export const ROBOTS = [
   {id:'unitree-go2',name:'Unitree Go2',short:'G2',kind:'Quadruped · inspection',legs:true,status:'dimOS path identified',image:'../assets/fleet/unitree-go2.jpg'},
   {id:'pupper-v3',name:'Pupper V3',short:'P3',kind:'Quadruped · research',legs:true,status:'Adaptor not verified',image:'../assets/fleet/pupper-v3.jpg'},
   {id:'open-duck-mini',name:'Open Duck Mini v2',short:'OD',kind:'Biped · research',legs:true,status:'Adaptor not verified',image:'../assets/fleet/open-duck-mini-v2.png'},
+  {id:'so101',name:'SO-101 Bimanual',short:'S1',kind:'Bimanual · leader/follower',arms:true,status:'Leader bridge',image:null},
 ];
 export const STALE_MS=2500;
 export const finite = v => typeof v==='number' && Number.isFinite(v) ? v : null;
 export const clamp=(n,a,b)=>Math.min(b,Math.max(a,n));
-export function emptyState(){return {connected:false,mock:false,enabled:false,battery:null,voltage:null,vx:null,wz:null,x:null,y:null,yaw:null,temp:null,latency:null,received:0,sourceAge:0,capabilities:{},joints:[],task:'No telemetry',camera:null};}
+export function emptyState(){return {connected:false,mock:false,enabled:false,battery:null,voltage:null,vx:null,wz:null,x:null,y:null,yaw:null,temp:null,latency:null,received:0,sourceAge:0,capabilities:{},joints:[],armJoints:{},gripper:null,task:'No telemetry',camera:null};}
 export function demoState(robot,index){return {...emptyState(),connected:true,mock:true,battery:92-index*7,voltage:25-index*.2,vx:0,wz:0,x:1.5+index*1.6,y:2+(index%2)*2.8,yaw:0,temp:36+index,latency:12+index*3,received:Date.now(),capabilities:{drive:true,arms:!!robot.arms,lift:!!robot.lift,posture:!!robot.legs},joints:robot.arms?[0,-12,24,0,12,0]:[],gripper:58,lift:0,task:'Standby',sample:true};}
 export function fresh(s,now=Date.now()){return s.connected && now-s.received+s.sourceAge<STALE_MS;}
 export function normalizeAR(raw,latency,now=Date.now()){
@@ -29,10 +30,14 @@ export function normalizeGeneric(raw,robotId,latency,now=Date.now()){
  if(timestamp===null||timestamp>now+1000)throw Error('Invalid telemetry timestamp');
  const s=emptyState(),t=raw.telemetry||{};
  for(const key of ['battery','voltage','vx','wz','x','y','yaw','temp'])s[key]=finite(t[key]);
+ for(const side of ['left','right']){
+  const arm=t.arms?.[side];
+  if(arm&&Array.isArray(arm.joints))s.armJoints[side]={joints:arm.joints.map(finite),gripper:finite(arm.gripper)};
+ }
  if(s.battery!==null&&(s.battery<0||s.battery>100))s.battery=null;
  Object.assign(s,{connected:raw.connected===true,mock:raw.mode==='simulation',enabled:raw.motor_enabled===true,received:now,sourceAge:Math.max(0,now-timestamp),latency,task:typeof raw.task==='string'?raw.task:'No active task'});
- // This first dashboard version enables only base motion on connected adaptors.
- s.capabilities={drive:raw.capabilities?.drive===true&&raw.watchdog_ms>0&&raw.watchdog_ms<=500,arms:false,lift:false,posture:false};
+ const watchdogValid=finite(raw.watchdog_ms)!==null&&raw.watchdog_ms>0&&raw.watchdog_ms<=500;
+ s.capabilities={drive:raw.capabilities?.drive===true&&watchdogValid,arms:raw.capabilities?.arms===true&&watchdogValid,lift:false,posture:false};
  return s;
 }
 export function validateEndpoint(input,pageProtocol='http:'){

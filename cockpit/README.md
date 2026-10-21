@@ -12,10 +12,11 @@ under `connected-robots/`.
 
 ## Fleet control center
 
-The shared [web cockpit](web/) provides one dashboard for Robot-AR, Aloha Mini,
-Bimanual Bunker Mini, Unitree Go2, Pupper V3 and Open Duck Mini. Launch it from the
-ARGUS website's **Open control center** button. The public page starts in a fully
-local demonstration mode; it does not connect to hardware automatically.
+The shared [web cockpit](web/) provides one dashboard for Robot-AR, SO-101,
+Aloha Mini, Bimanual Bunker Mini, Unitree Go2, Pupper V3 and Open Duck Mini.
+Launch it from the ARGUS website's **Open control center** button. The public
+page starts in a fully local demonstration mode; it does not connect to hardware
+automatically.
 
 The device-first layout separates **Control**, **Devices**, **Cockpit** and
 **Activity**. Select a robot in the sidebar (or mobile selector), connect it,
@@ -32,9 +33,10 @@ There is no live camera stream in the current Robot-AR backend.
 The header uses the original ARGUS logo. The operator cockpit status panel
 separately reports browser focus, the active control route, fresh robot links,
 VR browser support and detected gamepads. Device detection does not imply a
-calibrated control mapping. Leader arms, foot pedals and physical emergency-stop
-feedback remain unconfigured/unverified until their integrations are available;
-a robot connection never marks the physical cockpit ready automatically.
+calibrated control mapping. SO-101 leader status appears only while both
+physical leader streams are fresh. Foot pedals and physical emergency-stop
+feedback remain unconfigured/unverified; a robot connection never marks the
+physical cockpit ready automatically.
 
 ### Run and connect
 
@@ -61,9 +63,16 @@ release to send zero velocity, or use Stop to stop and disable the base.
 
 Connected Robot-AR supports chassis telemetry and existing base commands. Its
 arms are currently forced mock in the server, and camera capture is unwired;
-these are not exposed as live controls. The other five robots have demo controls
-and an [ARGUS v1 adapter boundary](ADAPTER_PROTOCOL.md), but their vendor bridges
-are not implemented in this repository.
+these are not exposed as live controls. SO-101 has an ARGUS v1 follower bridge:
+the physical leaders provide arm movement, while the cockpit provides explicit
+enable, status and stop. Browser-generated arm poses are not sent. The other
+five robots have demo controls and an [ARGUS v1 adapter boundary](ADAPTER_PROTOCOL.md),
+but their vendor bridges are not implemented in this repository.
+
+See [`connected-robots/so101/`](../connected-robots/so101/) for setup, network
+requirements and hardware validation guidance. The follower bridge binds to
+loopback by default; remote use requires explicit interface binding, an access
+token and a trusted network.
 
 Public HTTPS Pages can reach only appropriately configured HTTPS bridges with
 allowed browser origins. Prefer a trusted same-origin gateway for operation.
@@ -90,7 +99,8 @@ expose it directly to the public Internet.
   required before operational deployment.
 - The demo map uses fabricated floor positions. Connected mode shows only the
   selected robot's local odometry, with no assumption of a shared map frame.
-- Arm/lift/posture controls are demo-only; their ranges are illustrative.
+- Browser arm/lift/posture poses remain demo-only; SO-101 movement comes from
+  physical leader arms and is bounded by the follower bridge.
 
 ### Validation
 

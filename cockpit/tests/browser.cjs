@@ -7,9 +7,19 @@ const path=require('node:path');
 const http=require('node:http');
 const root=path.resolve(__dirname,'../../build/pages-control');
 const out=path.resolve(__dirname,'../../build/cockpit-qa');fs.mkdirSync(out,{recursive:true});
-let enabled=false,stale=false,failStop=false,enableDelay=0;
+let enabled=false,armsEnabled=false,armInputsFresh=true,stale=false,failStop=false,enableDelay=0;
 const commands=[];
 const fixture=http.createServer(async(req,res)=>{
+ if(req.url.startsWith('/so101/')){
+  res.setHeader('Content-Type','application/json');
+  if(req.method==='GET'){res.end(JSON.stringify({protocol:'argus.v1',robot_id:'so101',mode:'hardware',sample_time_ms:Date.now(),connected:true,motor_enabled:armsEnabled,watchdog_ms:300,capabilities:{arms:armInputsFresh},telemetry:{arms:{left:{joints:[1,2,3,4,5],gripper:50},right:{joints:[6,7,8,9,10],gripper:60}}}}));return;}
+  let body='';for await(const chunk of req)body+=chunk;
+  const data=JSON.parse(body||'{}');commands.push({url:req.url,data});
+  if(data.action==='enable'&&!armInputsFresh){res.writeHead(409);res.end(JSON.stringify({ok:false,error:'leader inputs stale'}));return;}
+  if(data.action==='enable')armsEnabled=data.enabled;
+  if(data.action==='stop')armsEnabled=false;
+  res.end(JSON.stringify({ok:true}));return;
+ }
  if(req.url.startsWith('/adaptor/')){
   const robotId=req.url.split('/')[2];res.setHeader('Content-Type','application/json');
   if(req.method==='GET')res.end(JSON.stringify({protocol:'argus.v1',robot_id:robotId,mode:'simulation',sample_time_ms:Date.now(),connected:true,motor_enabled:false,watchdog_ms:500,capabilities:{drive:true},telemetry:{vx:0,x:0,y:0,yaw:0}}));
@@ -33,7 +43,9 @@ const fixture=http.createServer(async(req,res)=>{
 });
 (async()=>{
  await new Promise(r=>fixture.listen(0,'127.0.0.1',r));const origin=`http://127.0.0.1:${fixture.address().port}`;
- const browser=await chromium.launch({headless:true,...(process.env.BROWSER_CHANNEL?{channel:process.env.BROWSER_CHANNEL}:{})});
+ const launchOptions={headless:true,...(process.env.BROWSER_CHANNEL?{channel:process.env.BROWSER_CHANNEL}:{})};
+ if(process.env.BROWSER_EXECUTABLE){delete launchOptions.channel;launchOptions.executablePath=process.env.BROWSER_EXECUTABLE;}
+ const browser=await chromium.launch(launchOptions);
  try{
   const errors=[];
   const site=await browser.newPage({viewport:{width:1536,height:1080}});
@@ -59,8 +71,8 @@ const fixture=http.createServer(async(req,res)=>{
   const page=await browser.newPage({viewport:{width:1536,height:1080}});
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto(origin+'/control/');await page.waitForSelector('.robot-option');
-  assert.equal(await page.locator('.robot-option').count(),6);assert.equal(commands.length,0);
-  assert.equal(await page.locator('.robot-connection-card').count(),6);
+  assert.equal(await page.locator('.robot-option').count(),7);assert.equal(commands.length,0);
+  assert.equal(await page.locator('.robot-connection-card').count(),7);
   assert.equal(await page.locator('#pane-devices').isVisible(),false);
   assert.equal(await page.locator('#pane-cockpit').isVisible(),false);
   assert.equal(await page.locator('.argus-logo').evaluate(img=>img.complete&&img.naturalWidth>0),true);
@@ -83,7 +95,7 @@ const fixture=http.createServer(async(req,res)=>{
   await page.setViewportSize({width:1536,height:1080});
   await page.locator('#connections').click();await page.locator('#connection-robot').selectOption('robot-ar');await page.locator('#endpoint').fill(origin+'/bridge');await page.locator('#token').fill('test-only-token');await page.locator('#connection-form button[type=submit]').click();await page.waitForFunction(()=>!document.querySelector('#connection-dialog').open);
   assert.equal(await page.locator('#mode').inputValue(),'connected');assert.match(await page.locator('#robot-status').textContent(),/SIMULATION/);assert.equal(commands.length,0);assert.equal(await page.locator('#battery').textContent(),'—');assert.equal(await page.locator('#gripper').isDisabled(),true);
-  assert.equal(await page.locator('#links-status').textContent(),'1 / 6 fresh links');
+  assert.equal(await page.locator('#links-status').textContent(),'1 / 7 fresh links');
   assert.equal(await page.locator('#camera-status').textContent(),'Camera frame available at bridge');
   assert.equal(await page.locator('#vr-status').textContent(),'Not connected');
   assert.equal(await page.locator('#cockpit-readiness').textContent(),'HARDWARE UNVERIFIED');
@@ -101,10 +113,17 @@ const fixture=http.createServer(async(req,res)=>{
    await page.locator('#tab-devices').click();
    const card=page.locator(`[data-connection="${id}"]`);await card.locator('input').fill(origin+'/adaptor/'+id);await card.locator('[type=submit]').click();await page.waitForFunction(id=>document.querySelector(`[data-connection="${id}"] .connection-status`).textContent==='Bridge simulation',id);
   }
-  assert.equal(await page.locator('#connection-count').textContent(),'6 / 6 CONFIGURED');
-  await page.locator('#tab-devices').click();await page.locator('[data-connection=pupper-v3] [data-disconnect]').click();await page.waitForFunction(()=>document.querySelector('#connection-count').textContent==='5 / 6 CONFIGURED');
+  assert.equal(await page.locator('#connection-count').textContent(),'6 / 7 CONFIGURED');
+  await page.locator('#tab-devices').click();
+  await page.locator('[data-connection=so101] input').fill(origin+'/so101');await page.locator('[data-connection=so101] [type=submit]').click();await page.waitForFunction(()=>document.querySelector('[data-connection=so101] .connection-status').textContent==='Connected');
+  assert.equal(await page.locator('#tools-label').textContent(),'LEADER ARM TELEOP');assert.match(await page.locator('#joints').textContent(),/J1/);
+  await page.locator('#enable').click();await page.waitForFunction(()=>document.querySelector('#route-status').textContent==='Robot control enabled');assert(commands.some(c=>c.url==='/so101/argus/v1/command'&&c.data.action==='enable'));
+  armInputsFresh=false;await page.waitForFunction(()=>document.querySelector('#route-status').textContent==='Control locked');assert.equal(armsEnabled,false);armInputsFresh=true;await page.waitForFunction(()=>!document.querySelector('#enable').disabled);
+  await page.locator('#enable').click();await page.waitForFunction(()=>document.querySelector('#route-status').textContent==='Robot control enabled');
+  await page.locator('#stop-selected').click();await page.waitForFunction(()=>document.querySelector('#route-status').textContent==='Control locked');assert.equal(armsEnabled,false);
+  await page.locator('#tab-devices').click();await page.locator('[data-connection=pupper-v3] [data-disconnect]').click();await page.waitForFunction(()=>document.querySelector('#connection-count').textContent==='6 / 7 CONFIGURED');
   assert.equal(await page.locator('[data-connection=unitree-go2] .connection-status').textContent(),'Bridge simulation');
   assert.equal(errors.length,0,errors.join('\n'));
-  console.log(JSON.stringify({robots:6,projectLinks:projectLinks.length,safetyReport:true,conceptVideo:true,demoSendsNoCommands:true,holdRelease:true,staleLock:true,failedStopReported:true,pendingEnableCancelled:true,wrongIdentityRejected:true,exportExcludesToken:true,mobileOverflow:false,pageErrors:errors.length,commands:commands.length}));
+  console.log(JSON.stringify({robots:7,projectLinks:projectLinks.length,safetyReport:true,conceptVideo:true,demoSendsNoCommands:true,holdRelease:true,staleLock:true,failedStopReported:true,pendingEnableCancelled:true,wrongIdentityRejected:true,so101LeaderControl:true,exportExcludesToken:true,mobileOverflow:false,pageErrors:errors.length,commands:commands.length}));
  }finally{await browser.close();fixture.close();}
 })().catch(e=>{console.error(e);fixture.close();process.exitCode=1;});

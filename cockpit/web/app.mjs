@@ -9,12 +9,14 @@ if(navigator.xr?.isSessionSupported){navigator.xr.isSessionSupported('immersive-
 function cockpitSnapshot(){
  let gamepads=[];try{gamepads=[...(navigator.getGamepads?.()||[])].filter(p=>p?.connected);}catch{/* Device access may be restricted by the browser. */}
  const armed=[...records.values()].filter(r=>r.authorized&&state(r).enabled&&fresh(state(r)));
- return {stationFocused:document.hasFocus()&&!document.hidden,source:mode,armedRobotIds:armed.map(r=>r.robot.id),freshRobotLinks:mode==='connected'?[...records.values()].filter(r=>r.config&&fresh(r.state)).length:0,vrSession:'not connected',vrSupport,gamepadsDetected:gamepads.length,leaderArms:'not configured',footPedals:'not configured',physicalEmergencyStop:'unverified',hardwareReady:false};
+ const leaderArms=mode==='connected'&&record()?.robot.id==='so101'&&fresh(record().state)&&record().state.capabilities.arms;
+ return {stationFocused:document.hasFocus()&&!document.hidden,source:mode,armedRobotIds:armed.map(r=>r.robot.id),freshRobotLinks:mode==='connected'?[...records.values()].filter(r=>r.config&&fresh(r.state)).length:0,vrSession:'not connected',vrSupport,gamepadsDetected:gamepads.length,leaderArms,footPedals:'not configured',physicalEmergencyStop:'unverified',hardwareReady:false};
 }
 function renderCockpit(){
  const c=cockpitSnapshot();$('station-status').textContent=c.stationFocused?'Operator page active':'Operator page unfocused';$('station-detail').textContent=c.stationFocused?'Keyboard and pointer available':'Motion locks when focus is lost';
  $('route-status').textContent=c.armedRobotIds.length?(mode==='demo'?'Demo control enabled':'Robot control enabled'):'Control locked';$('route-detail').textContent=c.armedRobotIds.length?c.armedRobotIds.map(id=>records.get(id).robot.name).join(', '):'No robot armed by this cockpit';
- $('links-status').textContent=mode==='demo'?'Demo session':`${c.freshRobotLinks} / 6 fresh links`;$('links-detail').textContent=mode==='demo'?'Local simulation · no hardware traffic':'Fresh links may include bridge simulation';
+ $('links-status').textContent=mode==='demo'?'Demo session':`${c.freshRobotLinks} / 7 fresh links`;$('links-detail').textContent=mode==='demo'?'Local simulation · no hardware traffic':'Fresh links may include bridge simulation';
+ $('leader-arms-status').textContent=c.leaderArms?'Connected · fresh leader stream':'Not configured';$('leader-arms-detail').textContent=c.leaderArms?'SO-101 leader inputs are fresh':'SO-101 physical leader bridge required';
  $('vr-status').textContent='Not connected';$('vr-detail').textContent=c.vrSupport;$('input-status').textContent=c.gamepadsDetected?`${c.gamepadsDetected} gamepad(s) detected`:'Keyboard / pointer';$('input-detail').textContent=c.gamepadsDetected?'Detected only · no robot mapping':'No gamepad detected';
 }
 const record=()=>records.get(selected);
@@ -31,7 +33,7 @@ function buildFleet(){for(const r of records.values()){
  const option=document.createElement('option');option.value=r.robot.id;option.textContent=r.robot.name;$('connection-robot').append(option);
  const card=document.createElement('form');card.className='robot-connection-card';card.dataset.connection=r.robot.id;
  card.innerHTML='<div class="connection-card-title"><h3></h3><span class="connection-status">Not configured</span></div><p class="connection-protocol"></p><label>Bridge address<input type="url" required autocomplete="off" placeholder="https://robot-bridge.example"></label><div class="connection-actions"><button type="submit">Connect</button><button type="button" data-disconnect>Disconnect</button><button type="button" data-options>Options</button></div><p class="connection-card-error" role="alert"></p>';
- card.querySelector('h3').textContent=r.robot.name;card.querySelector('.connection-protocol').textContent=r.robot.id==='robot-ar'?'Robot-AR bridge · existing integration':'ARGUS v1 · hardware adaptor required';
+ card.querySelector('h3').textContent=r.robot.name;card.querySelector('.connection-protocol').textContent=r.robot.id==='robot-ar'?'Robot-AR bridge · existing integration':r.robot.id==='so101'?'SO-101 leader bridge · ARGUS v1':'ARGUS v1 · hardware adaptor required';
  card.querySelector('input').setAttribute('aria-label',`${r.robot.name} bridge address`);
  if(r.robot.id==='robot-ar'&&location.pathname.startsWith('/cockpit/'))card.querySelector('input').value=location.origin;
  card.onsubmit=async e=>{e.preventDefault();const error=card.querySelector('.connection-card-error');error.textContent='';try{await connectRobot(r,card.querySelector('input').value,r.config?.token||'');}catch(ex){error.textContent=`Could not connect: ${ex.message}`;}};
@@ -94,7 +96,7 @@ function drawMap(){
 }
 function render(){
  renderCockpit();
- $('connection-count').textContent=`${[...records.values()].filter(r=>r.config).length} / 6 CONFIGURED`;
+ $('connection-count').textContent=`${[...records.values()].filter(r=>r.config).length} / 7 CONFIGURED`;
  for(const item of records.values()){
   const card=document.querySelector(`[data-connection="${item.robot.id}"]`);
   card.querySelector('.connection-status').textContent=item.connecting?'Connecting…':!item.config?'Not configured':mode==='demo'?'Paused · demo mode':fresh(item.state)?(item.state.mock?'Bridge simulation':'Connected'):'Offline / stale';
@@ -114,19 +116,20 @@ function render(){
  $('latency').textContent=ok?fmt(s.latency,' ms'):'—';$('temperature').textContent=ok?fmt(s.temp,' °C'):'—';
  $('freshness').textContent=!live?'Simulated round-trip':!r.config?'No adaptor configured':ok?`Updated ${Math.max(0,(Date.now()-s.received)/1000).toFixed(1)} s ago`:'Telemetry unavailable or stale';
  $('control-state').textContent=r.authorized&&s.enabled?'Manual control enabled':'Control disabled';$('authority').textContent=r.authorized&&s.enabled?'MANUAL':'LOCKED';
- $('enable').textContent=r.busy?'Waiting for acknowledgement…':r.authorized?'Disable control':'Enable control';$('enable').disabled=transition||r.busy||!ok||!s.capabilities.drive;
+ $('enable').textContent=r.busy?'Waiting for acknowledgement…':r.authorized?'Disable control':'Enable control';$('enable').disabled=transition||r.busy||!ok||!(s.capabilities.drive||s.capabilities.arms);
  document.querySelectorAll('[data-drive]').forEach(b=>b.disabled=!canDrive(r));$('stop-selected').disabled=!configured(r);
- $('drive-hint').textContent=!live?'Enable, then hold a direction to move.':!r.config?'Configure this robot’s adaptor to connect.':!ok?'Fresh telemetry required for control.':!s.capabilities.drive?'Base motion unavailable from this adaptor.':'Enable, then hold to send base commands.';
+ $('drive-hint').textContent=!live?'Enable, then hold a direction to move.':!r.config?'Configure this robot’s adaptor to connect.':!ok?'Fresh telemetry required for control.':r.robot.id==='so101'?'Enable only after both physical leaders are fresh; their motion streams to the followers.':!s.capabilities.drive?'Base motion unavailable from this adaptor.':'Enable, then hold to send base commands.';
  $('health').textContent=!live?'Simulation running':!r.config?'Awaiting adaptor':ok?(s.mock?'Bridge simulation':'Telemetry current'):'Stale / disconnected';
  $('pose-x').textContent=ok?fmt(s.x,' m',2):'—';$('pose-y').textContent=ok?fmt(s.y,' m',2):'—';$('pose-yaw').textContent=ok?fmt(s.yaw===null?null:s.yaw*180/Math.PI,'°',1):'—';
- const joints=live?s.joints:($('arm-side').value==='left'?r.leftJoints:r.rightJoints);$('joints').replaceChildren();
- for(let i=0;i<6;i++){const d=document.createElement('div');const label=document.createElement('span'),value=document.createElement('b');label.textContent=`J${i+1}`;value.textContent=fmt(ok?joints[i]:null,live?' rad':'°',live?2:0);d.append(label,value);$('joints').append(d);}
- $('gripper').value=s.gripper??58;$('lift').value=s.lift??0;$('gripper-value').textContent=fmt(s.gripper,' mm');$('lift-value').textContent=fmt(s.lift,' mm');
+ const side=$('arm-side').value,arm=s.armJoints?.[side];const joints=live?(arm?.joints||s.joints):(side==='left'?r.leftJoints:r.rightJoints);$('joints').replaceChildren();
+ const jointCount=live&&r.robot.id==='so101'?5:6;
+ for(let i=0;i<jointCount;i++){const d=document.createElement('div');const label=document.createElement('span'),value=document.createElement('b');label.textContent=`J${i+1}`;value.textContent=fmt(ok?joints[i]:null,live?(r.robot.id==='so101'?'°':' rad'):'°',live?2:0);d.append(label,value);$('joints').append(d);}
+ const gripper=live?(arm?.gripper??null):s.gripper;$('gripper').value=gripper??58;$('lift').value=s.lift??0;$('gripper-value').textContent=fmt(gripper,live&&r.robot.id==='so101'?' %':' mm');$('lift-value').textContent=fmt(s.lift,' mm');
  const toolsEnabled=!live&&r.authorized;document.querySelectorAll('[data-preset],[data-posture],#gripper,#lift').forEach(b=>b.disabled=!toolsEnabled);
- $('tools-label').textContent=live?'TELEMETRY ONLY':'DEMO CONTROLS';$('tool-note').textContent=live?'Arm, lift and posture commands await validated robot-specific adaptors.':'Demo joint values illustrate the interface, not calibrated hardware limits.';
+ $('tools-label').textContent=live?(r.robot.id==='so101'?'LEADER ARM TELEOP':'TELEMETRY ONLY'):'DEMO CONTROLS';$('tool-note').textContent=live?(r.robot.id==='so101'?'Read-only joint feedback. Physical leader arms provide motion; browser poses are not sent.':'Arm, lift and posture commands await validated robot-specific adaptors.'):'Demo joint values illustrate the interface, not calibrated hardware limits.';
  $('camera-status').textContent=live&&r.robot.id==='robot-ar'&&s.camera?'Camera frame available at bridge':'Camera offline';$('view-caption').textContent='Reference · not live';
  const pts=r.history.map((v,i)=>`${i*500/59},${135-Math.min(v,.25)/.25*110}`).join(' ');$('speed-line').setAttribute('points',pts);
- $('session-note').textContent=live?'Commands go only to explicitly configured adaptors.':'Simulated telemetry · no robot commands';$('footer-summary').textContent=`6 platforms · ${live?[...records.values()].filter(i=>i.config&&fresh(i.state)).length+' fresh connections':'demonstration session'}`;
+ $('session-note').textContent=live?'Commands go only to explicitly configured adaptors.':'Simulated telemetry · no robot commands';$('footer-summary').textContent=`7 platforms · ${live?[...records.values()].filter(i=>i.config&&fresh(i.state)).length+' fresh connections':'demonstration session'}`;
  drawMap();
 }
 async function poll(r){
@@ -138,6 +141,7 @@ async function poll(r){
   const next=config.kind==='robot-ar'?normalizeAR(raw,performance.now()-start):normalizeGeneric(raw,r.robot.id,performance.now()-start);
   r.state=next;r.lastError='';
   if(!fresh(next)&&r.authorized){r.authorized=false;await halt(r,true);log(`${r.robot.name}: stale device telemetry; control locked.`,true);}
+  else if(r.authorized&&!next.capabilities.drive&&!next.capabilities.arms){r.authorized=false;await halt(r,true);log(`${r.robot.name}: actuator capability unavailable; control locked.`,true);}
  }catch(e){
   if(version!==r.version)return;
   r.state.connected=false;
@@ -148,7 +152,7 @@ async function poll(r){
 function fillConnection(){
  const r=records.get($('connection-robot').value);$('endpoint').value=r.config?.endpoint||'';$('token').value=r.config?.token||'';$('connection-error').textContent='';
  if(!r.config&&r.robot.id==='robot-ar'&&location.pathname.startsWith('/cockpit/'))$('endpoint').value=location.origin;
- $('adapter-note').textContent=r.robot.id==='robot-ar'?'Robot-AR: uses the existing /state, /cmd_vel, /motor and /stop endpoints.':'Requires an ARGUS v1 adaptor. No hardware bridge for this robot is currently included in the repository.';
+ $('adapter-note').textContent=r.robot.id==='robot-ar'?'Robot-AR: uses the existing /state, /cmd_vel, /motor and /stop endpoints.':r.robot.id==='so101'?'SO-101: ARGUS v1 state, enable and stop; physical leader arms provide motion.':'Requires an ARGUS v1 adaptor. No hardware bridge for this robot is currently included in the repository.';
 }
 $('connections').onclick=()=>{$('connection-robot').value=selected;fillConnection();$('connection-dialog').showModal();};$('close-connections').onclick=()=>$('connection-dialog').close();$('connection-robot').onchange=fillConnection;
 $('connection-form').onsubmit=async event=>{
@@ -181,7 +185,7 @@ $('mode').onchange=()=>changeMode($('mode').value);
 $('enable').onclick=async()=>{
  const r=record();if(r.busy)return;r.busy=true;render();
  try{if(r.authorized)await halt(r,true);else{
-  if(!fresh(state(r))||!state(r).capabilities.drive)throw Error('Current drive telemetry is required');
+  if(!fresh(state(r))||!(state(r).capabilities.drive||state(r).capabilities.arms))throw Error('Current drive or arm telemetry is required');
   const epoch=r.controlEpoch,source=mode;await send(r,'enable',{enabled:true});
   if(epoch!==r.controlEpoch||selected!==r.robot.id||mode!==source||transition||$('pane-control').hidden){await halt(r,true,true);return;}
   r.authorized=true;if(mode==='demo')r.demo.enabled=true;
@@ -193,6 +197,12 @@ async function motionTick(){
  const active=hold,r=records.get(active.id);if(!canDrive(r)){await halt(r,true);return;}
  active.sending=true;
  try{await send(r,'drive',active.velocity);}catch(e){log(`${r.robot.name}: motion command failed — ${e.message}`,true);await halt(r,true);}finally{active.sending=false;}
+}
+async function armHeartbeatTick(){
+ const r=record(),s=state(r);
+ if(mode!=='connected'||r.robot.id!=='so101'||!r.authorized||r.busy||r.heartbeatSending||transition||$('pane-control').hidden||!fresh(s)||!s.capabilities.arms)return;
+ r.heartbeatSending=true;
+ try{await send(r,'enable',{enabled:true});}catch(e){log(`${r.robot.name}: arm control heartbeat failed — ${e.message}`,true);await halt(r,true);}finally{r.heartbeatSending=false;}
 }
 document.querySelectorAll('[data-drive]').forEach(button=>{
  button.addEventListener('pointerdown',event=>{if(event.button!==0||hold||!canDrive(record()))return;event.preventDefault();button.setPointerCapture(event.pointerId);const limit=Number($('speed-limit').value),d=button.dataset.drive;hold={id:selected,pointerId:event.pointerId,sending:false,velocity:{vx:d==='forward'?limit:d==='back'?-limit:0,wz:d==='left'?.45:d==='right'?-.45:0}};button.classList.add('held');motionTick();});
@@ -224,7 +234,7 @@ $('export').onclick=()=>{const snapshot={exported_at:new Date().toISOString(),so
 $('mobile-robot').onchange=()=>selectRobot($('mobile-robot').value);
 document.addEventListener('cockpit-view-change',e=>{if(e.detail!=='control'){if(hold)halt(records.get(hold.id),true);else if(record().authorized||record().busy)halt(record(),true);$('inspection-video').pause();}});
 buildFleet();updateSelection();log('ARGUS ready. Demo mode.');render();
-setInterval(motionTick,150);
+setInterval(()=>{motionTick();armHeartbeatTick();},150);
 setInterval(()=>{
  for(const r of records.values()){
   const s=state(r);if(mode==='demo'){s.received=Date.now();s.sourceAge=0;s.x=clamp(s.x+Math.cos(s.yaw)*s.vx*.25,.2,12);s.y=clamp(s.y+Math.sin(s.yaw)*s.vx*.25,.2,7);s.yaw+=s.wz*.25;}

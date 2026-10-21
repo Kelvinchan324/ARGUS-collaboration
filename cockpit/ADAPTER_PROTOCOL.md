@@ -39,9 +39,19 @@ bridge clock; the client rejects timestamps more than one second in the future.
 Use `mode: "hardware"` only for actual hardware feedback. Omit unknown sensors
 or return `null`. Battery is percentage, voltage volts, speeds m/s and rad/s,
 positions metres in this robot's local frame, yaw radians, temperature Celsius.
-The current dashboard accepts base motion only when the reported watchdog is
-positive and at most 500 ms. This declaration must correspond to a real
-robot-side timeout; it is not implemented by the browser.
+The current dashboard accepts base or leader-backed arm control only when the
+reported watchdog is positive and at most 500 ms. `capabilities.arms: true`
+means a validated robot-side arm path is available; for SO-101 it is true only
+while both physical leader streams and both follower arms are fresh and
+connected. This declaration must correspond to a real robot-side timeout; it
+is not implemented by the browser.
+
+An arm-capable adaptor may report read-only feedback using
+`telemetry.arms.left` and `telemetry.arms.right`, each with a `joints` array and
+optional `gripper`. Unknown values should be `null`. The browser does not send
+generic joint poses. For SO-101, physical leaders provide the action stream;
+`enable` gates that stream and `stop` disables it and requests a hold at the
+measured pose.
 
 ## Commands
 
@@ -63,9 +73,11 @@ Responses should be prompt enough for a 150 ms command heartbeat.
 
 The client serializes commands and invalidates queued motion before a stop.
 Network timeouts and requests already processing on a server cannot be revoked
-by the client. Implement a watchdog and server-side sequence/lease handling
-before deploying a hardware adaptor. Connected arm, lift, posture, task execution
-and camera APIs are intentionally not enabled in this first version.
+by the client. Every actuator adaptor must gate motion on explicit enable,
+expire stale inputs on the robot, and implement a stop that remains available
+when telemetry is stale. SO-101 is leader-backed and does not accept browser
+joint commands. Lift, posture, task execution and camera commands are not part
+of this protocol.
 
 ## Hosting
 

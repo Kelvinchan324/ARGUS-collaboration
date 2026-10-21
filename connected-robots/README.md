@@ -7,6 +7,7 @@ adds and maintains its connection code inside that folder.
 
 | Robot | Folder | Current status |
 | --- | --- | --- |
+| SO-101 Bimanual | [`so101/`](so101/) | Physical leader teleoperation bridge for the cockpit; hardware validation pending |
 | Robot-AR | [`robot-ar/`](robot-ar/) | Bridge and planner prototype imported; hardware validation pending |
 | Aloha Mini | [`aloha-mini/`](aloha-mini/) | Inventory needed |
 | Bimanual Bunker Mini | [`bimanual-bunker-mini/`](bimanual-bunker-mini/) | STEP assembly and inspection concept video; hardware adaptor pending |
