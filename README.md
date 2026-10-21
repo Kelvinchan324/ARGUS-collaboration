@@ -52,6 +52,9 @@ uv sync --locked --python 3.12 --extra feetech --extra pyzmq-dep
 bash ~/ARGUS-collaboration/test-code/setup-so101-device.sh
 
 chmod +x ~/Desktop/SO-101-Control-and-Camera.desktop
+
+# Change the settings on the desktop
+nano ~/ARGUS-collaboration/test-code/so101-config.env
 ```
 
 If `uv` is already installed, you can skip the `curl` line, but still run
