@@ -29,7 +29,40 @@ git clone https://github.com/Kelvinchan324/ARGUS-collaboration.git
 cd ARGUS-collaboration
 ```
 
-### 2. Choose the part you need
+### 2. Set up SO-101 leader station or Aloha Mini
+
+Run these steps on **both** computers. They install LeRobot inside the
+`ARGUS-collaboration` folder, install the SO-101 dependencies, and create the
+desktop shortcut and local configuration:
+
+```bash
+# Clone LeRobot inside ARGUS.
+git clone https://github.com/huggingface/lerobot.git "$HOME/ARGUS-collaboration/lerobot"
+
+# Install uv, then load it into this terminal's PATH.
+curl -LsSf https://astral.sh/uv/install.sh | sh
+source "$HOME/.local/bin/env"
+
+# Install LeRobot's SO-101 and ZeroMQ dependencies.
+cd "$HOME/ARGUS-collaboration/lerobot"
+uv python install 3.12
+uv sync --locked --python 3.12 --extra feetech --extra pyzmq-dep
+
+# Install the desktop shortcut and create this computer's config file.
+bash "$HOME/ARGUS-collaboration/test-code/setup-so101-device.sh"
+```
+
+If `uv` is already installed, you can skip the `curl` line, but still run
+`source "$HOME/.local/bin/env"` if the current terminal cannot find `uv`.
+Next, edit
+`~/ARGUS-collaboration/test-code/so101-config.env` on each machine: use
+`SO101_ROLE=leader` on the computer with the leader arms, and
+`SO101_ROLE=follower` on the Aloha Mini. Set the follower host, serial ports,
+and matching network ports for your hardware. Follow the
+[SO-101 setup guide](test-code/README.md) for the full per-device configuration
+and operating instructions.
+
+### 3. Choose the part you need
 
 | Goal | Start here | What is currently available |
 | --- | --- | --- |
