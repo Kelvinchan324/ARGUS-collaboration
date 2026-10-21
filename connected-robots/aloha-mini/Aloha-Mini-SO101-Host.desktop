@@ -1,0 +1,8 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Aloha Mini SO-101 Host
+Comment=Start the bimanual SO-101 host and camera stream
+Exec=/bin/bash -lc "exec \"$HOME/ARGUS-collaboration/connected-robots/aloha-mini/run_so101_bimanual_host.sh\""
+Terminal=true
+Categories=Utility;
