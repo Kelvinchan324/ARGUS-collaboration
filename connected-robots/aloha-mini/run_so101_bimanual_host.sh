@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-LEROBOT_ROOT="${LEROBOT_ROOT:-$HOME/Robot/lerobot}"
+LEROBOT_ROOT="${LEROBOT_ROOT:-$HOME/ARGUS-collaboration/lerobot}"
 PYTHON="${LEROBOT_PYTHON:-}"
 
 if [[ -z "$PYTHON" ]]; then

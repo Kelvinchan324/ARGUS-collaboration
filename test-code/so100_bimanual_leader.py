@@ -17,14 +17,16 @@ LOG = logging.getLogger("so101.leader")
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--follower-host", required=True)
-    parser.add_argument("--left-port", default="/dev/ttyACM1")
-    parser.add_argument("--right-port", default="/dev/ttyACM0")
+    parser.add_argument("--left-port", default="/dev/ttyACM1", help="left leader serial device")
+    parser.add_argument("--right-port", default="/dev/ttyACM0", help="right leader serial device")
     parser.add_argument("--left-zmq-port", type=int, default=5555)
     parser.add_argument("--right-zmq-port", type=int, default=5556)
     parser.add_argument("--frequency", type=float, default=30.0)
     args = parser.parse_args()
-    if args.frequency <= 0:
-        parser.error("--frequency must be positive")
+    if args.frequency <= 0 or not 0 < args.left_zmq_port <= 65_535 or not 0 < args.right_zmq_port <= 65_535:
+        parser.error("frequency must be positive and ZeroMQ ports must be between 1 and 65535")
+    if args.left_zmq_port == args.right_zmq_port:
+        parser.error("left and right ZeroMQ ports must be different")
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
     leaders: list[SOLeader] = []

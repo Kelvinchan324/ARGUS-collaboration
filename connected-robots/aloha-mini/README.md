@@ -14,21 +14,26 @@
 
 ## Raspberry Pi SO-101 host
 
-The files in this folder include the SO-101 bimanual host and MJPEG camera
-streamer currently launched from the local Raspberry Pi desktop shortcut. The
-`Aloha-Mini-SO101-Host.desktop` shortcut is included for copying to a new Pi's
-Desktop. It expects this repository at `~/ARGUS-collaboration`; if you cloned
-the repository elsewhere, update the `Exec` path in the shortcut before use.
-After copying it, mark the shortcut executable and trusted if the desktop
-environment prompts you.
-
-The host requires a compatible LeRobot checkout and Python environment with
-LeRobot, `pyzmq`, and OpenCV installed. By default, the launcher looks for
-`~/Robot/lerobot` and its `.venv` or `venv`; set `LEROBOT_ROOT` or
-`LEROBOT_PYTHON` when your checkout or environment is elsewhere:
+The shared SO-101 setup in [`../../test-code/`](../../test-code/) uses one
+configurable desktop launcher on both the leader/control station and Aloha
+Mini. On Aloha Mini, set `SO101_ROLE=follower` in
+`test-code/so101-config.env`, then install the shortcut and local config with:
 
 ```bash
-export LEROBOT_ROOT="$HOME/Robot/lerobot"
+bash ~/ARGUS-collaboration/test-code/setup-so101-device.sh
+```
+
+The `Aloha-Mini-SO101-Host.desktop` shortcut also starts that shared launcher.
+It expects the repository at `~/ARGUS-collaboration`. If the desktop asks,
+allow launching.
+
+The host requires a compatible LeRobot checkout and Python environment with
+LeRobot, `pyzmq`, and OpenCV installed. The shared setup guide installs the
+checkout at `~/ARGUS-collaboration/lerobot` and dependencies in its `.venv`.
+You can start the combined Aloha-specific host manually with:
+
+```bash
+export LEROBOT_ROOT="$HOME/ARGUS-collaboration/lerobot"
 bash connected-robots/aloha-mini/run_so101_bimanual_host.sh
 ```
 
