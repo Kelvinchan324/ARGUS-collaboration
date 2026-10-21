@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=SO-101 Control and Camera
+Comment=Start the leader-arm controller and open the follower camera stream
+Exec=/bin/bash -lc "cd ~/ARGUS-collaboration/test-code && exec ./start-so101-control.sh"
+Icon=applications-engineering
+Terminal=false
+Categories=Utility;
+StartupNotify=true

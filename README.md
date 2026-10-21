@@ -168,6 +168,10 @@ This table deliberately separates working public code from planned integration.
 Do not interpret a folder's presence as proof that its hardware connection has
 been completed or safety-validated.
 
+For the existing direct SO-101 desktop shortcut flow (leader controller,
+follower receiver and camera stream), see [`test-code/`](test-code/). This
+legacy test setup is separate from the web cockpit and its ARGUS v1 adapter.
+
 ## Website publishing
 
 Changes under `docs/` are deployed automatically by the
