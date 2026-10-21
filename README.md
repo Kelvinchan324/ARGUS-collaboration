@@ -37,19 +37,21 @@ desktop shortcut and local configuration:
 
 ```bash
 # Clone LeRobot inside ARGUS.
-git clone https://github.com/huggingface/lerobot.git "$HOME/ARGUS-collaboration/lerobot"
+git clone https://github.com/huggingface/lerobot.git
 
 # Install uv, then load it into this terminal's PATH.
 curl -LsSf https://astral.sh/uv/install.sh | sh
-source "$HOME/.local/bin/env"
+source ~/.local/bin/env
 
 # Install LeRobot's SO-101 and ZeroMQ dependencies.
-cd "$HOME/ARGUS-collaboration/lerobot"
+cd lerobot
 uv python install 3.12
 uv sync --locked --python 3.12 --extra feetech --extra pyzmq-dep
 
 # Install the desktop shortcut and create this computer's config file.
-bash "$HOME/ARGUS-collaboration/test-code/setup-so101-device.sh"
+bash ~/ARGUS-collaboration/test-code/setup-so101-device.sh
+
+chmod +x ~/Desktop/SO-101-Control-and-Camera.desktop
 ```
 
 If `uv` is already installed, you can skip the `curl` line, but still run
