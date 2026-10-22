@@ -15,6 +15,7 @@ from urllib.parse import urlsplit
 import cv2
 
 from so101_camera_utils import camera_source, open_capture, positive_int, validate_sources
+from so101_telemetry import read_telemetry
 
 LOG = logging.getLogger("so101.camera")
 ROOT = Path(__file__).resolve().parent
@@ -83,7 +84,7 @@ class CameraStream:
         self._thread.join(timeout=2)
 
 
-def make_handler(cameras: list[CameraStream], labels: list[str]):
+def make_handler(cameras: list[CameraStream], labels: list[str], telemetry_file: Path | None = None):
     assets = {
         "/": (ROOT / "camera-ui/index.html", "text/html; charset=utf-8"),
         "/camera.css": (ROOT / "camera-ui/camera.css", "text/css; charset=utf-8"),
@@ -108,9 +109,14 @@ def make_handler(cameras: list[CameraStream], labels: list[str]):
                     self.send_bytes(asset.read_bytes(), content_type)
                     return
                 if path == "/api/cameras":
-                    states = [dict(camera.status(), id=index, label=label)
+                    roles = ["top", "left", "right", "front"]
+                    states = [dict(camera.status(), id=index, label=label,
+                                   role=roles[index] if index < len(roles) else "camera")
                               for index, (camera, label) in enumerate(zip(cameras, labels))]
                     self.send_bytes(json.dumps({"cameras": states}).encode(), "application/json")
+                    return
+                if path == "/api/telemetry":
+                    self.send_bytes(json.dumps(read_telemetry(telemetry_file), allow_nan=False).encode(), "application/json")
                     return
                 match = re.fullmatch(r"/stream/(\d+)", path)
                 if match and int(match[1]) < len(cameras):
@@ -142,6 +148,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--camera", nargs="+", default=["0", "2", "4"], metavar="INDEX_OR_PATH")
     parser.add_argument("--labels", nargs="+", help="one display label per camera")
+    parser.add_argument("--telemetry-file", type=Path, help=argparse.SUPPRESS)
     parser.add_argument("--host", default="0.0.0.0")
     parser.add_argument("--port", type=positive_int, default=8000)
     parser.add_argument("--width", type=positive_int, default=640)
@@ -155,7 +162,7 @@ def main() -> None:
         parser.error(str(exc))
     if args.port > 65535:
         parser.error("port must be between 1 and 65535")
-    labels = args.labels or (DEFAULT_LABELS if len(args.camera) == 3 else
+    labels = args.labels or ((DEFAULT_LABELS + ["Front"])[:len(args.camera)] if len(args.camera) in (3, 4) else
                              [f"Camera {index + 1}" for index in range(len(args.camera))])
     if len(labels) != len(args.camera):
         parser.error("provide exactly one --labels value per camera")
@@ -163,7 +170,7 @@ def main() -> None:
     try:
         for value in args.camera:
             cameras.append(CameraStream(camera_source(value), args.width, args.height, args.fps, args.quality))
-        with ThreadingHTTPServer((args.host, args.port), make_handler(cameras, labels)) as server:
+        with ThreadingHTTPServer((args.host, args.port), make_handler(cameras, labels, args.telemetry_file)) as server:
             server.daemon_threads = True
             LOG.info("ARGUS camera page: http://<follower-host>:%d", args.port)
             try:

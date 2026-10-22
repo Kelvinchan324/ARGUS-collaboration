@@ -187,12 +187,60 @@ lerobot/.venv/bin/python test-code/so101_camera_stream.py --camera 0 2 4
 
 Open `http://<follower-host>:8000/`. The ARGUS dashboard shows the left gripper
 on the left, a larger top view in the center, and the right gripper on the right.
-The page keeps only the logo, view names, connection indicators and fullscreen
-controls; hover over a view for device details. Each view and the whole station
+The **Top / Front** selector changes only the center view; both gripper views
+stay visible. The compact instrument panels show arm command telemetry;
+hover over a view for device details. Each view and the whole station
 can expand to fullscreen. Missing cameras retry independently; offline or stale
 images are hidden instead of being presented as live video. The displayed
 connection status refers only to cameras, not motor/teleoperation health.
 The page and logo are served locally, without a CDN or Internet dependency.
+
+#### Add the fourth (front) camera
+
+Discover its ID/path on the follower using `discover-cameras.py --snapshots`,
+then add a single line to the existing local config, using the discovered
+source (6 is only an example):
+
+```ini
+SO101_CAMERA_FRONT=6
+```
+
+Restart the follower service. The Front button becomes available. With this
+setting empty or absent, existing three-camera setups continue to work and
+Front is disabled. All four cameras capture on the Pi; the browser receives
+only the selected center stream plus the two gripper streams. Switching views
+does not restart either gripper stream or the arm receiver.
+
+To test all four cameras without connecting arms, pass sources in the order
+**top, left gripper, right gripper, front**:
+
+```bash
+lerobot/.venv/bin/python test-code/so101_camera_stream.py --camera 0 2 4 6
+```
+
+Four cameras require more USB bandwidth, power and JPEG encoding time than
+three, even though only three views are displayed. Start with 640x480 at 10 FPS
+if the additional camera causes dropouts.
+
+#### Robot command instruments
+
+The two side panels show the **last successfully forwarded leader command
+targets** in native LeRobot units, the rate of received actions (Hz), elapsed
+time since the latest action (ms), and a receive-rate trace. Values are not
+measured joint positions, degree values, motor temperature, battery readings or
+a safety/stop confirmation. The browser is read-only and adds no arm controls.
+
+The receiver publishes snapshots in a separate thread to a private temporary
+directory outside the repository. The camera server reads that file; it does
+not query the motors or calibration. No extra motor reads or changes to the
+command payloads are introduced. A temporary-file failure leaves the receiver
+running with telemetry unavailable.
+
+Arm values clear after one second without a fresh action; telemetry becomes
+unavailable after two seconds without a receiver snapshot. The camera-only
+command shows camera feeds with instrument values marked unavailable, rather
+than synthetic robot values. These display timeouts do not stop the arms or
+add a disconnect watchdog to the existing receiver.
 
 The camera program also accepts one camera for diagnostics, e.g. `--camera 0`,
 or custom labels, e.g. `--camera 0 2 4 --labels "Top" "Left gripper" "Right gripper"`.

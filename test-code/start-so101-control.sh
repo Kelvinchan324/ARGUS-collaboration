@@ -17,6 +17,7 @@ SO101_CAMERA_INDEX=0
 SO101_CAMERA_TOP=
 SO101_CAMERA_LEFT=2
 SO101_CAMERA_RIGHT=4
+SO101_CAMERA_FRONT=
 SO101_CAMERA_WIDTH=640
 SO101_CAMERA_HEIGHT=480
 SO101_CAMERA_FPS=15
@@ -54,6 +55,7 @@ while IFS= read -r line || [[ -n "$line" ]]; do
         SO101_CAMERA_TOP) SO101_CAMERA_TOP="$value" ;;
         SO101_CAMERA_LEFT) SO101_CAMERA_LEFT="$value" ;;
         SO101_CAMERA_RIGHT) SO101_CAMERA_RIGHT="$value" ;;
+        SO101_CAMERA_FRONT) SO101_CAMERA_FRONT="$value" ;;
         SO101_CAMERA_WIDTH) SO101_CAMERA_WIDTH="$value" ;;
         SO101_CAMERA_HEIGHT) SO101_CAMERA_HEIGHT="$value" ;;
         SO101_CAMERA_FPS) SO101_CAMERA_FPS="$value" ;;
@@ -83,7 +85,11 @@ if ((10#$SO101_CAMERA_QUALITY > 100)); then
     printf 'Camera quality must be between 1 and 100.\n' >&2
     exit 1
 fi
-for source in "$SO101_CAMERA_TOP" "$SO101_CAMERA_LEFT" "$SO101_CAMERA_RIGHT"; do
+camera_sources=("$SO101_CAMERA_TOP" "$SO101_CAMERA_LEFT" "$SO101_CAMERA_RIGHT")
+if [[ -n "$SO101_CAMERA_FRONT" ]]; then
+    camera_sources+=("$SO101_CAMERA_FRONT")
+fi
+for source in "${camera_sources[@]}"; do
     if [[ ! "$source" =~ ^[0-9]+$ && "$source" != /dev/* ]]; then
         printf 'Camera sources must be nonnegative indices or /dev/ paths; got %s.\n' "$source" >&2
         exit 1
@@ -91,6 +97,10 @@ for source in "$SO101_CAMERA_TOP" "$SO101_CAMERA_LEFT" "$SO101_CAMERA_RIGHT"; do
 done
 if [[ "$SO101_ROLE" == follower ]] && [[ "$SO101_CAMERA_TOP" == "$SO101_CAMERA_LEFT" || "$SO101_CAMERA_TOP" == "$SO101_CAMERA_RIGHT" || "$SO101_CAMERA_LEFT" == "$SO101_CAMERA_RIGHT" ]]; then
     printf 'Top, left and right cameras must use different devices. Run discover-cameras.py.\n' >&2
+    exit 1
+fi
+if [[ "$SO101_ROLE" == follower && -n "$SO101_CAMERA_FRONT" ]] && [[ "$SO101_CAMERA_FRONT" == "$SO101_CAMERA_TOP" || "$SO101_CAMERA_FRONT" == "$SO101_CAMERA_LEFT" || "$SO101_CAMERA_FRONT" == "$SO101_CAMERA_RIGHT" ]]; then
+    printf 'Front camera must use a separate device. Run discover-cameras.py.\n' >&2
     exit 1
 fi
 if [[ "$SO101_ROLE" == leader && -z "$SO101_FOLLOWER_HOST" ]]; then
@@ -147,6 +157,7 @@ if [[ "${1-}" == "--check-config" ]]; then
     printf 'ZeroMQ ports: %s, %s\n' "$SO101_LEFT_ZMQ_PORT" "$SO101_RIGHT_ZMQ_PORT"
     printf 'Camera page: %s\n' "$(camera_url)"
     printf 'Cameras (top / left gripper / right): %s / %s / %s\n' "$SO101_CAMERA_TOP" "$SO101_CAMERA_LEFT" "$SO101_CAMERA_RIGHT"
+    printf 'Front camera: %s\n' "${SO101_CAMERA_FRONT:-not configured}"
     printf 'Camera request: %sx%s at %s FPS, JPEG quality %s\n' "$SO101_CAMERA_WIDTH" "$SO101_CAMERA_HEIGHT" "$SO101_CAMERA_FPS" "$SO101_CAMERA_QUALITY"
     exit 0
 fi
@@ -174,6 +185,7 @@ if [[ "${1-}" == "--run-control" ]]; then
             --camera-top "$SO101_CAMERA_TOP" \
             --camera-left "$SO101_CAMERA_LEFT" \
             --camera-right "$SO101_CAMERA_RIGHT" \
+            --camera-front "$SO101_CAMERA_FRONT" \
             --camera-width "$SO101_CAMERA_WIDTH" \
             --camera-height "$SO101_CAMERA_HEIGHT" \
             --camera-fps "$SO101_CAMERA_FPS" \

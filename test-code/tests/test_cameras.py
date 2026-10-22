@@ -177,6 +177,29 @@ class HttpTests(unittest.TestCase):
             cameras = json.load(response)["cameras"]
         self.assertEqual([camera["label"] for camera in cameras], stream.DEFAULT_LABELS)
         self.assertEqual([camera["id"] for camera in cameras], [0, 1, 2])
+        self.assertEqual([camera["role"] for camera in cameras], ["top", "left", "right"])
+
+    def test_camera_only_mode_does_not_invent_robot_data(self):
+        with urlopen(self.url + "/api/telemetry", timeout=2) as response:
+            self.assertEqual(json.load(response), {"available": False, "arms": {}})
+
+    def test_front_camera_has_independent_stream_and_role(self):
+        cameras = self.cameras + [self.cameras[0]]
+        server = ThreadingHTTPServer(("127.0.0.1", 0), stream.make_handler(cameras, stream.DEFAULT_LABELS + ["Front"]))
+        server.daemon_threads = True
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            base = f"http://127.0.0.1:{server.server_port}"
+            with urlopen(base + "/api/cameras", timeout=2) as response:
+                camera = json.load(response)["cameras"][3]
+                self.assertEqual((camera["id"], camera["role"], camera["label"]), (3, "front", "Front"))
+            with urlopen(base + "/stream/3", timeout=2) as response:
+                self.assertEqual(response.readline(), b"--frame\r\n")
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=2)
 
     def test_three_independent_mjpeg_streams(self):
         for index in range(3):
@@ -197,7 +220,7 @@ class HttpTests(unittest.TestCase):
 
 
 class ReceiverTests(unittest.TestCase):
-    def test_receiver_passes_three_sources_without_changing_calibration_ids(self):
+    def test_receiver_passes_four_sources_without_changing_calibration_ids(self):
         configs = []
 
         def config(**values):
@@ -213,16 +236,19 @@ class ReceiverTests(unittest.TestCase):
         receiver.zmq.Poller.return_value.poll.side_effect = KeyboardInterrupt
         process = Mock()
         process.poll.return_value = None
-        argv = ["receiver", "--camera-top", "/dev/v4l/by-id/top", "--camera-left", "6", "--camera-right", "8"]
+        argv = ["receiver", "--camera-top", "/dev/v4l/by-id/top", "--camera-left", "6", "--camera-right", "8", "--camera-front", "10"]
         with patch.object(sys, "argv", argv), patch.object(receiver.subprocess, "Popen", return_value=process) as popen:
             receiver.main()
         command = popen.call_args.args[0]
         start = command.index("--camera") + 1
-        self.assertEqual(command[start:start + 3], ["/dev/v4l/by-id/top", "6", "8"])
+        self.assertEqual(command[start:start + 4], ["/dev/v4l/by-id/top", "6", "8", "10"])
+        self.assertIn("--telemetry-file", command)
+        self.assertFalse(Path(command[command.index("--telemetry-file") + 1]).parent.exists())
         self.assertEqual([item["id"] for item in configs], ["follower_left", "follower_right"])
         for follower in followers:
             follower.connect.assert_called_once_with()
             follower.disconnect.assert_called_once_with()
+            follower.get_observation.assert_not_called()
 
 
 BASH = ("C:/Program Files/Git/bin/bash.exe" if sys.platform == "win32" and Path("C:/Program Files/Git/bin/bash.exe").exists()
@@ -252,6 +278,13 @@ class LauncherTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("/dev/v4l/by-id/top / 6 / 8", result.stdout)
         self.assertIn("10 FPS", result.stdout)
+
+    def test_optional_front_camera_preserves_old_config(self):
+        self.assertIn("Front camera: not configured", self.check_config("SO101_ROLE=follower\n").stdout)
+        result = self.check_config("SO101_ROLE=follower\nSO101_CAMERA_FRONT=/dev/v4l/by-id/front\n")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Front camera: /dev/v4l/by-id/front", result.stdout)
+        self.assertNotEqual(self.check_config("SO101_ROLE=follower\nSO101_CAMERA_FRONT=2\n").returncode, 0)
 
     def test_invalid_duplicate_and_zero_settings_rejected(self):
         for settings in ["SO101_CAMERA_LEFT=0\n", "SO101_CAMERA_FPS=0\n", "SO101_CAMERA_QUALITY=101\n", "SO101_CAMERA_TOP=-1\n"]:

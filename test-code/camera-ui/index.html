@@ -11,11 +11,23 @@
 <body>
   <header class="masthead">
     <a class="brand" href="/" aria-label="ARGUS camera station"><img src="/argus-logo.png" alt="ARGUS"></a>
+    <span class="mode">VIEW ONLY</span>
     <span class="connection" id="connection" role="status">Connecting</span>
     <button id="fullscreen" class="outline" type="button">Fullscreen</button>
   </header>
   <main>
-    <div class="feeds" id="feeds" aria-label="Camera feeds"></div>
+    <div class="cockpit" id="feeds" aria-label="Camera feeds">
+      <div class="wing"><div class="camera-slot" data-slot="left"></div><aside class="telemetry" data-side="left" aria-label="Left arm command telemetry"></aside></div>
+      <div class="center">
+        <div class="center-controls"><span class="instrument-label">OPTICS / 01</span><div class="view-switch" role="group" aria-label="Center camera">
+          <button id="view-top" type="button" aria-pressed="true">Top</button>
+          <button id="view-front" type="button" aria-pressed="false" disabled>Front</button>
+        </div></div>
+        <div class="camera-slot" data-slot="center"></div>
+        <div class="center-footer"><span>ARGUS // SO-101</span><span id="receiver-status">RX OFFLINE</span></div>
+      </div>
+      <div class="wing"><div class="camera-slot" data-slot="right"></div><aside class="telemetry" data-side="right" aria-label="Right arm command telemetry"></aside></div>
+    </div>
     <noscript><p>Enable JavaScript to view the camera station.</p></noscript>
   </main>
   <template id="camera-card">
@@ -26,6 +38,16 @@
         <strong>Connecting</strong></div>
         <button class="expand" type="button" aria-label="Expand camera">&#x26F6;</button></div>
     </section>
+  </template>
+  <template id="telemetry-panel">
+    <div class="telemetry-heading"><h2></h2><span class="arm-status">WAIT</span></div>
+    <div class="telemetry-metrics"><div><span class="instrument-label">RX</span><strong class="rate">—</strong><small>Hz</small></div>
+      <div><span class="instrument-label">AGE</span><strong class="age">—</strong><small>ms</small></div></div>
+    <svg class="signal" viewBox="0 0 240 40" preserveAspectRatio="none" aria-label="Received command rate history" role="img">
+      <path class="signal-grid" d="M0 10H240 M0 20H240 M0 30H240"></path><polyline points=""></polyline>
+    </svg>
+    <div class="instrument-label target-label" title="Received leader targets in native LeRobot units, not measured motor positions">COMMAND TARGETS / NATIVE</div>
+    <dl class="joint-targets"></dl>
   </template>
 </body>
 </html>

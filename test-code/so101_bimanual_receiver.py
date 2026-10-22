@@ -16,6 +16,7 @@ from lerobot.robots.so_follower.config_so_follower import SOFollowerRobotConfig
 from lerobot.robots.so_follower.so_follower import SOFollower
 
 from so101_camera_utils import positive_int, validate_sources
+from so101_telemetry import CommandTelemetry
 
 LOG = logging.getLogger("so101.receiver")
 
@@ -34,6 +35,7 @@ def main() -> None:
     parser.add_argument("--camera-top", help="top camera index/path; defaults to legacy --camera-index")
     parser.add_argument("--camera-left", default="2", help="left gripper camera index/path")
     parser.add_argument("--camera-right", default="4", help="right camera index/path")
+    parser.add_argument("--camera-front", default="", help="optional fourth camera index/path")
     parser.add_argument("--camera-width", type=positive_int, default=640)
     parser.add_argument("--camera-height", type=positive_int, default=480)
     parser.add_argument("--camera-fps", type=positive_int, default=15)
@@ -50,6 +52,8 @@ def main() -> None:
     if args.left_zmq_port == args.right_zmq_port:
         parser.error("left and right ZeroMQ ports must be different")
     camera_sources = [args.camera_top or str(args.camera_index), args.camera_left, args.camera_right]
+    if args.camera_front:
+        camera_sources.append(args.camera_front)
     try:
         validate_sources(camera_sources)
     except (ValueError, argparse.ArgumentTypeError) as exc:
@@ -60,6 +64,7 @@ def main() -> None:
     sockets = {}
     followers = []
     camera_process = None
+    telemetry = None
     try:
         for side, port in (("left", args.left_zmq_port), ("right", args.right_zmq_port)):
             socket = context.socket(zmq.PULL)
@@ -75,6 +80,10 @@ def main() -> None:
         left.connect()
         right.connect()
         LOG.info("Both followers connected; waiting for leader actions")
+        try:
+            telemetry = CommandTelemetry(args.frequency)
+        except OSError:
+            LOG.exception("Dashboard telemetry could not start; continuing arm receiver")
 
         camera_script = Path(__file__).resolve().with_name("so101_camera_stream.py")
         camera_process = subprocess.Popen(
@@ -91,6 +100,7 @@ def main() -> None:
                 "--height", str(args.camera_height),
                 "--fps", str(args.camera_fps),
                 "--quality", str(args.camera_quality),
+                *(["--telemetry-file", str(telemetry.path)] if telemetry is not None else []),
             ]
         )
         LOG.info("Camera stream starting on %s:%d", args.camera_host, args.camera_port)
@@ -114,6 +124,8 @@ def main() -> None:
                     if not isinstance(action, dict):
                         raise ValueError("action must be a JSON object")
                     followers[0 if side == "left" else 1].send_action(action)
+                    if telemetry is not None:
+                        telemetry.record(side, action)
                     if side == "left":
                         count += 1
                         if count % 30 == 0:
@@ -134,6 +146,8 @@ def main() -> None:
         for socket in sockets.values():
             socket.close()
         context.term()
+        if telemetry is not None:
+            telemetry.close()
         for follower in reversed(followers):
             if follower.is_connected:
                 follower.disconnect()
