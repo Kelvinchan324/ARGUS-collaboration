@@ -15,6 +15,9 @@ import zmq
 from lerobot.robots.so_follower.config_so_follower import SOFollowerRobotConfig
 from lerobot.robots.so_follower.so_follower import SOFollower
 
+from so101_camera_utils import positive_int, validate_sources
+from so101_telemetry import CommandTelemetry
+
 LOG = logging.getLogger("so101.receiver")
 
 
@@ -29,6 +32,14 @@ def main() -> None:
     parser.add_argument("--camera-host", default="0.0.0.0")
     parser.add_argument("--camera-port", type=int, default=8000)
     parser.add_argument("--camera-index", type=int, default=0)
+    parser.add_argument("--camera-top", help="top camera index/path; defaults to legacy --camera-index")
+    parser.add_argument("--camera-left", default="2", help="left gripper camera index/path")
+    parser.add_argument("--camera-right", default="4", help="right camera index/path")
+    parser.add_argument("--camera-front", default="", help="optional fourth camera index/path")
+    parser.add_argument("--camera-width", type=positive_int, default=640)
+    parser.add_argument("--camera-height", type=positive_int, default=480)
+    parser.add_argument("--camera-fps", type=positive_int, default=15)
+    parser.add_argument("--camera-quality", type=int, choices=range(1, 101), default=75)
     args = parser.parse_args()
     if (
         args.frequency <= 0
@@ -40,12 +51,20 @@ def main() -> None:
         parser.error("frequency, camera index, or port value is invalid")
     if args.left_zmq_port == args.right_zmq_port:
         parser.error("left and right ZeroMQ ports must be different")
+    camera_sources = [args.camera_top or str(args.camera_index), args.camera_left, args.camera_right]
+    if args.camera_front:
+        camera_sources.append(args.camera_front)
+    try:
+        validate_sources(camera_sources)
+    except (ValueError, argparse.ArgumentTypeError) as exc:
+        parser.error(str(exc))
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
     context = zmq.Context()
     sockets = {}
     followers = []
     camera_process = None
+    telemetry = None
     try:
         for side, port in (("left", args.left_zmq_port), ("right", args.right_zmq_port)):
             socket = context.socket(zmq.PULL)
@@ -61,6 +80,10 @@ def main() -> None:
         left.connect()
         right.connect()
         LOG.info("Both followers connected; waiting for leader actions")
+        try:
+            telemetry = CommandTelemetry(args.frequency)
+        except OSError:
+            LOG.exception("Dashboard telemetry could not start; continuing arm receiver")
 
         camera_script = Path(__file__).resolve().with_name("so101_camera_stream.py")
         camera_process = subprocess.Popen(
@@ -72,7 +95,12 @@ def main() -> None:
                 "--port",
                 str(args.camera_port),
                 "--camera",
-                str(args.camera_index),
+                *camera_sources,
+                "--width", str(args.camera_width),
+                "--height", str(args.camera_height),
+                "--fps", str(args.camera_fps),
+                "--quality", str(args.camera_quality),
+                *(["--telemetry-file", str(telemetry.path)] if telemetry is not None else []),
             ]
         )
         LOG.info("Camera stream starting on %s:%d", args.camera_host, args.camera_port)
@@ -82,7 +110,12 @@ def main() -> None:
             poller.register(socket, zmq.POLLIN)
         period = 1.0 / args.frequency
         count = 0
+        camera_exit_reported = False
         while True:
+            if not camera_exit_reported and camera_process.poll() is not None:
+                LOG.error("Camera service exited (status %s); arm receiver is still running",
+                          camera_process.returncode)
+                camera_exit_reported = True
             started = time.perf_counter()
             for socket, _ in poller.poll(timeout=max(1, int(period * 1000))):
                 side = next(name for name, candidate in sockets.items() if candidate is socket)
@@ -91,6 +124,8 @@ def main() -> None:
                     if not isinstance(action, dict):
                         raise ValueError("action must be a JSON object")
                     followers[0 if side == "left" else 1].send_action(action)
+                    if telemetry is not None:
+                        telemetry.record(side, action)
                     if side == "left":
                         count += 1
                         if count % 30 == 0:
@@ -111,6 +146,8 @@ def main() -> None:
         for socket in sockets.values():
             socket.close()
         context.term()
+        if telemetry is not None:
+            telemetry.close()
         for follower in reversed(followers):
             if follower.is_connected:
                 follower.disconnect()

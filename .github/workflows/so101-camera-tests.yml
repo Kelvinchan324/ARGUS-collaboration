@@ -1,0 +1,25 @@
+name: SO-101 camera checks
+on:
+  pull_request:
+    paths:
+      - "test-code/**"
+      - ".gitignore"
+      - ".github/workflows/so101-camera-tests.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cameras:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install camera-only test dependencies
+        run: python -m pip install opencv-python-headless
+      - name: Check launcher syntax
+        run: bash -n test-code/start-so101-control.sh test-code/setup-so101-device.sh
+      - name: Test with synthetic frames and mocked arms
+        run: python -m unittest discover -s test-code/tests -v
