@@ -55,7 +55,17 @@ chmod +x ~/Desktop/SO-101-Control-and-Camera.desktop
 
 # Change the settings on the desktop
 nano ~/ARGUS-collaboration/test-code/so101-config.env
+
+# Search cameras on the follower Pi only. Stop the camera service first.
+~/ARGUS-collaboration/lerobot/.venv/bin/python \
+  ~/ARGUS-collaboration/test-code/discover-cameras.py --snapshots
 ```
+
+The camera search lists usable IDs/device paths and saves sample pictures in
+`test-code/camera-snapshots/`. Use the pictures to identify top, front, left
+gripper and right gripper, then set `SO101_CAMERA_TOP`, `SO101_CAMERA_FRONT`,
+`SO101_CAMERA_LEFT` and `SO101_CAMERA_RIGHT` in the same local config. The search
+does not connect to the arms or change calibration files.
 
 If `uv` is already installed, you can skip the `curl` line, but still run
 `source "$HOME/.local/bin/env"` if the current terminal cannot find `uv`.
