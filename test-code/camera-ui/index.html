@@ -11,31 +11,20 @@
 <body>
   <header class="masthead">
     <a class="brand" href="/" aria-label="ARGUS camera station"><img src="/argus-logo.png" alt="ARGUS"></a>
-    <div class="station"><span class="eyebrow">OPERATOR STATION</span><span>SO-101 / Aloha Mini</span></div>
-    <span class="connection" id="connection" role="status">Connecting to cameras</span>
+    <span class="connection" id="connection" role="status">Connecting</span>
     <button id="fullscreen" class="outline" type="button">Fullscreen</button>
   </header>
   <main>
-    <div class="page-heading"><div><p class="eyebrow">SPATIAL AWARENESS</p><h1>Every angle. One station.</h1>
-      <p class="subtitle">Overhead context and close-up views, together.</p></div>
-      <div class="view-controls" role="group" aria-label="Camera layout">
-        <button type="button" id="overview" aria-pressed="true">Overview</button>
-        <button type="button" id="grid" aria-pressed="false">Equal grid</button>
-      </div>
-    </div>
     <div class="feeds" id="feeds" aria-label="Camera feeds"></div>
     <noscript><p>Enable JavaScript to view the camera station.</p></noscript>
-    <footer><span>ARGUS <span class="divider">/</span> TELEPRESENCE</span>
-      <span>Camera view only &middot; Arm control runs separately</span></footer>
   </main>
   <template id="camera-card">
     <section class="camera-card" data-online="false">
-      <div class="card-heading"><div class="camera-name"><span class="camera-number"></span><h2></h2></div>
+      <div class="card-heading"><h2></h2>
         <span class="badge">Connecting</span></div>
       <div class="viewport"><img class="feed" alt=""><div class="offline-message"><span class="lens" aria-hidden="true">&#9678;</span>
-        <strong>Waiting for camera</strong><span class="reason">Connecting to the camera service</span></div>
-        <button class="expand" type="button">Expand view</button></div>
-      <div class="card-meta"><span class="source"></span><span class="resolution">No frames yet</span></div>
+        <strong>Connecting</strong></div>
+        <button class="expand" type="button" aria-label="Expand camera">&#x26F6;</button></div>
     </section>
   </template>
 </body>

@@ -185,15 +185,17 @@ To check all three streams **without any arm connection**:
 lerobot/.venv/bin/python test-code/so101_camera_stream.py --camera 0 2 4
 ```
 
-Open `http://<follower-host>:8000/`. The ARGUS dashboard shows a large top view
-with the two close-up views, or an equal grid. Each view and the whole station
+Open `http://<follower-host>:8000/`. The ARGUS dashboard shows the left gripper
+on the left, a larger top view in the center, and the right gripper on the right.
+The page keeps only the logo, view names, connection indicators and fullscreen
+controls; hover over a view for device details. Each view and the whole station
 can expand to fullscreen. Missing cameras retry independently; offline or stale
 images are hidden instead of being presented as live video. The displayed
 connection status refers only to cameras, not motor/teleoperation health.
 The page and logo are served locally, without a CDN or Internet dependency.
 
 The camera program also accepts one camera for diagnostics, e.g. `--camera 0`,
-or custom labels, e.g. `--camera 0 2 4 --labels "Top camera" "Left gripper camera" "Right camera"`.
+or custom labels, e.g. `--camera 0 2 4 --labels "Top" "Left gripper" "Right gripper"`.
 
 Three USB cameras share bandwidth and power. The server requests MJPEG USB
 transport, 640x480 at 15 FPS and JPEG quality 75; cameras may negotiate other

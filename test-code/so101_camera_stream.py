@@ -19,7 +19,7 @@ from so101_camera_utils import camera_source, open_capture, positive_int, valida
 LOG = logging.getLogger("so101.camera")
 ROOT = Path(__file__).resolve().parent
 FRESH_SECONDS = 2.0
-DEFAULT_LABELS = ["Top camera", "Left gripper camera", "Right camera"]
+DEFAULT_LABELS = ["Top", "Left gripper", "Right gripper"]
 
 
 class CameraStream:
