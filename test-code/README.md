@@ -108,13 +108,148 @@ SO101_CAMERA_INDEX=0
 LEROBOT_ROOT=~/ARGUS-collaboration/lerobot
 ```
 
-Set the follower serial ports and `SO101_CAMERA_INDEX` for the actual hardware.
+Set the follower serial ports and camera sources for the actual hardware (see
+the three-camera setup below).
 The left/right ZeroMQ ports and camera port must match the leader station's
 config. Leave the follower host blank on the Aloha Mini itself.
 
 Other supported settings include `SO101_FREQUENCY`, `SO101_CAMERA_INDEX`,
 `SO101_LEFT_ZMQ_PORT`, `SO101_RIGHT_ZMQ_PORT`, `SO101_CAMERA_PORT`, and
 `LEROBOT_PYTHON` (an explicit Python interpreter path).
+
+### Discover and map the three cameras
+
+Run this on the **follower Raspberry Pi**, with other camera apps and the
+SO-101 service stopped. It only opens cameras; it does not import LeRobot,
+connect to motors, or run calibration:
+
+```bash
+cd "$HOME/ARGUS-collaboration"
+lerobot/.venv/bin/python test-code/discover-cameras.py --snapshots
+```
+
+The report lists usable camera IDs/device paths, aliases such as `/dev/video0`,
+the actual frame size, and failed/busy/metadata nodes. Each candidate must
+deliver three frames. Probes run in separate processes with an eight-second
+timeout so a stuck device cannot block the whole search. On Linux it examines
+existing `/dev/video*` nodes and groups their stable aliases; on other systems
+it tries indices 0 through 9 (`--max-index` changes that range).
+
+Snapshots are saved locally under ignored `test-code/camera-snapshots/`.
+Open them on the Pi to identify top, left gripper and right views; discovery
+cannot infer their physical positions. A USB camera can expose more than one
+video node; metadata nodes are not usable streams. Do not assume IDs are 0, 1, 2.
+
+To test specific devices or print a JSON report:
+
+```bash
+lerobot/.venv/bin/python test-code/discover-cameras.py --camera 0 2 4 --snapshots
+lerobot/.venv/bin/python test-code/discover-cameras.py --json
+```
+
+Add these lines to the follower's **existing** `test-code/so101-config.env`,
+replacing `0`, `2`, `4` with your verified sources:
+
+```ini
+SO101_CAMERA_TOP=0
+SO101_CAMERA_LEFT=2
+SO101_CAMERA_RIGHT=4
+SO101_CAMERA_WIDTH=640
+SO101_CAMERA_HEIGHT=480
+SO101_CAMERA_FPS=15
+SO101_CAMERA_QUALITY=75
+```
+
+Prefer the report's `/dev/v4l/by-id/...` paths when cameras have unique serial
+numbers. For identical cameras without unique serials, use `/dev/v4l/by-path/...`
+and keep each plugged into the same USB socket. These can be used directly as
+the config values, without quotes. Numbered `/dev/video*` nodes can change after
+reboot. Each view must resolve to a different capture device.
+
+The launcher defaults to three views. If `SO101_CAMERA_TOP` is absent or empty,
+the old `SO101_CAMERA_INDEX` becomes the top view; left/right default to 2/4.
+If your old index is 2 or 4, explicitly map all three to avoid duplicate sources.
+The existing local config is never rewritten by an update or setup rerun.
+The leader only needs the follower host and matching camera port; the source
+mapping belongs on the follower.
+
+Check settings without connecting arms:
+
+```bash
+bash test-code/start-so101-control.sh --check-config
+```
+
+To check all three streams **without any arm connection**:
+
+```bash
+lerobot/.venv/bin/python test-code/so101_camera_stream.py --camera 0 2 4
+```
+
+Open `http://<follower-host>:8000/`. The ARGUS dashboard shows a large top view
+with the two close-up views, or an equal grid. Each view and the whole station
+can expand to fullscreen. Missing cameras retry independently; offline or stale
+images are hidden instead of being presented as live video. The displayed
+connection status refers only to cameras, not motor/teleoperation health.
+The page and logo are served locally, without a CDN or Internet dependency.
+
+The camera program also accepts one camera for diagnostics, e.g. `--camera 0`,
+or custom labels, e.g. `--camera 0 2 4 --labels "Top camera" "Left gripper camera" "Right camera"`.
+
+Three USB cameras share bandwidth and power. The server requests MJPEG USB
+transport, 640x480 at 15 FPS and JPEG quality 75; cameras may negotiate other
+values. If capture is unreliable, try 10 FPS or 320x240, check cables/power, and
+consider a powered USB hub. Discovery tests cameras individually; confirm all
+three simultaneously with the camera-only command before starting teleoperation.
+The dashboard reports actual frame dimensions; the discovery FPS is the driver's
+reported rate, not a measured end-to-end latency or throughput guarantee.
+
+### Updating existing devices and preserving calibration
+
+Stop the running SO-101 service before updating. Once this change is merged
+into `main`, update each machine from its existing checkout:
+
+```bash
+cd "$HOME/ARGUS-collaboration"
+git status --short
+git pull --ff-only
+```
+
+If Git reports local edits to tracked scripts or a diverged branch, resolve
+those edits first; do not use a hard reset or `git clean` to force an update.
+Do not replace your local config with the example. Add only the camera settings
+above on the follower, then use the existing desktop shortcut.
+
+This change does **not** update LeRobot, reinstall it, run calibration, change
+arm IDs, or change leader/follower serial-port mappings. The existing IDs remain
+`lead_r` (left leader), `lead_l` (right leader), `follower_left` and
+`follower_right`; retaining these IDs preserves the calibration lookup behavior.
+Do not rename them simply to match their spelling.
+
+LeRobot normally stores calibration under
+`~/.cache/huggingface/lerobot/calibration/`, outside this ARGUS checkout. The
+[LeRobot cache settings](https://github.com/huggingface/lerobot/blob/main/src/lerobot/utils/constants.py)
+`HF_LEROBOT_CALIBRATION`, `HF_LEROBOT_HOME`, or `HF_HOME` can move it. The nested `lerobot/` checkout, local
+`test-code/so101-config.env`, and repo-local `calibration/`, `calibrations/` and
+`.cache/huggingface/lerobot/` directories are ignored. No existing calibration
+files are tracked or modified by this change. A normal pull of this change
+leaves those local files intact. `.gitignore` does not protect files already
+tracked in a custom branch; check any custom calibration location with
+`git ls-files -- <your-calibration-path>` before updating it.
+
+For an extra backup before updating, copy the actual calibration directory
+outside the repository; for the default location:
+
+```bash
+if [ -d "$HOME/.cache/huggingface/lerobot/calibration" ]; then
+  cp -a "$HOME/.cache/huggingface/lerobot/calibration" \
+    "$HOME/lerobot-calibration-backup-$(date +%Y%m%d-%H%M%S)"
+fi
+```
+
+There is no need to recalibrate arms that already work. This preserves the
+existing LeRobot `connect()` behavior: if that installation cannot find a
+matching calibration or detects a mismatch, investigate the ID/cache settings
+before accepting any recalibration prompt.
 
 ## 5. Start the system
 

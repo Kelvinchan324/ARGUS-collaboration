@@ -4,6 +4,12 @@
 !.env.example
 /test-code/so101-config.env
 /lerobot/
+# Optional local LeRobot calibration directories (the standard home cache is
+# already outside this repo). Keep machine calibration out of future commits.
+calibration/
+calibrations/
+.cache/huggingface/lerobot/
+/test-code/camera-snapshots/
 *.pem
 *.key
 *.p12

@@ -15,6 +15,8 @@ import zmq
 from lerobot.robots.so_follower.config_so_follower import SOFollowerRobotConfig
 from lerobot.robots.so_follower.so_follower import SOFollower
 
+from so101_camera_utils import positive_int, validate_sources
+
 LOG = logging.getLogger("so101.receiver")
 
 
@@ -29,6 +31,13 @@ def main() -> None:
     parser.add_argument("--camera-host", default="0.0.0.0")
     parser.add_argument("--camera-port", type=int, default=8000)
     parser.add_argument("--camera-index", type=int, default=0)
+    parser.add_argument("--camera-top", help="top camera index/path; defaults to legacy --camera-index")
+    parser.add_argument("--camera-left", default="2", help="left gripper camera index/path")
+    parser.add_argument("--camera-right", default="4", help="right camera index/path")
+    parser.add_argument("--camera-width", type=positive_int, default=640)
+    parser.add_argument("--camera-height", type=positive_int, default=480)
+    parser.add_argument("--camera-fps", type=positive_int, default=15)
+    parser.add_argument("--camera-quality", type=int, choices=range(1, 101), default=75)
     args = parser.parse_args()
     if (
         args.frequency <= 0
@@ -40,6 +49,11 @@ def main() -> None:
         parser.error("frequency, camera index, or port value is invalid")
     if args.left_zmq_port == args.right_zmq_port:
         parser.error("left and right ZeroMQ ports must be different")
+    camera_sources = [args.camera_top or str(args.camera_index), args.camera_left, args.camera_right]
+    try:
+        validate_sources(camera_sources)
+    except (ValueError, argparse.ArgumentTypeError) as exc:
+        parser.error(str(exc))
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
     context = zmq.Context()
@@ -72,7 +86,11 @@ def main() -> None:
                 "--port",
                 str(args.camera_port),
                 "--camera",
-                str(args.camera_index),
+                *camera_sources,
+                "--width", str(args.camera_width),
+                "--height", str(args.camera_height),
+                "--fps", str(args.camera_fps),
+                "--quality", str(args.camera_quality),
             ]
         )
         LOG.info("Camera stream starting on %s:%d", args.camera_host, args.camera_port)
@@ -82,7 +100,12 @@ def main() -> None:
             poller.register(socket, zmq.POLLIN)
         period = 1.0 / args.frequency
         count = 0
+        camera_exit_reported = False
         while True:
+            if not camera_exit_reported and camera_process.poll() is not None:
+                LOG.error("Camera service exited (status %s); arm receiver is still running",
+                          camera_process.returncode)
+                camera_exit_reported = True
             started = time.perf_counter()
             for socket, _ in poller.poll(timeout=max(1, int(period * 1000))):
                 side = next(name for name, candidate in sockets.items() if candidate is socket)

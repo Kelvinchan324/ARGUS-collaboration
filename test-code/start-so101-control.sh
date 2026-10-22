@@ -14,6 +14,13 @@ SO101_LEFT_ZMQ_PORT=5555
 SO101_RIGHT_ZMQ_PORT=5556
 SO101_CAMERA_PORT=8000
 SO101_CAMERA_INDEX=0
+SO101_CAMERA_TOP=
+SO101_CAMERA_LEFT=2
+SO101_CAMERA_RIGHT=4
+SO101_CAMERA_WIDTH=640
+SO101_CAMERA_HEIGHT=480
+SO101_CAMERA_FPS=15
+SO101_CAMERA_QUALITY=75
 SO101_FREQUENCY=30
 LEROBOT_ROOT="$HOME/ARGUS-collaboration/lerobot"
 LEROBOT_PYTHON=
@@ -44,6 +51,13 @@ while IFS= read -r line || [[ -n "$line" ]]; do
         SO101_RIGHT_ZMQ_PORT) SO101_RIGHT_ZMQ_PORT="$value" ;;
         SO101_CAMERA_PORT) SO101_CAMERA_PORT="$value" ;;
         SO101_CAMERA_INDEX) SO101_CAMERA_INDEX="$value" ;;
+        SO101_CAMERA_TOP) SO101_CAMERA_TOP="$value" ;;
+        SO101_CAMERA_LEFT) SO101_CAMERA_LEFT="$value" ;;
+        SO101_CAMERA_RIGHT) SO101_CAMERA_RIGHT="$value" ;;
+        SO101_CAMERA_WIDTH) SO101_CAMERA_WIDTH="$value" ;;
+        SO101_CAMERA_HEIGHT) SO101_CAMERA_HEIGHT="$value" ;;
+        SO101_CAMERA_FPS) SO101_CAMERA_FPS="$value" ;;
+        SO101_CAMERA_QUALITY) SO101_CAMERA_QUALITY="$value" ;;
         SO101_FREQUENCY) SO101_FREQUENCY="$value" ;;
         LEROBOT_ROOT) LEROBOT_ROOT="${value/#\~/$HOME}" ;;
         LEROBOT_PYTHON) LEROBOT_PYTHON="${value/#\~/$HOME}" ;;
@@ -51,8 +65,32 @@ while IFS= read -r line || [[ -n "$line" ]]; do
     esac
 done < "$CONFIG_FILE"
 
+# Old local configs keep their camera as the top view. Never rewrite the config.
+SO101_CAMERA_TOP="${SO101_CAMERA_TOP:-$SO101_CAMERA_INDEX}"
+
 if [[ "$SO101_ROLE" != leader && "$SO101_ROLE" != follower ]]; then
     printf 'Set SO101_ROLE=leader or SO101_ROLE=follower in %s.\n' "$CONFIG_FILE" >&2
+    exit 1
+fi
+
+for value in "$SO101_CAMERA_WIDTH" "$SO101_CAMERA_HEIGHT" "$SO101_CAMERA_FPS" "$SO101_CAMERA_QUALITY"; do
+    if [[ ! "$value" =~ ^[0-9]+$ ]] || ((10#$value < 1)); then
+        printf 'Camera width, height, FPS and quality must be positive integers.\n' >&2
+        exit 1
+    fi
+done
+if ((10#$SO101_CAMERA_QUALITY > 100)); then
+    printf 'Camera quality must be between 1 and 100.\n' >&2
+    exit 1
+fi
+for source in "$SO101_CAMERA_TOP" "$SO101_CAMERA_LEFT" "$SO101_CAMERA_RIGHT"; do
+    if [[ ! "$source" =~ ^[0-9]+$ && "$source" != /dev/* ]]; then
+        printf 'Camera sources must be nonnegative indices or /dev/ paths; got %s.\n' "$source" >&2
+        exit 1
+    fi
+done
+if [[ "$SO101_ROLE" == follower ]] && [[ "$SO101_CAMERA_TOP" == "$SO101_CAMERA_LEFT" || "$SO101_CAMERA_TOP" == "$SO101_CAMERA_RIGHT" || "$SO101_CAMERA_LEFT" == "$SO101_CAMERA_RIGHT" ]]; then
+    printf 'Top, left and right cameras must use different devices. Run discover-cameras.py.\n' >&2
     exit 1
 fi
 if [[ "$SO101_ROLE" == leader && -z "$SO101_FOLLOWER_HOST" ]]; then
@@ -107,7 +145,9 @@ if [[ "${1-}" == "--check-config" ]]; then
     printf 'Leader serial ports: %s, %s\n' "$SO101_LEFT_LEADER_PORT" "$SO101_RIGHT_LEADER_PORT"
     printf 'Follower serial ports: %s, %s\n' "$SO101_LEFT_FOLLOWER_PORT" "$SO101_RIGHT_FOLLOWER_PORT"
     printf 'ZeroMQ ports: %s, %s\n' "$SO101_LEFT_ZMQ_PORT" "$SO101_RIGHT_ZMQ_PORT"
-    printf 'Camera: %s (index %s)\n' "$(camera_url)" "$SO101_CAMERA_INDEX"
+    printf 'Camera page: %s\n' "$(camera_url)"
+    printf 'Cameras (top / left gripper / right): %s / %s / %s\n' "$SO101_CAMERA_TOP" "$SO101_CAMERA_LEFT" "$SO101_CAMERA_RIGHT"
+    printf 'Camera request: %sx%s at %s FPS, JPEG quality %s\n' "$SO101_CAMERA_WIDTH" "$SO101_CAMERA_HEIGHT" "$SO101_CAMERA_FPS" "$SO101_CAMERA_QUALITY"
     exit 0
 fi
 
@@ -131,6 +171,13 @@ if [[ "${1-}" == "--run-control" ]]; then
             --right-zmq-port "$SO101_RIGHT_ZMQ_PORT" \
             --camera-port "$SO101_CAMERA_PORT" \
             --camera-index "$SO101_CAMERA_INDEX" \
+            --camera-top "$SO101_CAMERA_TOP" \
+            --camera-left "$SO101_CAMERA_LEFT" \
+            --camera-right "$SO101_CAMERA_RIGHT" \
+            --camera-width "$SO101_CAMERA_WIDTH" \
+            --camera-height "$SO101_CAMERA_HEIGHT" \
+            --camera-fps "$SO101_CAMERA_FPS" \
+            --camera-quality "$SO101_CAMERA_QUALITY" \
             --frequency "$SO101_FREQUENCY"
         status=$?
     fi
