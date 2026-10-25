@@ -3,8 +3,14 @@ on:
   pull_request:
     paths:
       - "test-code/**"
+      - "connected-robots/so101/**"
+      - "connected-robots/aloha-mini/**"
+      - "cockpit/camera-ui/**"
       - ".gitignore"
       - ".github/workflows/so101-camera-tests.yml"
+  push:
+    branches: [main]
+    paths: ['connected-robots/so101/**', 'connected-robots/aloha-mini/**', 'cockpit/camera-ui/**', '.github/workflows/so101-camera-tests.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -23,3 +29,5 @@ jobs:
         run: bash -n test-code/start-so101-control.sh test-code/setup-so101-device.sh
       - name: Test with synthetic frames and mocked arms
         run: python -m unittest discover -s test-code/tests -v
+      - name: Test promoted runtime with synthetic frames and mocked arms
+        run: python -m unittest discover -s connected-robots/so101/tests -v

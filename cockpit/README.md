@@ -10,6 +10,18 @@ Put code here when it is useful to more than one robot. Do not place a robot's
 vendor SDK or hardware-specific commands here; keep those in that robot's folder
 under `connected-robots/`.
 
+## SO-101 / Aloha multi-camera station
+
+The working test camera dashboard is promoted to `camera-ui/`; its server and
+direct leader/receiver runtime are in `connected-robots/so101/`.
+In the fleet cockpit, choose Live and select SO-101 or Aloha Mini to configure
+the independent read-only camera dashboard. Views keep their own fresh/offline
+indicators and never enable actuators. The original direct receiver is not
+controlled by the fleet Stop button. For cockpit enable/stop, use the ARGUS
+bridge route, not the direct receiver; see [migration and setup](../connected-robots/so101/README.md).
+Aloha uses the same arm bridge with its own identity and enable-lease renewal.
+No Aloha base/lift controls are added. Both routes still need a physical stop.
+
 ## Fleet control center
 
 The shared [web cockpit](web/) provides one dashboard for Robot-AR, SO-101,
@@ -65,8 +77,8 @@ Connected Robot-AR supports chassis telemetry and existing base commands. Its
 arms are currently forced mock in the server, and camera capture is unwired;
 these are not exposed as live controls. SO-101 has an ARGUS v1 follower bridge:
 the physical leaders provide arm movement, while the cockpit provides explicit
-enable, status and stop. Browser-generated arm poses are not sent. The other
-five robots have demo controls and an [ARGUS v1 adapter boundary](ADAPTER_PROTOCOL.md),
+enable, status and stop. Browser-generated arm poses are not sent. Aloha Mini shares this arm bridge. The other
+four robots have demo controls and an [ARGUS v1 adapter boundary](ADAPTER_PROTOCOL.md),
 but their vendor bridges are not implemented in this repository.
 
 See [`connected-robots/so101/`](../connected-robots/so101/) for setup, network

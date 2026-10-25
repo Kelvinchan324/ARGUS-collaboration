@@ -1,5 +1,77 @@
 # SO-101 bimanual teleoperation
 
+## Promoted working setup (SO-101 / Aloha Mini)
+
+The owner reports the test-code setup worked on their station. Its direct
+leader/receiver, camera discovery, multi-camera server and command instruments
+are now maintained here; shared dashboard assets live in `cockpit/camera-ui/`.
+This report is not a certification of other hardware or the ARGUS bridge mode.
+
+### Update the working installation
+
+Stop both existing services first. On **both computers**, from the existing repo:
+
+```bash
+git status --short
+git pull --ff-only
+bash connected-robots/so101/setup-so101-device.sh
+bash connected-robots/so101/start-so101-control.sh --check-config
+```
+
+The installer preserves an existing `test-code/so101-config.env` if no new
+local config exists. The launcher uses that same fallback. If both exist, the
+new `connected-robots/so101/so101-config.env` wins; use `SO101_CONFIG_FILE`
+to select explicitly. It never copies over or rewrites your settings.
+The installed desktop shortcut now starts this directory's launcher.
+The original test-code scripts remain unchanged for comparison/rollback.
+
+Keep calibration IDs: left leader `lead_r`, right leader `lead_l`,
+left follower `follower_left`, right follower `follower_right`.
+Do not delete calibration or accept unexpected recalibration prompts.
+The bridge leader now defaults to these working IDs; previous bridge users
+can retain their old mapping with `--left-id lead_l --right-id lead_r`.
+
+### Choose ONE control route
+
+- **Direct (working setup):** use the updated desktop shortcut on each device.
+  Raw leader JSON drives the receiver. The camera dashboard shows forwarded
+  command targets, not measured joints. This route has no disconnect watchdog.
+  The fleet cockpit's Stop does NOT control this receiver.
+- **ARGUS bridge:** stop the direct receiver and leader first, then use
+  `follower_bridge.py` and `leader_teleop.py` below. Packets are token-wrapped;
+  the cockpit must explicitly enable, renew the lease and stop the bridge.
+  Never run both routes on the same serial ports/ZeroMQ ports.
+
+### Cameras in the main cockpit
+
+The server uses the same Top/Front switch, left/right gripper views, fullscreen,
+independent reconnect and stale-image hiding as the successful test UI.
+Launch camera-only mode without connecting motors:
+
+```bash
+python connected-robots/so101/camera_stream.py --host 0.0.0.0 --port 8000 --camera 0 2 4 6
+```
+
+Replace the example camera sources with your verified IDs or stable paths;
+omit the fourth source for a three-camera setup. The direct receiver already
+starts this server: do not start a second process on the same cameras.
+On a trusted LAN, open the main cockpit locally in Live mode, select SO-101
+or Aloha Mini, and enter the camera service URL in **Camera dashboard address**.
+The view is independent of bridge connectivity and cannot enable motion.
+HTTPS-hosted cockpit pages require an HTTPS camera proxy; do not expose the
+unauthenticated camera server to the public Internet.
+Interacting with the embedded viewer may blur the cockpit and lock bridge
+motion; re-enable deliberately after returning to controls.
+Without a direct receiver telemetry file, camera instruments remain unavailable.
+
+### Hardware-independent checks
+
+```bash
+python -m pip install opencv-python-headless
+python -m unittest discover -s connected-robots/so101/tests -v
+```
+
+
 This folder contains ARGUS-owned integration scripts for the SO-101 leader /
 follower setup. It does not copy LeRobot. Install a calibrated LeRobot checkout
 or release separately; the scripts use LeRobot's SO-101 driver APIs.

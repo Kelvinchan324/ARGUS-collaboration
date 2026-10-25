@@ -30,7 +30,7 @@ document.querySelector('.mode-picker').firstChild.textContent='Mode';
 document.querySelector('.drive .micro').textContent='Hold W/A/S/D or a direction. Release to halt. Space = stop. Software stop only.';
 document.querySelector('.vision h2').textContent='Robot view';
 document.querySelector('.events h2').textContent='Activity';
-document.querySelector('.robot-connections .cockpit-status-note').textContent='Connect telemetry here, then enable motion in Control. Robot-AR has a bridge; other robots need an adaptor.';
+document.querySelector('.robot-connections .cockpit-status-note').textContent='Connect telemetry here, then enable motion in Control. Robot-AR and SO-101/Aloha Mini arms have bridges; other robots need an adaptor.';
 document.querySelector('.cockpit-status-note').textContent='These checks verify software behavior, not robot hardware. Leader arms, pedals, headset sessions, physical stop feedback and on-site route reliability remain unverified.';
 document.getElementById('view-caption').textContent='Reference · not live';
 document.getElementById('notice').textContent='Demo mode · no hardware commands.';

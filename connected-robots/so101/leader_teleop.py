@@ -22,6 +22,8 @@ def main() -> None:
     parser.add_argument("--right-port", default="/dev/ttyACM0")
     parser.add_argument("--left-zmq-port", type=int, default=5555)
     parser.add_argument("--right-zmq-port", type=int, default=5556)
+    parser.add_argument("--left-id", default="lead_r", help="calibration ID used by the working test setup")
+    parser.add_argument("--right-id", default="lead_l", help="calibration ID used by the working test setup")
     parser.add_argument("--frequency", type=float, default=30.0)
     args = parser.parse_args()
     if args.frequency <= 0:
@@ -39,8 +41,8 @@ def main() -> None:
 
     leaders: list[SOLeader] = []
     try:
-        left = SOLeader(SOLeaderTeleopConfig(port=args.left_port, id="lead_l"))
-        right = SOLeader(SOLeaderTeleopConfig(port=args.right_port, id="lead_r"))
+        left = SOLeader(SOLeaderTeleopConfig(port=args.left_port, id=args.left_id))
+        right = SOLeader(SOLeaderTeleopConfig(port=args.right_port, id=args.right_id))
         leaders.extend((left, right))
         for leader in leaders:
             leader.connect()

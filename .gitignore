@@ -60,3 +60,5 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+/connected-robots/so101/so101-config.env
+/connected-robots/so101/camera-snapshots/

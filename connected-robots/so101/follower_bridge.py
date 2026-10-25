@@ -53,7 +53,10 @@ def validate_action(action: Any, expected_keys: set[str]) -> dict[str, float]:
 
 
 class SO101Bridge:
-    def __init__(self, left: Any, right: Any, token: str = "") -> None:
+    def __init__(self, left: Any, right: Any, token: str = "", robot_id: str = ROBOT_ID) -> None:
+        if robot_id not in {"so101", "aloha-mini"}:
+            raise ValueError("unsupported robot identity")
+        self.robot_id = robot_id
         self.robots = {"left": left, "right": right}
         self.expected_keys = {
             side: set(robot.action_features) for side, robot in self.robots.items()
@@ -169,7 +172,7 @@ class SO101Bridge:
                 }
             return {
                 "protocol": PROTOCOL,
-                "robot_id": ROBOT_ID,
+                "robot_id": self.robot_id,
                 "mode": "hardware",
                 "sample_time_ms": int(time.time() * 1000),
                 "connected": connected,
@@ -259,6 +262,7 @@ def make_handler(bridge: SO101Bridge, token: str, cors_origin: str):
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--robot-id", choices=["so101", "aloha-mini"], default=ROBOT_ID)
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--http-port", type=int, default=8081)
     parser.add_argument("--zmq-host", default="127.0.0.1")
@@ -314,7 +318,7 @@ def main() -> None:
             sockets[side] = socket
         for follower in followers.values():
             follower.connect()
-        bridge = SO101Bridge(followers["left"], followers["right"], token)
+        bridge = SO101Bridge(followers["left"], followers["right"], token, args.robot_id)
         server = http.server.ThreadingHTTPServer(
             (args.host, args.http_port), make_handler(bridge, token, args.cors_origin)
         )

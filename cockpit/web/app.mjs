@@ -1,5 +1,6 @@
-import './layout.mjs?v=robot-ar-1';
-import {ROBOTS,STALE_MS,emptyState,demoState,fresh,finite,clamp,normalizeAR,normalizeGeneric,validateEndpoint,commandRequest,jsonRequest,CommandChannel} from './core.mjs?v=robot-ar-1';
+import './layout.mjs?v=so101-main-2';
+import './camera-panel.mjs?v=so101-main-2';
+import {isLeaderRobot,ROBOTS,STALE_MS,emptyState,demoState,fresh,finite,clamp,normalizeAR,normalizeGeneric,validateEndpoint,commandRequest,jsonRequest,CommandChannel} from './core.mjs?v=so101-main-2';
 const $=id=>document.getElementById(id);
 let selected=ROBOTS[0].id,mode='demo',hold=null,transition=false,videoMode=false;
 const records=new Map(ROBOTS.map((robot,i)=>[robot.id,{robot,demo:demoState(robot,i),state:emptyState(),config:null,channel:null,version:0,controlEpoch:0,polling:false,authorized:false,busy:false,history:[],rightJoints:[0,-12,24,0,12,0],leftJoints:[0,-12,24,0,12,0],lastError:''}]));
@@ -9,7 +10,7 @@ if(navigator.xr?.isSessionSupported){navigator.xr.isSessionSupported('immersive-
 function cockpitSnapshot(){
  let gamepads=[];try{gamepads=[...(navigator.getGamepads?.()||[])].filter(p=>p?.connected);}catch{/* Device access may be restricted by the browser. */}
  const armed=[...records.values()].filter(r=>r.authorized&&state(r).enabled&&fresh(state(r)));
- const leaderArms=mode==='connected'&&record()?.robot.id==='so101'&&fresh(record().state)&&record().state.capabilities.arms;
+ const leaderArms=mode==='connected'&&isLeaderRobot(record()?.robot.id)&&fresh(record().state)&&record().state.capabilities.arms;
  return {stationFocused:document.hasFocus()&&!document.hidden,source:mode,armedRobotIds:armed.map(r=>r.robot.id),freshRobotLinks:mode==='connected'?[...records.values()].filter(r=>r.config&&fresh(r.state)).length:0,vrSession:'not connected',vrSupport,gamepadsDetected:gamepads.length,leaderArms,footPedals:'not configured',physicalEmergencyStop:'unverified',hardwareReady:false};
 }
 function renderCockpit(){
@@ -33,7 +34,7 @@ function buildFleet(){for(const r of records.values()){
  const option=document.createElement('option');option.value=r.robot.id;option.textContent=r.robot.name;$('connection-robot').append(option);
  const card=document.createElement('form');card.className='robot-connection-card';card.dataset.connection=r.robot.id;
  card.innerHTML='<div class="connection-card-title"><h3></h3><span class="connection-status">Not configured</span></div><p class="connection-protocol"></p><label>Bridge address<input type="url" required autocomplete="off" placeholder="https://robot-bridge.example"></label><div class="connection-actions"><button type="submit">Connect</button><button type="button" data-disconnect>Disconnect</button><button type="button" data-options>Options</button></div><p class="connection-card-error" role="alert"></p>';
- card.querySelector('h3').textContent=r.robot.name;card.querySelector('.connection-protocol').textContent=r.robot.id==='robot-ar'?'Robot-AR bridge · existing integration':r.robot.id==='so101'?'SO-101 leader bridge · ARGUS v1':'ARGUS v1 · hardware adaptor required';
+ card.querySelector('h3').textContent=r.robot.name;card.querySelector('.connection-protocol').textContent=r.robot.id==='robot-ar'?'Robot-AR bridge · existing integration':isLeaderRobot(r.robot.id)?'SO-101 leader bridge · ARGUS v1':'ARGUS v1 · hardware adaptor required';
  card.querySelector('input').setAttribute('aria-label',`${r.robot.name} bridge address`);
  if(r.robot.id==='robot-ar'&&location.pathname.startsWith('/cockpit/'))card.querySelector('input').value=location.origin;
  card.onsubmit=async e=>{e.preventDefault();const error=card.querySelector('.connection-card-error');error.textContent='';try{await connectRobot(r,card.querySelector('input').value,r.config?.token||'');}catch(ex){error.textContent=`Could not connect: ${ex.message}`;}};
@@ -118,15 +119,15 @@ function render(){
  $('control-state').textContent=r.authorized&&s.enabled?'Manual control enabled':'Control disabled';$('authority').textContent=r.authorized&&s.enabled?'MANUAL':'LOCKED';
  $('enable').textContent=r.busy?'Waiting for acknowledgement…':r.authorized?'Disable control':'Enable control';$('enable').disabled=transition||r.busy||!ok||!(s.capabilities.drive||s.capabilities.arms);
  document.querySelectorAll('[data-drive]').forEach(b=>b.disabled=!canDrive(r));$('stop-selected').disabled=!configured(r);
- $('drive-hint').textContent=!live?'Enable, then hold a direction to move.':!r.config?'Configure this robot’s adaptor to connect.':!ok?'Fresh telemetry required for control.':r.robot.id==='so101'?'Enable only after both physical leaders are fresh; their motion streams to the followers.':!s.capabilities.drive?'Base motion unavailable from this adaptor.':'Enable, then hold to send base commands.';
+ $('drive-hint').textContent=!live?'Enable, then hold a direction to move.':!r.config?'Configure this robot’s adaptor to connect.':!ok?'Fresh telemetry required for control.':isLeaderRobot(r.robot.id)?'Enable only after both physical leaders are fresh; their motion streams to the followers.':!s.capabilities.drive?'Base motion unavailable from this adaptor.':'Enable, then hold to send base commands.';
  $('health').textContent=!live?'Simulation running':!r.config?'Awaiting adaptor':ok?(s.mock?'Bridge simulation':'Telemetry current'):'Stale / disconnected';
  $('pose-x').textContent=ok?fmt(s.x,' m',2):'—';$('pose-y').textContent=ok?fmt(s.y,' m',2):'—';$('pose-yaw').textContent=ok?fmt(s.yaw===null?null:s.yaw*180/Math.PI,'°',1):'—';
  const side=$('arm-side').value,arm=s.armJoints?.[side];const joints=live?(arm?.joints||s.joints):(side==='left'?r.leftJoints:r.rightJoints);$('joints').replaceChildren();
- const jointCount=live&&r.robot.id==='so101'?5:6;
- for(let i=0;i<jointCount;i++){const d=document.createElement('div');const label=document.createElement('span'),value=document.createElement('b');label.textContent=`J${i+1}`;value.textContent=fmt(ok?joints[i]:null,live?(r.robot.id==='so101'?'°':' rad'):'°',live?2:0);d.append(label,value);$('joints').append(d);}
- const gripper=live?(arm?.gripper??null):s.gripper;$('gripper').value=gripper??58;$('lift').value=s.lift??0;$('gripper-value').textContent=fmt(gripper,live&&r.robot.id==='so101'?' %':' mm');$('lift-value').textContent=fmt(s.lift,' mm');
+ const jointCount=live&&isLeaderRobot(r.robot.id)?5:6;
+ for(let i=0;i<jointCount;i++){const d=document.createElement('div');const label=document.createElement('span'),value=document.createElement('b');label.textContent=`J${i+1}`;value.textContent=fmt(ok?joints[i]:null,live?(isLeaderRobot(r.robot.id)?'°':' rad'):'°',live?2:0);d.append(label,value);$('joints').append(d);}
+ const gripper=live?(arm?.gripper??null):s.gripper;$('gripper').value=gripper??58;$('lift').value=s.lift??0;$('gripper-value').textContent=fmt(gripper,live&&isLeaderRobot(r.robot.id)?' %':' mm');$('lift-value').textContent=fmt(s.lift,' mm');
  const toolsEnabled=!live&&r.authorized;document.querySelectorAll('[data-preset],[data-posture],#gripper,#lift').forEach(b=>b.disabled=!toolsEnabled);
- $('tools-label').textContent=live?(r.robot.id==='so101'?'LEADER ARM TELEOP':'TELEMETRY ONLY'):'DEMO CONTROLS';$('tool-note').textContent=live?(r.robot.id==='so101'?'Read-only joint feedback. Physical leader arms provide motion; browser poses are not sent.':'Arm, lift and posture commands await validated robot-specific adaptors.'):'Demo joint values illustrate the interface, not calibrated hardware limits.';
+ $('tools-label').textContent=live?(isLeaderRobot(r.robot.id)?'LEADER ARM TELEOP':'TELEMETRY ONLY'):'DEMO CONTROLS';$('tool-note').textContent=live?(isLeaderRobot(r.robot.id)?'Read-only joint feedback. Physical leader arms provide motion; browser poses are not sent.':'Arm, lift and posture commands await validated robot-specific adaptors.'):'Demo joint values illustrate the interface, not calibrated hardware limits.';
  $('camera-status').textContent=live&&r.robot.id==='robot-ar'&&s.camera?'Camera frame available at bridge':'Camera offline';$('view-caption').textContent='Reference · not live';
  const pts=r.history.map((v,i)=>`${i*500/59},${135-Math.min(v,.25)/.25*110}`).join(' ');$('speed-line').setAttribute('points',pts);
  $('session-note').textContent=live?'Commands go only to explicitly configured adaptors.':'Simulated telemetry · no robot commands';$('footer-summary').textContent=`7 platforms · ${live?[...records.values()].filter(i=>i.config&&fresh(i.state)).length+' fresh connections':'demonstration session'}`;
@@ -152,7 +153,7 @@ async function poll(r){
 function fillConnection(){
  const r=records.get($('connection-robot').value);$('endpoint').value=r.config?.endpoint||'';$('token').value=r.config?.token||'';$('connection-error').textContent='';
  if(!r.config&&r.robot.id==='robot-ar'&&location.pathname.startsWith('/cockpit/'))$('endpoint').value=location.origin;
- $('adapter-note').textContent=r.robot.id==='robot-ar'?'Robot-AR: uses the existing /state, /cmd_vel, /motor and /stop endpoints.':r.robot.id==='so101'?'SO-101: ARGUS v1 state, enable and stop; physical leader arms provide motion.':'Requires an ARGUS v1 adaptor. No hardware bridge for this robot is currently included in the repository.';
+ $('adapter-note').textContent=r.robot.id==='robot-ar'?'Robot-AR: uses the existing /state, /cmd_vel, /motor and /stop endpoints.':isLeaderRobot(r.robot.id)?'SO-101: ARGUS v1 state, enable and stop; physical leader arms provide motion.':'Requires an ARGUS v1 adaptor. No hardware bridge for this robot is currently included in the repository.';
 }
 $('connections').onclick=()=>{$('connection-robot').value=selected;fillConnection();$('connection-dialog').showModal();};$('close-connections').onclick=()=>$('connection-dialog').close();$('connection-robot').onchange=fillConnection;
 $('connection-form').onsubmit=async event=>{
@@ -200,7 +201,7 @@ async function motionTick(){
 }
 async function armHeartbeatTick(){
  const r=record(),s=state(r);
- if(mode!=='connected'||r.robot.id!=='so101'||!r.authorized||r.busy||r.heartbeatSending||transition||$('pane-control').hidden||!fresh(s)||!s.capabilities.arms)return;
+ if(mode!=='connected'||!isLeaderRobot(r.robot.id)||!r.authorized||r.busy||r.heartbeatSending||transition||$('pane-control').hidden||!fresh(s)||!s.capabilities.arms)return;
  r.heartbeatSending=true;
  try{await send(r,'enable',{enabled:true});}catch(e){log(`${r.robot.name}: arm control heartbeat failed — ${e.message}`,true);await halt(r,true);}finally{r.heartbeatSending=false;}
 }

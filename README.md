@@ -56,20 +56,20 @@ uv python install 3.12
 uv sync --locked --python 3.12 --extra feetech --extra pyzmq-dep
 
 # Install the desktop shortcut and create this computer's config file.
-bash ~/ARGUS-collaboration/test-code/setup-so101-device.sh
+bash ~/ARGUS-collaboration/connected-robots/so101/setup-so101-device.sh
 
 chmod +x ~/Desktop/SO-101-Control-and-Camera.desktop
 
 # Change the settings on the desktop
-nano ~/ARGUS-collaboration/test-code/so101-config.env
+nano ~/ARGUS-collaboration/connected-robots/so101/so101-config.env
 
 # Search cameras on the follower Pi only. Stop the camera service first.
 ~/ARGUS-collaboration/lerobot/.venv/bin/python \
-  ~/ARGUS-collaboration/test-code/discover-cameras.py --snapshots
+  ~/ARGUS-collaboration/connected-robots/so101/discover-cameras.py --snapshots
 ```
 
 The camera search lists usable IDs/device paths and saves sample pictures in
-`test-code/camera-snapshots/`. Use the pictures to identify top, front, left
+`connected-robots/so101/camera-snapshots/`. Use the pictures to identify top, front, left
 gripper and right gripper, then set `SO101_CAMERA_TOP`, `SO101_CAMERA_FRONT`,
 `SO101_CAMERA_LEFT` and `SO101_CAMERA_RIGHT` in the same local config. The search
 does not connect to the arms or change calibration files.
@@ -77,11 +77,12 @@ does not connect to the arms or change calibration files.
 If `uv` is already installed, you can skip the `curl` line, but still run
 `source "$HOME/.local/bin/env"` if the current terminal cannot find `uv`.
 Next, edit
-`~/ARGUS-collaboration/test-code/so101-config.env` on each machine: use
+`~/ARGUS-collaboration/connected-robots/so101/so101-config.env` on each machine: use
 `SO101_ROLE=leader` on the computer with the leader arms, and
 `SO101_ROLE=follower` on the Aloha Mini. Set the follower host, serial ports,
-and matching network ports for your hardware. Follow the
-[SO-101 setup guide](test-code/README.md) for the full per-device configuration
+and matching network ports for your hardware. If the installer reports an existing `test-code/so101-config.env`, edit that file instead; it is reused without rewriting.
+Follow the
+[SO-101 setup guide](connected-robots/so101/README.md) for the full per-device configuration
 and operating instructions.
 
 ### 3. Choose the part you need
@@ -212,7 +213,7 @@ Use these placement rules:
 | --- | --- | --- |
 | [Robot-AR](connected-robots/robot-ar/) | Student bridge synced from [`Lycheee-Lychee/ARGUS`](https://github.com/Lycheee-Lychee/ARGUS) at `9c3640c`; four-arm, paired-lift and live-camera support is present in software | Supervised on-robot validation of ports, ranges, lift directions and stop behavior |
 | [SO-101 Bimanual](connected-robots/so101/) | ARGUS v1 follower bridge with physical leader teleoperation | Supervised on-robot calibration, mapping and stop validation |
-| Aloha Mini | Integration area created | Hardware inventory, maintainer and tested upstream commit |
+| Aloha Mini | Shared SO-101 runtime and Aloha-identity arm bridge; direct setup reported working by owner | Supervised validation of bridge mode; no base control |
 | [Bimanual Bunker Mini](connected-robots/bimanual-bunker-mini/) | Blender inspection concept video available; no CAD published on the website | Verified source CAD, hardware adaptor, simulator validation and supervised tests |
 | Open Duck Mini | Integration area created; source-referenced visualization STLs retained in the repository | Runtime and safe-stop behavior |
 | Pupper V3 | Integration area created; source-referenced visualization STLs retained in the repository | Hardware inventory and maintainer |
@@ -223,9 +224,10 @@ This table deliberately separates working public code from planned integration.
 Do not interpret a folder's presence as proof that its hardware connection has
 been completed or safety-validated.
 
-For the existing direct SO-101 desktop shortcut flow (leader controller,
-follower receiver and camera stream), see [`test-code/`](test-code/). This
-legacy test setup is separate from the web cockpit and its ARGUS v1 adapter.
+For the promoted direct SO-101 desktop flow (leader, follower and cameras),
+see [`connected-robots/so101/`](connected-robots/so101/). The original
+[`test-code/`](test-code/) remains unchanged for comparison. Direct teleoperation
+and the cockpit's ARGUS v1 adapter are separate control routes; do not run both.
 
 ## Website publishing
 

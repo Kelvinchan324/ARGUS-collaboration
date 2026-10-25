@@ -3,6 +3,6 @@ Version=1.0
 Type=Application
 Name=Aloha Mini SO-101 Host
 Comment=Start the configured SO-101 follower host and camera stream
-Exec=/bin/bash -lc "cd ~/ARGUS-collaboration/test-code && exec ./start-so101-control.sh"
+Exec=/bin/bash -lc "cd ~/ARGUS-collaboration/connected-robots/so101 && exec ./start-so101-control.sh"
 Terminal=true
 Categories=Utility;

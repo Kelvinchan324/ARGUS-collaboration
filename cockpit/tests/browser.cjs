@@ -10,9 +10,15 @@ const out=path.resolve(__dirname,'../../build/cockpit-qa');fs.mkdirSync(out,{rec
 let enabled=false,armsEnabled=false,armInputsFresh=true,stale=false,failStop=false,enableDelay=0;
 const commands=[];
 const fixture=http.createServer(async(req,res)=>{
- if(req.url.startsWith('/so101/')){
+ if(req.url==='/api/cameras'){res.setHeader('Content-Type','application/json');res.end(JSON.stringify({cameras:['top','left','right','front'].map((role,id)=>({id,role,label:role,online:false,error:'Synthetic offline camera',source:id}))}));return;}
+ if(req.url==='/api/telemetry'){res.setHeader('Content-Type','application/json');res.end(JSON.stringify({available:false,arms:{}}));return;}
+ if(req.url==='/argus-logo.png'){res.setHeader('Content-Type','image/png');res.end(fs.readFileSync(path.join(root,'assets/argus-logo.png')));return;}
+ const cameraAssets={'/camera-fixture/':'index.html','/camera.css':'camera.css','/camera.js':'camera.js'};
+ if(cameraAssets[req.url]){res.setHeader('Content-Type',req.url.endsWith('.js')?'application/javascript':req.url.endsWith('.css')?'text/css':'text/html');res.end(fs.readFileSync(path.resolve(__dirname,'../camera-ui',cameraAssets[req.url])));return;}
+
+ if(req.url.startsWith('/so101/')||req.url.startsWith('/aloha/')){
   res.setHeader('Content-Type','application/json');
-  if(req.method==='GET'){res.end(JSON.stringify({protocol:'argus.v1',robot_id:'so101',mode:'hardware',sample_time_ms:Date.now(),connected:true,motor_enabled:armsEnabled,watchdog_ms:300,capabilities:{arms:armInputsFresh},telemetry:{arms:{left:{joints:[1,2,3,4,5],gripper:50},right:{joints:[6,7,8,9,10],gripper:60}}}}));return;}
+  if(req.method==='GET'){res.end(JSON.stringify({protocol:'argus.v1',robot_id:req.url.startsWith('/aloha/')?'aloha-mini':'so101',mode:'hardware',sample_time_ms:Date.now(),connected:true,motor_enabled:armsEnabled,watchdog_ms:300,capabilities:{arms:armInputsFresh},telemetry:{arms:{left:{joints:[1,2,3,4,5],gripper:50},right:{joints:[6,7,8,9,10],gripper:60}}}}));return;}
   let body='';for await(const chunk of req)body+=chunk;
   const data=JSON.parse(body||'{}');commands.push({url:req.url,data});
   if(data.action==='enable'&&!armInputsFresh){res.writeHead(409);res.end(JSON.stringify({ok:false,error:'leader inputs stale'}));return;}
@@ -124,6 +130,37 @@ const fixture=http.createServer(async(req,res)=>{
   await page.locator('#tab-devices').click();await page.locator('[data-connection=pupper-v3] [data-disconnect]').click();await page.waitForFunction(()=>document.querySelector('#connection-count').textContent==='6 / 7 CONFIGURED');
   assert.equal(await page.locator('[data-connection=unitree-go2] .connection-status').textContent(),'Bridge simulation');
   assert.equal(errors.length,0,errors.join('\n'));
-  console.log(JSON.stringify({robots:7,projectLinks:projectLinks.length,safetyReport:true,conceptVideo:true,demoSendsNoCommands:true,holdRelease:true,staleLock:true,failedStopReported:true,pendingEnableCancelled:true,wrongIdentityRejected:true,so101LeaderControl:true,exportExcludesToken:true,mobileOverflow:false,pageErrors:errors.length,commands:commands.length}));
+  await page.locator('#tab-devices').click();
+  await page.locator('[data-connection=aloha-mini] input').fill(origin+'/aloha');
+  await page.locator('[data-connection=aloha-mini] [type=submit]').click();
+  await page.waitForFunction(()=>document.querySelector('[data-connection=aloha-mini] .connection-status').textContent==='Connected');
+  await page.locator('#tab-control').click();
+  await page.locator('#enable').click();
+  await page.waitForTimeout(700);
+  assert(commands.filter(c=>c.url==='/aloha/argus/v1/command'&&c.data.action==='enable').length>=2,'Aloha enable lease must renew');
+  await page.locator('#stop-selected').click();
+  await page.waitForFunction(()=>document.querySelector('#route-status').textContent==='Control locked');
+  const beforeCamera=commands.length;
+  await page.locator('[aria-label="Camera dashboard address"]').fill(origin+'/camera-fixture');
+  await page.locator('.camera-connect [type=submit]').click();
+  assert.equal(await page.locator('.camera-station iframe').getAttribute('src'),origin+'/camera-fixture/');
+  const cameraFrame=page.frameLocator('.camera-station iframe');
+  await cameraFrame.locator('#connection').filter({hasText:'0/4 live'}).waitFor();
+  await cameraFrame.locator('#view-front').click();
+  assert.equal(await cameraFrame.locator('#view-front').getAttribute('aria-pressed'),'true');
+  assert.equal(commands.length,beforeCamera,'Camera connect/view switch must not send arm commands');
+  await page.evaluate(()=>window.scrollTo(0,0));
+  await page.screenshot({path:path.join(out,'aloha-camera-desktop.png'),fullPage:true});
+  await page.setViewportSize({width:390,height:844});
+  assert.equal(await cameraFrame.locator('body').evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+  await page.screenshot({path:path.join(out,'aloha-camera-loaded-mobile.png'),fullPage:true});
+  await page.locator('#tab-devices').click();
+  assert.equal(await page.locator('.camera-station iframe').getAttribute('src'),null);
+  await page.locator('#tab-control').click();
+  await page.setViewportSize({width:390,height:844});
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+  await page.screenshot({path:path.join(out,'aloha-camera-mobile.png'),fullPage:true});
+  assert.equal(errors.length,0,errors.join('\n'));
+  console.log(JSON.stringify({robots:7,projectLinks:projectLinks.length,safetyReport:true,conceptVideo:true,demoSendsNoCommands:true,holdRelease:true,staleLock:true,failedStopReported:true,pendingEnableCancelled:true,wrongIdentityRejected:true,so101LeaderControl:true,alohaLeaderControl:true,cameraViewOnly:true,exportExcludesToken:true,mobileOverflow:false,pageErrors:errors.length,commands:commands.length}));
  }finally{await browser.close();fixture.close();}
 })().catch(e=>{console.error(e);fixture.close();process.exitCode=1;});

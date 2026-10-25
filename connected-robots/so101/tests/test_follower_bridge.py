@@ -42,6 +42,13 @@ class SO101BridgeTests(unittest.TestCase):
         self.right = FakeFollower()
         self.bridge = bridge_module.SO101Bridge(self.left, self.right, token="secret")
 
+    def test_aloha_identity_and_invalid_identity(self):
+        bridge = bridge_module.SO101Bridge(self.left, self.right, robot_id="aloha-mini")
+        self.assertEqual(bridge.snapshot()["robot_id"], "aloha-mini")
+        self.assertFalse(bridge.snapshot()["motor_enabled"])
+        with self.assertRaises(ValueError):
+            bridge_module.SO101Bridge(self.left, self.right, robot_id="other")
+
     def provide_fresh_actions(self):
         self.bridge.accept_leader_action("left", packet())
         self.bridge.accept_leader_action("right", packet())

@@ -1,54 +1,53 @@
-# Aloha Mini
+# Aloha Mini — shared SO-101 runtime
 
-> [Open the ARGUS website](https://kelvinchan324.github.io/ARGUS-collaboration/) · [English](https://kelvinchan324.github.io/ARGUS-collaboration/en/)
+The owner reports the direct SO-101/Aloha test setup worked. Its runtime is now
+promoted to [SO-101](../so101/README.md), with shared camera UI in
+[`cockpit/camera-ui`](../../cockpit/camera-ui/). Other devices and the bridge
+control route still require supervised calibration/stop checks.
 
-<p align="center">
-  <img src="aloha-mini.png" alt="ARGUS Robot 1 — Aloha Mini dual-arm mobile robot" width="560">
-</p>
+## Keep the working direct setup
 
-> ARGUS Robot 1 prototype. Upstream project: [liyiteng/AlohaMini](https://github.com/liyiteng/AlohaMini).
-
-- Student maintainer: To be assigned
-- Status: SO-101 bimanual host and camera-streaming prototype added; not yet validated on another device
-- Tested upstream version/commit: To be recorded
-
-## Raspberry Pi SO-101 host
-
-The shared SO-101 setup in [`../../test-code/`](../../test-code/) uses one
-configurable desktop launcher on both the leader/control station and Aloha
-Mini. On Aloha Mini, set `SO101_ROLE=follower` in
-`test-code/so101-config.env`, then install the shortcut and local config with:
+On the Aloha Mini, stop the running service, update the existing checkout, then:
 
 ```bash
-bash ~/ARGUS-collaboration/test-code/setup-so101-device.sh
+bash connected-robots/so101/setup-so101-device.sh
+bash connected-robots/so101/start-so101-control.sh --check-config
 ```
 
-The `Aloha-Mini-SO101-Host.desktop` shortcut also starts that shared launcher.
-It expects the repository at `~/ARGUS-collaboration`. If the desktop asks,
-allow launching.
+Keep `SO101_ROLE=follower`. Existing `test-code/so101-config.env` is reused
+when no new local config exists. The installed desktop shortcut uses the new
+runtime. Repeat installation on the leader station, retaining its leader role.
+Camera IDs, serial ports and calibration files are not rewritten.
 
-The host requires a compatible LeRobot checkout and Python environment with
-LeRobot, `pyzmq`, and OpenCV installed. The shared setup guide installs the
-checkout at `~/ARGUS-collaboration/lerobot` and dependencies in its `.venv`.
-You can start the combined Aloha-specific host manually with:
+`so101_bimanual_host.py` now delegates to the shared direct receiver instead
+of maintaining a separate single-camera implementation. Its defaults use
+`follower_left` / `follower_right`, matching the working test setup.
+If you previously used the older Aloha-only `follower_l` / `follower_r`
+calibration, stop and verify the matching configuration before connecting;
+do not rename or overwrite calibration files to bypass a prompt.
+Prefer the configured desktop launcher over the old manual host wrapper,
+which does not read the shared config automatically.
+
+## Main cockpit enable/stop route
+
+Stop the direct leader and receiver before using the ARGUS bridge:
 
 ```bash
-export LEROBOT_ROOT="$HOME/ARGUS-collaboration/lerobot"
-bash connected-robots/aloha-mini/run_so101_bimanual_host.sh
+# Loopback-only example; configure a private interface and token for a LAN.
+python connected-robots/aloha-mini/follower_bridge.py
 ```
 
-Before starting, confirm that the two follower arms are connected to the
-expected serial ports (`/dev/ttyACM0` and `/dev/ttyACM1`) and that the robot is
-clear to move. The host connects to both arms and accepts commands on TCP ports
-5555 and 5556; the camera stream is served on port 8000, normally at
-`http://<robot-ip>:8000/`. Check the camera index on each device before use.
+This reuses the SO-101 bridge with `robot_id=aloha-mini`. Use the shared
+`connected-robots/so101/leader_teleop.py` with the same token and verified
+ports, following [the bridge guide](../so101/README.md).
+Select **Aloha Mini** in the main cockpit and connect to this bridge, then
+enable explicitly. Only arm leader-following is supported; no mobile-base,
+lift, autonomous task or browser-generated arm pose is added.
 
-These services bind to all network interfaces and do not authenticate clients.
-Use them only on a trusted, isolated LAN; do not expose their ports to the
-internet. This host uses a ZMQ JSON action protocol and is not yet connected to
-the ARGUS cockpit's common adaptor/receiver interface. Hardware operation and
-cross-device setup have not been verified by this repository.
+Run the shared camera server separately in bridge mode. In the main cockpit's
+Live Control view, set **Camera dashboard address** to that service.
+Camera availability is not evidence that motors are safe or enabled.
 
-Only the runtime host and camera-streaming modules are copied here. Machine
-logs, calibration files, desktop shortcuts, experimental scripts, and bundled
-vendor reference code remain on the source device.
+Do not mix the raw direct protocol and token-wrapped bridge protocol.
+Direct mode still has no leader-disconnect watchdog. Bridge software stop holds
+position, does not cut motor power, and does not replace a physical emergency stop.
