@@ -9,6 +9,7 @@ on:
       - "cockpit/web/**"
       - "connected-robots/bimanual-bunker-mini/**"
       - "scripts/build_pages.py"
+      - "scripts/test_build_pages.py"
       - ".gitattributes"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
@@ -31,6 +32,9 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
+
+      - name: Verify private research is excluded from Pages
+        run: python3 -m unittest discover -s scripts -p 'test_build_pages.py'
 
       - name: Build website with verified public assets
         run: python3 scripts/build_pages.py --output "${{ runner.temp }}/argus-pages"

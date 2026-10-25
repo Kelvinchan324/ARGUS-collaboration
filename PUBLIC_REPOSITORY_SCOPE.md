@@ -1,5 +1,16 @@
 # Public repository scope
 
+## Private-repository research exception
+
+The owner confirmed the repository is now private. The four STP report-back
+PDFs and interview synthesis are authorized for collaborator-only storage in
+`docs/private-reference/`. This narrow exception does not authorize public
+publication, unrelated participant records, or credentials. The Pages builder
+excludes that directory. Keep it out of any alternative website deployment.
+Before making the repository public, review both current files and Git history;
+deleting a file from the latest commit alone does not remove previous copies.
+The public-material rules below continue to apply to the website and other exports.
+
 This repository is the public technical integration hub for ARGUS. It should
 contain material that collaborators can review, test or use to reproduce the
 system without exposing people, customers, networks or internal business work.

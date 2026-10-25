@@ -12,7 +12,9 @@ def build(output: Path) -> None:
     if output.exists():
         raise FileExistsError(f"Choose a new output directory: {output}")
 
-    shutil.copytree(root / "docs", output)
+    # Internal interview material must never enter the Pages artifact,
+    # even while the source repository is private.
+    shutil.copytree(root / "docs", output, ignore=shutil.ignore_patterns("private-reference"))
     shutil.copytree(root / "cockpit/web", output / "control")
     video_target = output / "connected-robots/bimanual-bunker-mini/media"
     video_target.mkdir(parents=True)

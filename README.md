@@ -20,6 +20,13 @@ Generated website images are labeled as illustrative concept imagery; they are
 not evidence of a field deployment. Integration status and validation limits
 come from the repository and its automated tests.
 
+## Internal interview and STP reports
+
+Authorized repository collaborators can read the [research archive](docs/private-reference/README.md):
+four original STP report-back PDF decks and the Traditional Chinese interview synthesis.
+These documents are internal reference material, excluded from GitHub Pages.
+Do not change this repository to public without reviewing the archive and its Git history.
+
 ## Start here
 
 ### 1. Clone the repository
