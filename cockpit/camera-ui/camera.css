@@ -123,7 +123,7 @@ h2 { font-size: 13px; font-weight: 550; margin: 0; }
   height: 100cqw;
   max-width: none;
   max-height: none;
-  transform: translate(-50%, -50%) rotate(90deg);
+  transform: translate(-50%, -50%) rotate(-90deg);
 }
 .camera-card[data-online="true"] .feed { visibility: visible; }
 .offline-message {

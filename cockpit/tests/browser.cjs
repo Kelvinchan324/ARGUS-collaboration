@@ -150,7 +150,7 @@ const fixture=http.createServer(async(req,res)=>{
   const rightCamera=cameraFrame.locator('.camera-card[data-role="right"]');
   assert.equal(await leftCamera.getAttribute('data-display-side'),'left');
   assert.equal(await rightCamera.getAttribute('data-display-side'),'right');
-  assert.match(await leftCamera.locator('.feed').evaluate(image=>getComputedStyle(image).transform),/^matrix\(0, 1, -1, 0,/);
+  assert.match(await leftCamera.locator('.feed').evaluate(image=>getComputedStyle(image).transform),/^matrix\(0, -1, 1, 0,/);
   await cameraFrame.locator('#swap-sides').click();
   assert.equal(await cameraFrame.locator('#swap-sides').getAttribute('aria-pressed'),'true');
   assert.equal(await leftCamera.getAttribute('data-display-side'),'right');
