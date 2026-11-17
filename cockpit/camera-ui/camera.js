@@ -7,6 +7,8 @@ const joints = [["shoulder_pan", "PAN"], ["shoulder_lift", "LIFT"], ["elbow_flex
   ["wrist_flex", "WRIST P"], ["wrist_roll", "WRIST R"], ["gripper", "GRIP"]];
 let cameraStates = [];
 let centerView = "top";
+let sideViewsSwapped = false;
+try { sideViewsSwapped = localStorage.getItem("argus-swap-gripper-cameras") === "true"; } catch {}
 
 async function toggleFullscreen(element) {
   try {
@@ -15,6 +17,32 @@ async function toggleFullscreen(element) {
   } catch { connection.textContent = "Fullscreen unavailable"; }
 }
 document.querySelector("#fullscreen").addEventListener("click", () => toggleFullscreen(document.documentElement));
+
+function displaySide(role) {
+  if (!sideViewsSwapped) return role;
+  return role === "left" ? "right" : "left";
+}
+
+function applySideLayout() {
+  const button = document.querySelector("#swap-sides");
+  button.setAttribute("aria-pressed", String(sideViewsSwapped));
+  for (const card of cards.values()) {
+    if (!['left', 'right'].includes(card.dataset.role)) continue;
+    const side = displaySide(card.dataset.role);
+    const label = `${side === "left" ? "Left" : "Right"} Gripper`;
+    document.querySelector(`[data-slot="${side}"]`).append(card);
+    card.dataset.displaySide = side;
+    card.querySelector("h2").textContent = label;
+    card.querySelector(".feed").alt = label;
+    card.querySelector(".expand").setAttribute("aria-label", `Expand ${label}`);
+  }
+}
+
+document.querySelector("#swap-sides").addEventListener("click", () => {
+  sideViewsSwapped = !sideViewsSwapped;
+  try { localStorage.setItem("argus-swap-gripper-cameras", String(sideViewsSwapped)); } catch {}
+  applySideLayout();
+});
 
 function selectCenter(role) {
   centerView = role;
@@ -45,13 +73,14 @@ function makeCard(camera) {
   card.querySelector("h2").textContent = camera.label;
   card.dataset.cameraId = String(camera.id);
   card.dataset.role = camera.role;
+  card.classList.toggle("side-camera", ["left", "right"].includes(camera.role));
   const image = card.querySelector(".feed");
   image.alt = camera.label;
   image.addEventListener("error", () => { image.removeAttribute("src"); card.dataset.online = "false"; });
   const expand = card.querySelector(".expand");
   expand.setAttribute("aria-label", `Expand ${camera.label}`);
   expand.addEventListener("click", () => toggleFullscreen(card));
-  const slot = ["left", "right"].includes(camera.role) ? camera.role : "center";
+  const slot = ["left", "right"].includes(camera.role) ? displaySide(camera.role) : "center";
   document.querySelector(`[data-slot="${slot}"]`).append(card);
   cards.set(camera.id, card);
   return card;
@@ -74,6 +103,7 @@ async function refreshCameras() {
       card.title = camera.online ? `Device ${camera.source}${camera.resolution ? ` · ${camera.resolution.join(" × ")}` : ""}` : camera.error;
       if (camera.online) online++;
     }
+    applySideLayout();
     if (!cameras.some(camera => camera.role === centerView)) centerView = cameras[0]?.role || "top";
     selectCenter(centerView);
     connection.dataset.state = online === cameras.length && online > 0 ? "live" : "partial";

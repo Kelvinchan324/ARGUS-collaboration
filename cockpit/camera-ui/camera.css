@@ -57,6 +57,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid #ff3939; outline-offs
 .connection[data-state="live"] { color: var(--green); }
 .connection[data-state="partial"] { color: #edbd77; }
 .outline { background: transparent; font-size: 12px; }
+#swap-sides[aria-pressed="true"] { border-color: var(--amber); color: var(--amber); background: #2a1d10; }
 
 main { max-width: 2200px; margin: auto; padding: 24px 2.5vw; }
 .cockpit {
@@ -103,6 +104,7 @@ h2 { font-size: 13px; font-weight: 550; margin: 0; }
 .camera-card[data-online="true"] .badge { color: var(--green); }
 .viewport {
   position: relative;
+  container-type: size;
   aspect-ratio: 4/3;
   max-height: calc(100dvh - 250px);
   background: #07090c;
@@ -112,6 +114,17 @@ h2 { font-size: 13px; font-weight: 550; margin: 0; }
   justify-content: center;
 }
 .feed { width: 100%; height: 100%; object-fit: contain; display: block; visibility: hidden; }
+.side-camera .viewport { aspect-ratio: 3/4; }
+.side-camera .feed {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100cqh;
+  height: 100cqw;
+  max-width: none;
+  max-height: none;
+  transform: translate(-50%, -50%) rotate(90deg);
+}
 .camera-card[data-online="true"] .feed { visibility: visible; }
 .offline-message {
   position: absolute;
@@ -172,9 +185,10 @@ h2 { font-size: 13px; font-weight: 550; margin: 0; }
 }
 
 @media (max-width: 700px) {
-  .masthead { gap: 14px; min-height: 72px; }
-  .brand { width: 135px; }
+  .masthead { gap: 8px; min-height: 72px; }
+  .brand { width: 120px; margin-right: auto; }
   .mode { display: none; }
+  .connection { display: none; }
   .outline { font-size: 11px; padding: 7px 10px; }
   main { padding: 16px 2.5vw; }
   .cockpit { grid-template-columns: 1fr; min-height: 0; gap: 20px; }

@@ -146,6 +146,15 @@ const fixture=http.createServer(async(req,res)=>{
   assert.equal(await page.locator('.camera-station iframe').getAttribute('src'),origin+'/camera-fixture/');
   const cameraFrame=page.frameLocator('.camera-station iframe');
   await cameraFrame.locator('#connection').filter({hasText:'0/4 live'}).waitFor();
+  const leftCamera=cameraFrame.locator('.camera-card[data-role="left"]');
+  const rightCamera=cameraFrame.locator('.camera-card[data-role="right"]');
+  assert.equal(await leftCamera.getAttribute('data-display-side'),'left');
+  assert.equal(await rightCamera.getAttribute('data-display-side'),'right');
+  assert.match(await leftCamera.locator('.feed').evaluate(image=>getComputedStyle(image).transform),/^matrix\(0, 1, -1, 0,/);
+  await cameraFrame.locator('#swap-sides').click();
+  assert.equal(await cameraFrame.locator('#swap-sides').getAttribute('aria-pressed'),'true');
+  assert.equal(await leftCamera.getAttribute('data-display-side'),'right');
+  assert.equal(await rightCamera.getAttribute('data-display-side'),'left');
   await cameraFrame.locator('#view-front').click();
   assert.equal(await cameraFrame.locator('#view-front').getAttribute('aria-pressed'),'true');
   assert.equal(commands.length,beforeCamera,'Camera connect/view switch must not send arm commands');
